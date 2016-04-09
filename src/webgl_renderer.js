@@ -13,8 +13,10 @@ let Goomba = stampit.compose(Sprite)
     console.log(this.material);
   });
 
-
-
+let ItemBlock = stampit.compose(Sprite).refs({ texture: 'item_block.png'}).init(function() {
+  this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
+  this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
+});
 
 let Ground = stampit.compose(Sprite).refs({ texture: 'ground.png' });
 let Block = stampit.compose(Sprite).refs({ texture: 'block.png' })
@@ -25,7 +27,7 @@ let PipeBottomLeft = stampit.compose(Sprite).refs({ texture: 'pipe_bottom_left.p
 let PipeBottomRight = stampit.compose(Sprite).refs({ texture: 'pipe_bottom_right.png' });
 
 
-let BlockData = [,Ground,Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight];
+let BlockData = [,Ground,Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock];
 let WebGLRenderer = stampit()
   .methods({
     render: function(){
