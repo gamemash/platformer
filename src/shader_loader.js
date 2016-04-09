@@ -19,9 +19,10 @@ function ShaderLoader(){
     var promise = new Promise(function(resolve, reject) {
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
-          if (xhttp.readyState == 4 && xhttp.status == 200)
+          if (xhttp.readyState == 4 && xhttp.status == 200){
             me.save(filename, xhttp.responseText);
-            resolve(filename);
+            resolve(xhttp.responseText);
+          }
         }
       xhttp.open("GET", "shaders/" + filename, true);
       xhttp.send();
