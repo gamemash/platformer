@@ -13,7 +13,7 @@ menuStream.onValue((x) => {
   sounds.pauseSound.pause();
   sounds.pauseSound.currentTime = 0;
   sounds.pauseSound.play();
-  document.getElementById("pause-menu").classList.toggle("visible");
+  document.getElementById("game-wrapper").classList.toggle("paused");
   paused = ! paused;
 })
 
