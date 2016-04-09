@@ -11,7 +11,7 @@ let Sprite = stampit()
       ShaderLoader.load('tile.vert'),
       ShaderLoader.load('tile.frag')
     ],
-    size: 50
+    size: 32
 
   })
   .methods({
@@ -24,7 +24,12 @@ let Sprite = stampit()
     updateMaterial: function(texture){
       this.material.uniforms.texture1 = { type: "t", value: texture };
       this.material.needsUpdate = true;
+    },
+    gridPosition: function(){
+      return [Math.round(this.position.x / this.size), Math.round(this.position.y / this.size)];
     }
+
+
 
   })
   .init(function(){

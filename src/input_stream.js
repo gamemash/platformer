@@ -17,9 +17,11 @@ var inputStream = Kefir.stream(emitter => {
 });
 
 var menuStream = inputStream.filter(x => x == "menu").debounce(50, {immediate: true});
+var jumpStream = inputStream.filter(x => x == "jump").debounce(50, {immediate: true});
 
 module.exports = {
   inputStream: inputStream,
   menuStream: menuStream,
-  inputState: inputState
+  jumpStream: jumpStream,
+  inputState: inputState,
 };
