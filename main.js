@@ -4,7 +4,7 @@ let stampit = require('stampit');
 let THREE = require('three');
 let WebGLRenderer = require('./src/webgl_renderer.js');
 
-let {inputStream, menuStream} = require("./src/input_stream.js");
+let {inputStream, menuStream, inputState} = require("./src/input_stream.js");
 let paused = false;
 menuStream.onValue((x) => {
   document.getElementById("pause-menu").classList.toggle("visible");
@@ -26,6 +26,14 @@ let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canva
 renderer.loadLevel(levelData);
 
 function render() {
+  if (inputState.pressed("up")) { }
+  if (inputState.pressed("right")) { }
+  if (inputState.pressed("left")) { }
+  if (inputState.pressed("down")) { }
+  if (inputState.pressed("jump")) { }
+  if (inputState.pressed("run")) { }
+  if (inputState.pressed("menu")) { }
+
   renderer.render();
   requestAnimationFrame(render);
 }

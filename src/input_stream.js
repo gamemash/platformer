@@ -20,5 +20,6 @@ var menuStream = inputStream.filter(x => x == "menu").debounce(50, {immediate: t
 
 module.exports = {
   inputStream: inputStream,
-  menuStream: menuStream
+  menuStream: menuStream,
+  inputState: inputState
 };
