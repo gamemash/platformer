@@ -16,14 +16,22 @@ let PhysicsEngine = stampit()
       this.objects[this.key(obj)] = obj;
     },
     checkCollision: function(position){
-      console.log(position);
-      return checkPosition(position[0] - 1, position[1]);
+      let blockLeft = this.checkPosition(position[0] - 1, position[1]);
+      let blockRight = this.checkPosition(position[0] + 1, position[1]);
+      document.getElementById("blockLeft").innerHTML = blockLeft;
+      document.getElementById("blockRight").innerHTML = blockRight;
+
+      return {
+        blockLeft: blockLeft,
+        blockRight: blockRight
+        // blockUp: blockUp,
+        // blockDown: blockDown
+      }
     },
-    checkPosition: function(position){
-      let key = position[0] + "x" + position[1];
-      if (key in this.objects)
-        return this.objects[key];
-      //objects[position.x * this.height + position.y]
+
+    checkPosition: function(x, y){
+      let key = x + "x" + y;
+      return (key in this.objects)
     }
 
 

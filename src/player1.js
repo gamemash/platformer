@@ -13,24 +13,32 @@ let Player1 = stampit.compose(Mario)
   })
   .methods({
     update: function(dt){
-
+      document.getElementById("mariox").innerHTML = this.gridPosition()[0];
+      document.getElementById("marioy").innerHTML = this.gridPosition()[1];
       let oldPosition = this.position.clone();
 
 
       this.position.addScaledVector(this.velocity, dt)
       this.position.addScaledVector(this.acceleration, dt * dt)
       this.velocity.addScaledVector(this.acceleration, dt)
-      if (inputState.pressed("right")) { 
-        this.acceleration.x = this.accelerationConstant; 
+      if (inputState.pressed("right")) {
+        this.acceleration.x = this.accelerationConstant;
       } else if(inputState.pressed("left")) {
-        this.acceleration.x = -this.accelerationConstant; 
+        this.acceleration.x = -this.accelerationConstant;
       } else {
         this.acceleration.x =  - this.velocity.x * this.groundResistance;
       }
-      
-      let collision = PhysicsEngine.checkPosition(this.gridPosition());
+
+      let collision = PhysicsEngine.checkCollision(this.gridPosition());
       if (collision){
-        console.log("collided", collision);
+        if (collision.blockLeft) {
+
+        }
+
+        if (collision.blockRight) {
+
+        }
+        // console.log("collided", collision);
         //position = [
         //  Math.ceil(oldPosition.x / this.size),
         //  Math.ceil(oldPosition.y / this.size)
