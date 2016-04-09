@@ -18,8 +18,6 @@ let Goomba = stampit.compose(Sprite)
   .init(function(){
     this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
     this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
-
-    console.log(this.material);
   });
 
 let ItemBlock = stampit.compose(Sprite).refs({ texture: 'item_block.png'}).init(function() {
@@ -28,12 +26,12 @@ let ItemBlock = stampit.compose(Sprite).refs({ texture: 'item_block.png'}).init(
 });
 
 let Ground = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
-let Block = stampit.compose(Sprite).refs({ texture: 'block.png' })
-let Brick = stampit.compose(Sprite).refs({ texture: 'brick.png' });
-let PipeTopLeft = stampit.compose(Sprite).refs({ texture: 'pipe_top_left.png' });
-let PipeTopRight = stampit.compose(Sprite).refs({ texture: 'pipe_top_right.png' });
-let PipeBottomLeft = stampit.compose(Sprite).refs({ texture: 'pipe_bottom_left.png' });
-let PipeBottomRight = stampit.compose(Sprite).refs({ texture: 'pipe_bottom_right.png' });
+let Block = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
+let Brick = stampit.compose(Sprite, Collidable).refs({ texture: 'brick.png' });
+let PipeTopLeft = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
+let PipeTopRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
+let PipeBottomLeft = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
+let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
 
 
 let BlockData = [,Ground,Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock];
