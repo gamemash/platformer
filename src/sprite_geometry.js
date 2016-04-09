@@ -10,10 +10,10 @@ rectShape.lineTo( size, 0 );
 rectShape.lineTo( 0, 0 );
   
 
-var TileGeometry = stampit().refs({
+var SpriteGeometry = stampit().refs({
 }).init(function(){
   this.geometry = new THREE.ShapeGeometry(rectShape);
 });
 
-module.exports = TileGeometry;
+module.exports = SpriteGeometry;
 

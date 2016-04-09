@@ -1,10 +1,10 @@
 let stampit = require('stampit');
 let THREE = require('three');
-let TileGeometry = require('./tile_geometry.js');
+let SpriteGeometry = require('./sprite_geometry.js');
 let ShaderLoader = require('./shader_loader.js');
 
-
-let Tile = stampit()
+let loader = new THREE.TextureLoader();
+let Sprite = stampit()
   .refs({
     position: new THREE.Vector2(0, 0),
     shaders: [
@@ -36,16 +36,16 @@ let Tile = stampit()
   })
   .init(function(){
     this.material = new THREE.ShaderMaterial();
-    this.geometry = TileGeometry.create();
+    this.geometry = SpriteGeometry.create();
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
 
     let loader = new THREE.TextureLoader();
-    loader.load('images/ground.png', this.updateMaterial.bind(this));
+    loader.load('images/' + this.texture, this.updateMaterial.bind(this));
     Promise.all(this.shaders).then(this.shadersReceived.bind(this));
     this.renderer.scene.add(this.mesh);
   });
 
 
 
-module.exports = Tile;
+module.exports = Sprite;
 

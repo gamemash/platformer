@@ -1,7 +1,18 @@
 let stampit = require('stampit');
 let THREE = require('three');
-let Tile = require('./tile.js');
+let Sprite = require('./sprite.js');
 
+
+let Ground = stampit.compose(Sprite).refs({ texture: 'ground.png' });
+let Block = stampit.compose(Sprite).refs({ texture: 'block.png' })
+let Brick = stampit.compose(Sprite).refs({ texture: 'brick.png' });
+let PipeTopLeft = stampit.compose(Sprite).refs({ texture: 'pipe_top_left.png' });
+let PipeTopRight = stampit.compose(Sprite).refs({ texture: 'pipe_top_right.png' });
+let PipeBottomLeft = stampit.compose(Sprite).refs({ texture: 'pipe_bottom_left.png' });
+let PipeBottomRight = stampit.compose(Sprite).refs({ texture: 'pipe_bottom_right.png' });
+
+
+let BlockData = [,Ground,Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight];
 let WebGLRenderer = stampit()
   .methods({
     render: function(){
@@ -12,7 +23,7 @@ let WebGLRenderer = stampit()
       for (let y = levelData.length - 1; y >= 0; y -= 1){
         for (let x = 0; x < levelData[y].length; x += 1){
           if (levelData[y][x] != 0)
-            Tile.create({renderer: this, position: new THREE.Vector2(x, levelData.length - 1 - y)});
+            BlockData[levelData[y][x]].create({renderer: this, position: new THREE.Vector2(x, levelData.length - 1 - y)});
         }
       }
     }
