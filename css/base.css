@@ -8,6 +8,11 @@ body {
   font-family: monospace;
 }
 
+.debug {
+  font-size: 16px;
+  color: #fff;
+}
+
 h1 {
   text-align: center;
   color: #ddd;
