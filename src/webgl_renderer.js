@@ -2,6 +2,19 @@ let stampit = require('stampit');
 let THREE = require('three');
 let Sprite = require('./sprite.js');
 
+let Goomba = stampit.compose(Sprite)
+  .refs({
+    texture: 'goomba.png'
+  })
+  .init(function(){
+    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
+    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
+
+    console.log(this.material);
+  });
+
+
+
 
 let Ground = stampit.compose(Sprite).refs({ texture: 'ground.png' });
 let Block = stampit.compose(Sprite).refs({ texture: 'block.png' })
@@ -26,6 +39,8 @@ let WebGLRenderer = stampit()
             BlockData[levelData[y][x]].create({renderer: this, position: new THREE.Vector2(x, levelData.length - 1 - y)});
         }
       }
+
+      Goomba.create({renderer: this, position: new THREE.Vector2(3, 3) });
     }
 
 

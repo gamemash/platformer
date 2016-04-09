@@ -19,13 +19,6 @@ let Sprite = stampit()
 
       this.material.vertexShader = result[0];
       this.material.fragmentShader = result[1];
-      this.material.uniforms = {
-        tileLocation: { type: "v2", value: this.position.multiplyScalar(this.size) },
-        screenSize: {type: "v2", value: new THREE.Vector2(this.renderer.width, this.renderer.height) },
-        tileSize: {type: "f", value: this.size }
-  
-
-      };
       this.material.needsUpdate = true;
     },
     updateMaterial: function(texture){
@@ -36,6 +29,13 @@ let Sprite = stampit()
   })
   .init(function(){
     this.material = new THREE.ShaderMaterial();
+    this.material.uniforms = {
+      tileLocation: { type: "v2", value: this.position.multiplyScalar(this.size) },
+      screenSize: {type: "v2", value: new THREE.Vector2(this.renderer.width, this.renderer.height) },
+      tileSize: {type: "f", value: this.size },
+      spriteLayout: {type: "v2", value: new THREE.Vector2(1, 1) },
+      spritePosition: {type: "v2", value: new THREE.Vector2(0, 0) }
+    };
     this.geometry = SpriteGeometry.create();
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
 
