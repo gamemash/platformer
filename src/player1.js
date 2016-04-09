@@ -2,7 +2,8 @@ let stampit = require('stampit');
 let THREE = require('three');
 let Mario = require('./mario.js');
 let PhysicsEngine = require('./physics_engine.js');
-let {inputStream, menuStream, inputState} = require("./input_stream.js");
+let {jumpStream, inputState} = require("./input_stream.js");
+let sounds = require('./sounds.js');
 
 let Player1 = stampit.compose(Mario)
   .refs({
@@ -12,6 +13,9 @@ let Player1 = stampit.compose(Mario)
     accelerationConstant: 1000
   })
   .methods({
+    airborne: function() {
+      return (this.position.y > 64)
+    },
     boundingBox: function(obj_a, obj_b){
       let a_xy = obj_a.position;
       let a_XY = new THREE.Vector2(obj_a.size + obj_a.position.x, obj_a.size + obj_a.position.y);
@@ -20,13 +24,41 @@ let Player1 = stampit.compose(Mario)
       let b_XY = new THREE.Vector2(obj_b.size + obj_b.position.x, obj_b.size + obj_b.position.y);
 
       let not_collided = (
-        a_XY.x < b_xy.x || b_XY.x < a_xy.x || 
+        a_XY.x < b_xy.x || b_XY.x < a_xy.x ||
         a_XY.y < b_xy.y || b_XY.y < a_xy.y);
       return !not_collided;
     },
     update: function(dt){
-      document.getElementById("mariox").innerHTML = this.gridPosition()[0];
-      document.getElementById("marioy").innerHTML = this.gridPosition()[1];
+      document.getElementById("mariox").innerHTML = this.position.y;
+      if (this.position.y > 64) {
+
+        if (inputState.pressed("jump")) { // Jump further while jump button is held down
+          this.acceleration.y = -this.accelerationConstant;
+        } else {
+          this.acceleration.y = -this.accelerationConstant - 2000;
+        }
+
+        if (this.velocity.y < 0) { // fall down faster then you went up
+          this.acceleration.y = -this.accelerationConstant *2;
+        }
+      } else {
+        this.position.y = 64;
+        if (this.acceleration.y < 0) {
+          this.acceleration.y = 0;
+          this.velocity.y = 0;
+        }
+      }
+
+      jumpStream.onValue((x) => {
+        if (!this.airborne()) {
+          sounds.jumpSmall.pause();
+          sounds.jumpSmall.currentTime = 0;
+          sounds.jumpSmall.play();
+          this.acceleration.y = this.accelerationConstant * 30;
+        }
+      });
+
+
       let oldPosition = this.position.clone();
 
 

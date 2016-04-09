@@ -6,7 +6,7 @@ let WebGLRenderer = require('./src/webgl_renderer.js');
 let Player1 = require('./src/player1.js');
 let sounds = require('./src/sounds.js');
 
-let {inputStream, menuStream, inputState} = require("./src/input_stream.js");
+let {inputStream, menuStream, jumpStream, inputState} = require("./src/input_stream.js");
 let paused = false;
 
 menuStream.onValue((x) => {
@@ -15,8 +15,7 @@ menuStream.onValue((x) => {
   sounds.pauseSound.play();
   document.getElementById("game-wrapper").classList.toggle("paused");
   paused = ! paused;
-})
-
+});
 
 let levelData = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
