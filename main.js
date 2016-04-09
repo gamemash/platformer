@@ -69,8 +69,9 @@ function render() {
   //if (inputState.pressed("menu")) { }
 
   let relativeCameraPosition = player1.position.x + renderer.camera.position.x;
-  if (relativeCameraPosition > renderer.width)
+  if (relativeCameraPosition > renderer.width){
     renderer.camera.position.x = (renderer.width - player1.position.x);
+  }
 
   player1.update(dt);
   renderer.render();
