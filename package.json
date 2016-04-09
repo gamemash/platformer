@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.3.4",
+    "request-promise": "^2.0.1",
     "stampit": "^2.1.1",
     "three": "^0.75.0"
   }
