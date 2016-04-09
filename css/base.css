@@ -25,13 +25,14 @@ h1 {
   border-bottom: 1px solid #555;
   margin-bottom: 15px;
   position: relative;
+  background-color: #111;
 }
 
 #game-canvas {
   width: 100%;
   height: 500px;
   background-color: #5c94fc;
-  transition: opacity 0.3s;
+  transition: opacity 0.2s;
 }
 
 #help-text {
@@ -56,11 +57,11 @@ h1 {
   font-size: 50px;
   top: 43%;
   opacity: 0;
-  transition: top 0.3s, opacity 0.1s;
+  transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .paused #game-canvas{
-  opacity: 0.3;
+  opacity: 0.5;
 }
 
 .paused #pause-menu {
