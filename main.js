@@ -27,8 +27,8 @@ renderer.loadLevel(levelData);
 
 function render() {
   if (inputState.pressed("up")) { }
-  if (inputState.pressed("right")) { }
-  if (inputState.pressed("left")) { }
+  if (inputState.pressed("right")) { renderer.camera.position.x += 10; }
+  if (inputState.pressed("left")) { renderer.camera.position.x -= 10; }
   if (inputState.pressed("down")) { }
   if (inputState.pressed("jump")) { }
   if (inputState.pressed("run")) { }
