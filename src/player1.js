@@ -29,7 +29,6 @@ let Player1 = stampit.compose(Mario)
       return !not_collided;
     },
     update: function(dt){
-      document.getElementById("mariox").innerHTML = this.position.y;
       if (this.position.y > 64) {
 
         if (inputState.pressed("jump")) { // Jump further while jump button is held down
@@ -51,9 +50,9 @@ let Player1 = stampit.compose(Mario)
 
       jumpStream.onValue((x) => {
         if (!this.airborne()) {
-          sounds.jumpSmall.pause();
-          sounds.jumpSmall.currentTime = 0;
-          sounds.jumpSmall.play();
+          new Promise(function(resolve, reject) {
+            sounds.jumpSmall.play();
+          });
           this.acceleration.y = this.accelerationConstant * 30;
         }
       });
@@ -75,10 +74,9 @@ let Player1 = stampit.compose(Mario)
 
       let position = this.gridPosition();
       let collision = PhysicsEngine.checkCollision(position);
-      document.getElementById("blockLeft").innerHTML = false;
+
       if (collision){
         if (collision.blockLeft) {
-          //let blockPosition = [position[0] - 1, position[1]];
           if (this.boundingBox(this, collision.blockLeft)){
             this.position.x = collision.blockLeft.size + collision.blockLeft.position.x;
             if (this.velocity.x < 0.0){
@@ -86,11 +84,6 @@ let Player1 = stampit.compose(Mario)
               this.acceleration.x = 0.0;
             }
           }
-
-          //document.getElementById("blockRight").innerHTML = blockRight;
-          //if (this.velocity.x < 0)
-          //  this.velocity.x = 0;
-          //this.position.x = (blockPosition[0] + 1) * this.size;
         }
 
 
@@ -102,22 +95,8 @@ let Player1 = stampit.compose(Mario)
               this.acceleration.x = 0.0;
             }
           }
-
         }
-        // console.log("collided", collision);
-        //position = [
-        //  Math.ceil(oldPosition.x / this.size),
-        //  Math.ceil(oldPosition.y / this.size)
-        //];
-        //console.log(position);
-        //position[0] *= this.size;
-        //position[1] *= this.size;
-        //this.position.fromArray(position);
-        //this.velocity.x = 0;
-        //this.acceleration.x = 0;
       }
-
-
     }
   })
 

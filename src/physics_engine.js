@@ -18,7 +18,6 @@ let PhysicsEngine = stampit()
     checkCollision: function(position){
       let blockLeft = this.checkPosition(position[0] - 1, position[1]);
       let blockRight = this.checkPosition(position[0] + 1, position[1]);
-      document.getElementById("blockRight").innerHTML = [position[0] + 1, position[1]];
 
       return {
         blockLeft: blockLeft,
