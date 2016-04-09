@@ -1,7 +1,7 @@
 var stampit = require('stampit');
 var THREE = require('three');
 
-var size = 50;
+var size = 32;
 var rectShape = new THREE.Shape();
 rectShape.moveTo( 0,0 );
 rectShape.lineTo( 0, size );
