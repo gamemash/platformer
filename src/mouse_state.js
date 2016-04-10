@@ -13,7 +13,7 @@ function _addEventListener(canvas, callback){
   canvas.addEventListener('mousemove', (evt) => {
     var mousePos = _getMousePos(canvas, evt);
     callback(mousePos.x, mousePos.y)
-  }, false);
+  }, true);
 }
 
 let MouseState = stampit()
@@ -23,10 +23,6 @@ let MouseState = stampit()
   .init(function(){
     console.log(this);
     this.canvas = document.getElementById(this.canvasId);
-    _addEventListener(this.canvas, (x, y) => {
-      debug(1, x);
-      debug(2, y);
-    });
   })
   .methods({
     addListener: function(callback) {
