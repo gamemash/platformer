@@ -13,16 +13,10 @@ let Player1 = stampit.compose(Mario)
   })
   .methods({
     boundingBox: function(obj_a, obj_b){
-      let a_xy = obj_a.position;
-      let a_XY = new THREE.Vector2(obj_a.size + obj_a.position.x, obj_a.size + obj_a.position.y);
-
-      let b_xy = obj_a.position;
-      let b_XY = new THREE.Vector2(obj_b.size + obj_b.position.x, obj_b.size + obj_b.position.y);
-
-      let not_collided = (
-        a_XY.x < b_xy.x || b_XY.x < a_xy.x || 
-        a_XY.y < b_xy.y || b_XY.y < a_xy.y);
-      return !not_collided;
+      return (obj_a.position.x < obj_b.position.x + obj_b.size &&
+         obj_a.position.x + obj_a.size > obj_b.position.x &&
+         obj_a.position.y < obj_b.position.y + obj_b.size &&
+         obj_a.size + obj_a.position.y > obj_a.position.y);
     },
     update: function(dt){
       document.getElementById("mariox").innerHTML = this.gridPosition()[0];
@@ -46,7 +40,6 @@ let Player1 = stampit.compose(Mario)
       document.getElementById("blockLeft").innerHTML = false;
       if (collision){
         if (collision.blockLeft) {
-          //let blockPosition = [position[0] - 1, position[1]];
           if (this.boundingBox(this, collision.blockLeft)){
             this.position.x = collision.blockLeft.size + collision.blockLeft.position.x;
             if (this.velocity.x < 0.0){
@@ -54,11 +47,6 @@ let Player1 = stampit.compose(Mario)
               this.acceleration.x = 0.0;
             }
           }
-
-          //document.getElementById("blockRight").innerHTML = blockRight;
-          //if (this.velocity.x < 0)
-          //  this.velocity.x = 0;
-          //this.position.x = (blockPosition[0] + 1) * this.size;
         }
 
 
@@ -72,17 +60,6 @@ let Player1 = stampit.compose(Mario)
           }
 
         }
-        // console.log("collided", collision);
-        //position = [
-        //  Math.ceil(oldPosition.x / this.size),
-        //  Math.ceil(oldPosition.y / this.size)
-        //];
-        //console.log(position);
-        //position[0] *= this.size;
-        //position[1] *= this.size;
-        //this.position.fromArray(position);
-        //this.velocity.x = 0;
-        //this.acceleration.x = 0;
       }
 
 
