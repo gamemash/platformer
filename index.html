@@ -7,12 +7,6 @@
   </head>
   <body>
     <h1>Mario 1-1</h1>
-    <div id="debugParent" class='debug'>
-    <span id="mariox">0</span>
-    <span id="marioy">0</span>
-    <span id="blockLeft">false</span>
-    <span id="blockRight">false</span>
-    </div>
 
     <div id="game-wrapper">
       <canvas id="game-canvas"></canvas>
@@ -20,6 +14,7 @@
         <h2>PAUSED</h2>
       </div>
     </div>
+
     <div id="help-text">
       Controls: WASD to move, J to Jump, K to Run, Enter to pause<br/>
       Also supports Gamepads.
@@ -28,6 +23,9 @@
     <div id="music-controls">
       <span id="play-music">[Play music]</span>
       <span id="stop-music">[Stop music]</span>
+    </div>
+
+    <div id="debugParent" class='debug'>
     </div>
 
     <script src="js/bundle.js"></script>
