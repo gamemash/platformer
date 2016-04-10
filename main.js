@@ -8,6 +8,7 @@ let sounds = require('./src/sounds.js');
 let Selector = require('./src/selector.js');
 let MouseState = require('./src/mouse_state.js');
 let MouseStream = require('./src/mouse_stream.js');
+let Debug = require('./src/debug.js');
 
 let {inputStream, menuStream, jumpStream, inputState} = require("./src/input_stream.js");
 let paused = false;
@@ -19,6 +20,7 @@ menuStream.onValue((x) => {
   document.getElementById("game-wrapper").classList.toggle("paused");
   paused = ! paused;
 });
+
 
 let levelData = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -66,6 +68,7 @@ function render() {
     player1.update(dt);
     renderer.render();
   }
+  Debug('test', player1.position.toArray());
 
   requestAnimationFrame(render);
 }

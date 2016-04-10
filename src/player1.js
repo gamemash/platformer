@@ -17,16 +17,10 @@ let Player1 = stampit.compose(Mario)
       return (this.position.y > 64)
     },
     boundingBox: function(obj_a, obj_b){
-      let a_xy = obj_a.position;
-      let a_XY = new THREE.Vector2(obj_a.size + obj_a.position.x, obj_a.size + obj_a.position.y);
-
-      let b_xy = obj_a.position;
-      let b_XY = new THREE.Vector2(obj_b.size + obj_b.position.x, obj_b.size + obj_b.position.y);
-
-      let not_collided = (
-        a_XY.x < b_xy.x || b_XY.x < a_xy.x ||
-        a_XY.y < b_xy.y || b_XY.y < a_xy.y);
-      return !not_collided;
+      return (obj_a.position.x < obj_b.position.x + obj_b.size &&
+         obj_a.position.x + obj_a.size > obj_b.position.x &&
+         obj_a.position.y < obj_b.position.y + obj_b.size &&
+         obj_a.size + obj_a.position.y > obj_a.position.y);
     },
     update: function(dt){
       if (this.position.y > 64) {
