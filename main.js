@@ -4,6 +4,7 @@ let stampit = require('stampit');
 let THREE = require('three');
 let WebGLRenderer = require('./src/webgl_renderer.js');
 let Player1 = require('./src/player1.js');
+let Debug = require('./src/debug.js');
 
 let {inputStream, menuStream, inputState} = require("./src/input_stream.js");
 let paused = false;
@@ -12,6 +13,7 @@ menuStream.onValue((x) => {
   paused = ! paused;
   console.log("Menu pressed");
 })
+
 
 
 let levelData = [
@@ -50,6 +52,7 @@ function render() {
   if (relativeCameraPosition > renderer.width){
     renderer.camera.position.x = (renderer.width - player1.position.x);
   }
+  Debug('test', player1.position.toArray());
 
   player1.update(dt);
   renderer.render();
