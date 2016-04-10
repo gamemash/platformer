@@ -68,7 +68,8 @@ function render() {
     player1.update(dt);
     renderer.render(dt);
   }
-  Debug('test', player1.position.toArray());
+  Debug('mario-x', player1.position.x);
+  Debug('mario-y', player1.position.y);
 
   requestAnimationFrame(render);
 }

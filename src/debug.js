@@ -9,7 +9,7 @@ let Debug = function(what, value){
     element.id = what;
     debugParent.appendChild(element);
   }
-  element.innerHTML = value;
+  element.innerHTML = what + ": " + value;
 }
 
 module.exports = Debug;

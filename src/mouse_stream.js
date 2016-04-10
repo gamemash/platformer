@@ -29,7 +29,7 @@ directionStream = mouseStream.bufferWithCount(2).map((x) => {
   }
 }).skipDuplicates();
 
-directionStream.onValue((x) => {debug(1, "mouse is moving: " + x)});
+directionStream.onValue((x) => {debug("mouse_direction", x)});
 // directionStream.log();
 
 shakeStream = directionStream.bufferWithTimeOrCount(600, 7).filter((x) => x.length == 7).map(() => {return "shake"})
