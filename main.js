@@ -66,7 +66,7 @@ function render() {
 
     selector.update(dt);
     player1.update(dt);
-    renderer.render();
+    renderer.render(dt);
   }
   Debug('test', player1.position.toArray());
 

@@ -3,7 +3,6 @@ let stampit = require('stampit');
 let debugParent = document.getElementById('debugParent');
 
 let Debug = function(what, value){
-  console.log(what, debugParent);
   let element = document.getElementById(what);
   if (!element){
     element = document.createElement("div");

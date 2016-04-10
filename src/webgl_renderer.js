@@ -1,6 +1,7 @@
 let stampit = require('stampit');
 let THREE = require('three');
 let Sprite = require('./sprite.js');
+let AnimatedSprite = require('./animated_sprite.js');
 let PhysicsEngine = require('./physics_engine.js');
 
 let Collidable = stampit()
@@ -20,7 +21,7 @@ let Goomba = stampit.compose(Sprite)
     this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
   });
 
-let ItemBlock = stampit.compose(Sprite).refs({ texture: 'item_block.png'}).init(function() {
+let ItemBlock = stampit.compose(AnimatedSprite).refs({texture: 'item_block.png'}).init(function() {
   this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
   this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
 });
@@ -37,20 +38,29 @@ let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_
 let BlockData = [,Ground,Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock];
 let WebGLRenderer = stampit()
   .methods({
-    render: function(){
+    render: function(dt){
       this.renderer.render(this.scene, this.camera);
+
+      for (let item of this.toUpdate) {
+        item.update(dt);
+      };
     },
     loadLevel: function(levelData){
       for (let y = levelData.length - 1; y >= 0; y -= 1){
         for (let x = 0; x < levelData[y].length; x += 1){
-          if (levelData[y][x] != 0)
-            BlockData[levelData[y][x]].create({renderer: this, position: new THREE.Vector2(x, levelData.length - 1 - y)});
+          if (levelData[y][x] != 0) {
+            let block = BlockData[levelData[y][x]].create({renderer: this, position: new THREE.Vector2(x, levelData.length - 1 - y)});
+            if (block.animated) {
+              this.toUpdate.add(block);
+            }
+          }
         }
       }
     }
   })
   .init(function(){
     this.scene = new THREE.Scene();
+    this.toUpdate = new Set();
     this.renderer = new THREE.WebGLRenderer({canvas: this.canvas, alpha: true});
     this.width = this.renderer.domElement.offsetWidth;
     this.height = this.renderer.domElement.offsetHeight;
