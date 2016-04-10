@@ -7,7 +7,6 @@ let Selector = stampit.compose(Sprite)
     texture: 'selector.png',
   })
   .init(function(){
-    console.log('wut')
   })
   .methods({
     update: function(dt){

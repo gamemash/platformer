@@ -21,12 +21,10 @@ let MouseState = stampit()
 
   })
   .init(function(){
-    console.log(this);
     this.canvas = document.getElementById(this.canvasId);
   })
   .methods({
     addListener: function(callback) {
-      console.log(this);
       _addEventListener(this.canvas, callback);
     }
   });

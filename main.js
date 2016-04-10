@@ -7,6 +7,7 @@ let Player1 = require('./src/player1.js');
 let sounds = require('./src/sounds.js');
 let Selector = require('./src/selector.js');
 let MouseState = require('./src/mouse_state.js');
+let MouseStream = require('./src/mouse_stream.js');
 
 let {inputStream, menuStream, jumpStream, inputState} = require("./src/input_stream.js");
 let paused = false;
