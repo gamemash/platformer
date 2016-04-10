@@ -6,13 +6,7 @@ let Debug = require('./debug.js');
 let AnimatedSprite = stampit.compose(Sprite)
   .refs({
     animated: true,
-    frames: [
-      {id: 0, duration: 0.05},
-      {id: 1, duration: 0.05},
-      {id: 2, duration: 0.6},
-      {id: 1, duration: 0.05},
-      {id: 0, duration: 0.05}
-    ] // seconds
+    frames: [{id:0, duration: 1}]
   })
   .init(function(){
     this.animated = true;

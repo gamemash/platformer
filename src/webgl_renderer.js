@@ -21,10 +21,21 @@ let Goomba = stampit.compose(Sprite)
     this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
   });
 
-let ItemBlock = stampit.compose(AnimatedSprite).refs({texture: 'item_block.png'}).init(function() {
-  this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
-  this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
-});
+let ItemBlock = stampit.compose(AnimatedSprite)
+  .refs({
+    texture: 'item_block.png',
+    frames: [
+      {id: 0, duration: 0.05},
+      {id: 1, duration: 0.05},
+      {id: 2, duration: 0.60},
+      {id: 1, duration: 0.05},
+      {id: 0, duration: 0.05}
+    ]
+  })
+  .init(function() {
+    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
+    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
+  });
 
 let Ground = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
