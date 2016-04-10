@@ -71,3 +71,17 @@ h1 {
   opacity: 1;
   display: block !important;
 }
+
+#music-controls {
+  margin-top: 25px;
+  color: #bbb;
+  text-align: center;
+}
+
+#music-controls span {
+  cursor: pointer;
+}
+
+#music-controls span:hover {
+  color: #fff;
+}

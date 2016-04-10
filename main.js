@@ -74,3 +74,13 @@ function render() {
 }
 
 render();
+
+
+document.getElementById('play-music').onclick = function() {
+  sounds.groundTheme.play();
+};
+
+document.getElementById('stop-music').onclick = function() {
+  sounds.groundTheme.pause();
+  sounds.groundTheme.currentTime = 0;
+};
