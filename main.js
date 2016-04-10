@@ -5,6 +5,8 @@ let THREE = require('three');
 let WebGLRenderer = require('./src/webgl_renderer.js');
 let Player1 = require('./src/player1.js');
 let sounds = require('./src/sounds.js');
+let Selector = require('./src/selector.js');
+let MouseState = require('./src/mouse_state.js');
 
 let {inputStream, menuStream, jumpStream, inputState} = require("./src/input_stream.js");
 let paused = false;
@@ -40,6 +42,15 @@ let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canva
 renderer.loadLevel(levelData);
 
 let player1 = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 2) });
+let selector = Selector.create({renderer: renderer, position: new THREE.Vector2(0, 0)});
+
+let mouseState = MouseState.create({canvasId: "game-canvas"});
+
+mouseState.addListener(function(x,y) {
+  x = Math.floor(x/24);
+  y = Math.floor(y/24);
+  selector.moveTo(x,y);
+});
 
 function render() {
   let dt = 1/60;
@@ -50,6 +61,7 @@ function render() {
       renderer.camera.position.x = (renderer.width - player1.position.x);
     }
 
+    selector.update(dt);
     player1.update(dt);
     renderer.render();
   }

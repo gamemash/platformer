@@ -38,7 +38,6 @@ let BlockData = [,Ground,Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft
 let WebGLRenderer = stampit()
   .methods({
     render: function(){
-
       this.renderer.render(this.scene, this.camera);
     },
     loadLevel: function(levelData){
@@ -48,11 +47,7 @@ let WebGLRenderer = stampit()
             BlockData[levelData[y][x]].create({renderer: this, position: new THREE.Vector2(x, levelData.length - 1 - y)});
         }
       }
-
     }
-
-
-
   })
   .init(function(){
     this.scene = new THREE.Scene();

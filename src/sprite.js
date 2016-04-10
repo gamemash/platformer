@@ -16,7 +16,6 @@ let Sprite = stampit()
   })
   .methods({
     shadersReceived: function(result){
-
       this.material.vertexShader = result[0];
       this.material.fragmentShader = result[1];
       this.material.needsUpdate = true;
