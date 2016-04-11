@@ -50,8 +50,8 @@ let selector = Selector.create({renderer: renderer, position: new THREE.Vector2(
 let mouseState = MouseState.create({canvasId: "game-canvas"});
 
 mouseState.addListener(function(x,y) {
-  x = Math.floor(x/24);
-  y = Math.floor(y/24);
+  x = Math.floor(x/32 - renderer.camera.position.x);
+  y = Math.floor(y/32);
   selector.moveTo(x,y);
 });
 
