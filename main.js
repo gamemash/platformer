@@ -9,6 +9,7 @@ let Selector = require('./src/selector.js');
 let MouseState = require('./src/mouse_state.js');
 let MouseStream = require('./src/mouse_stream.js');
 let Debug = require('./src/debug.js');
+let {Goomba} = require('./src/enemies.js')
 
 let {inputStream, menuStream, jumpStream, inputState} = require("./src/input_stream.js");
 let paused = false;
@@ -45,6 +46,7 @@ let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canva
 renderer.loadLevel(levelData);
 
 let player1 = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 4) });
+let goomba = Goomba.create({renderer: renderer, position: new THREE.Vector2(22, 2)});
 let selector = Selector.create({renderer: renderer, position: new THREE.Vector2(0, 0)});
 
 let mouseState = MouseState.create({canvasId: "game-canvas"});

@@ -28,7 +28,6 @@ let Mario = stampit.compose(AnimatedSprite)
     updateSprite: function(dt){
       this.timeElapsed += dt;
 
-      
       this.frame = this.frame % this.animations[this.animationState].length;
       let duration = this.animations[this.animationState][this.frame].duration;
       if (this.animationState == "moving"){

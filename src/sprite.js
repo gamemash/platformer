@@ -30,9 +30,6 @@ let Sprite = stampit()
     gridPosition: function(){
       return [Math.round(this.position.x / this.size), Math.round(this.position.y / this.size)];
     }
-
-
-
   })
   .init(function(){
     this.material = new THREE.ShaderMaterial();

@@ -25,7 +25,7 @@ let PhysicsEngine = stampit()
         blockLeft: blockLeft,
         blockDown: blockDown,
         blockRight: blockRight,
-       blockUp: blockUp
+        blockUp: blockUp
       }
     },
 
@@ -34,7 +34,6 @@ let PhysicsEngine = stampit()
       if (key in this.objects)
         return this.objects[key];
       return false;
-
     }
 
 

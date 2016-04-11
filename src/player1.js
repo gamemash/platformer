@@ -19,7 +19,6 @@ let Player1 = stampit.compose(Mario, Entity)
     onGround: false,
     timeSinceJump: 10,
     jumpLength: 0.2
-
   })
   .init(function(){
   })
