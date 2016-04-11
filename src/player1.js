@@ -21,7 +21,6 @@ let Player1 = stampit.compose(Mario, Entity)
     jumpLength: 0.3,
     maxVelocity: 12,
     airJumpCount: 0,
-    canAirJump: true,
     maxAirJumps: 2,
   })
   .init(function(){
@@ -37,7 +36,7 @@ let Player1 = stampit.compose(Mario, Entity)
         this.airJumpCount = 0;
       }
 
-      if(this.onGround || (this.canAirJump && this.airJumpCount < this.maxAirJumps)){
+      if(this.onGround || (this.airJumpCount < this.maxAirJumps)){
         this.timeSinceJump = 0;
         this.airJumpCount += 1;
         this.velocity.y = this.jumpForce / this.mass;
