@@ -2,6 +2,7 @@ let stampit = require('stampit');
 let THREE = require('three');
 let SpriteGeometry = require('./sprite_geometry.js');
 let ShaderLoader = require('./shader_loader.js');
+let TextureLoader = require('./texture_loader.js');
 
 let loader = new THREE.TextureLoader();
 let Sprite = stampit()
@@ -45,8 +46,7 @@ let Sprite = stampit()
     this.geometry = SpriteGeometry.create();
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
 
-    let loader = new THREE.TextureLoader();
-    loader.load('images/' + this.texture, this.updateMaterial.bind(this));
+    TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
     Promise.all(this.shaders).then(this.shadersReceived.bind(this));
     this.renderer.scene.add(this.mesh);
   });
