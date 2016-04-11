@@ -28,7 +28,7 @@ h1 {
 
 #game-wrapper {
   width: 100%;
-  height: 384px;
+  height: 512px;
   border-top: 1px solid #555;
   border-bottom: 1px solid #555;
   margin-bottom: 15px;
@@ -38,7 +38,7 @@ h1 {
 
 #game-canvas {
   width: 100%;
-  height: 384px;
+  height: 512px;
   background-color: #5c94fc;
   transition: opacity 0.2s;
 }
