@@ -16,7 +16,8 @@ let Player1 = stampit.compose(Mario)
     mass: 80,
     jumpForce: 3 * 9.8 * scale,
     onGround: false,
-    timeSinceJump: 10
+    timeSinceJump: 10,
+    jumpLength: 0.2
 
   })
   .methods({
@@ -27,13 +28,14 @@ let Player1 = stampit.compose(Mario)
          obj_a.size + obj_a.position.y > obj_a.position.y);
     },
     update: function(dt){
+      this.acceleration.x = 0;
       this.acceleration.y = -this.gravity / this.mass;
 
       if (inputState.pressed("jump")) { 
         if (this.onGround)
           this.timeSinceJump = 0;
 
-        if (this.timeSinceJump < 0.2){ // Jump further while jump button is held down
+        if (this.timeSinceJump < this.jumpLength){ // Jump further while jump button is held down
           this.acceleration.y += this.jumpForce / this.mass;
         }
       }
@@ -48,17 +50,19 @@ let Player1 = stampit.compose(Mario)
         }
       });
 
+      if (this.onGround || this.timeSinceJump < this.jumpLength){
+        if (inputState.pressed("right")) {
+          this.acceleration.x = this.accelerationConstant;
+        } else if(inputState.pressed("left")) {
+          this.acceleration.x = -this.accelerationConstant;
+        } else {
+          this.acceleration.x =  - this.velocity.x * this.groundResistance;
+        }
+      }
+
       this.position.addScaledVector(this.velocity, dt)
       this.position.addScaledVector(this.acceleration, dt * dt)
       this.velocity.addScaledVector(this.acceleration, dt)
-
-      if (inputState.pressed("right")) {
-        this.acceleration.x = this.accelerationConstant;
-      } else if(inputState.pressed("left")) {
-        this.acceleration.x = -this.accelerationConstant;
-      } else {
-        this.acceleration.x =  - this.velocity.x * this.groundResistance;
-      }
 
       let position = this.gridPosition();
       let collision = PhysicsEngine.checkCollision(position);
