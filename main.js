@@ -44,7 +44,7 @@ let levelData = [
 let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canvas')});
 renderer.loadLevel(levelData);
 
-let player1 = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 2) });
+let player1 = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 4) });
 let selector = Selector.create({renderer: renderer, position: new THREE.Vector2(0, 0)});
 
 let mouseState = MouseState.create({canvasId: "game-canvas"});

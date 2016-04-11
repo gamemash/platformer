@@ -21,7 +21,7 @@ let Goomba = stampit.compose(Sprite)
     this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
   });
 
-let ItemBlock = stampit.compose(AnimatedSprite)
+let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
     texture: 'item_block.png',
     frames: [

@@ -16,14 +16,16 @@ let PhysicsEngine = stampit()
       this.objects[this.key(obj)] = obj;
     },
     checkCollision: function(position){
-      let blockLeft = this.checkPosition(position[0] - 1, position[1]);
-      let blockRight = this.checkPosition(position[0] + 1, position[1]);
+      let blockLeft   = this.checkPosition(position[0] - 1, position[1]);
+      let blockRight  = this.checkPosition(position[0] + 1, position[1]);
+      let blockDown   = this.checkPosition(position[0], position[1] - 1);
+      let blockUp     = this.checkPosition(position[0], position[1] + 1);
 
       return {
         blockLeft: blockLeft,
-        blockRight: blockRight
-        // blockUp: blockUp,
-        // blockDown: blockDown
+        blockDown: blockDown,
+        blockRight: blockRight,
+       blockUp: blockUp
       }
     },
 
