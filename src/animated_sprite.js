@@ -6,7 +6,6 @@ let Updatable = require('./updatable.js');
 
 let AnimatedSprite = stampit.compose(Updatable, Sprite)
   .refs({
-    animated: true,
     frames: [{id:0, duration: 1}]
   })
   .init(function(){

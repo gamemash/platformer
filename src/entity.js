@@ -2,6 +2,13 @@ let PhysicsEngine = require('./physics_engine.js');
 var stampit = require('stampit');
 
 var Entity = stampit().methods({
+  boundingBox: function(obj_a, obj_b){
+    return (obj_a.position.x < obj_b.position.x + obj_b.size &&
+       obj_a.position.x + obj_a.size > obj_b.position.x &&
+       obj_a.position.y < obj_b.position.y + obj_b.size &&
+       obj_a.size + obj_a.position.y > obj_a.position.y);
+  },
+
   updateCollisions: function(dt){
     let position = this.gridPosition();
     let collision = PhysicsEngine.checkCollision(position);

@@ -23,12 +23,6 @@ let Player1 = stampit.compose(Mario, Entity)
   .init(function(){
   })
   .methods({
-    boundingBox: function(obj_a, obj_b){
-      return (obj_a.position.x < obj_b.position.x + obj_b.size &&
-         obj_a.position.x + obj_a.size > obj_b.position.x &&
-         obj_a.position.y < obj_b.position.y + obj_b.size &&
-         obj_a.size + obj_a.position.y > obj_a.position.y);
-    },
     update: function(dt){
       this.acceleration.x = 0;
       this.acceleration.y = -this.gravity / this.mass;
@@ -46,7 +40,7 @@ let Player1 = stampit.compose(Mario, Entity)
       jumpStream.onValue((x) => {
         if (this.onGround) {
           sounds.jumpSmall.currentTime = 0;
-          sounds.jumpSmall.play();
+          // sounds.jumpSmall.play();
           this.acceleration.y += this.jumpForce / this.mass;
         }
       });
