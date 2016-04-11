@@ -22,6 +22,7 @@ let Player1 = stampit.compose(Mario, Entity)
     maxVelocity: 12,
     airJumpCount: 0,
     maxAirJumps: 2,
+    dead: false
   })
   .init(function(){
     jumpStream.onValue((x) => {
@@ -56,7 +57,31 @@ let Player1 = stampit.compose(Mario, Entity)
 
   })
   .methods({
+    die: function() {
+      if (!this.dead){
+        console.log('died');
+        sounds.die.play();
+
+        window.setTimeout(function() { // Respawn the player after 3 seconds
+          this.position.x = 6;
+          this.position.y = 5;
+          this.acceleration.y = 0;
+          this.velocity.y = 18;
+          this.velocity.x = 2;
+          sounds.kick.play();
+          this.dead = false;
+        }.bind(this), 3250)
+      }
+
+      this.dead = true;
+    },
     update: function(dt){
+      if (this.dead) {
+        this.animationState = "dead";
+        this.position.y -= 0.02;
+        return;
+      }
+
       this.acceleration.x = 0;
       this.acceleration.y = -this.gravity / this.mass;
 

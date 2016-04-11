@@ -6,7 +6,7 @@ var Entity = stampit().methods({
     return (obj_a.position.x < obj_b.position.x + obj_b.size &&
        obj_a.position.x + obj_a.size > obj_b.position.x &&
        obj_a.position.y < obj_b.position.y + obj_b.size &&
-       obj_a.size + obj_a.position.y > obj_a.position.y);
+       obj_a.size + obj_a.position.y > obj_b.position.y);
   },
   updateCollisions: function(dt){
     let position = this.gridPosition();

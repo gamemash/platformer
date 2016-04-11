@@ -61,6 +61,8 @@ mouseState.addListener(function(x,y) {
   selector.moveTo(x,y);
 });
 
+let entities = [goomba]
+
 function render() {
   let dt = 1/60;
   if (!gameState.paused) {
@@ -77,13 +79,15 @@ function render() {
     player1.update(dt);
     renderer.render(dt);
 
-    gameRules.update(player1, gameState);
+    gameRules.update(player1, entities, gameState);
   }
   Debug('mario-x', player1.position.x);
   Debug('mario-y', player1.position.y);
 
   requestAnimationFrame(render);
 }
+
+window.player = player1;
 
 render();
 

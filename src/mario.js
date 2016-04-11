@@ -21,6 +21,9 @@ let Mario = stampit.compose(AnimatedSprite)
       ],
       jumping: [
         {id: 5, duration: 0.0}
+      ],
+      dead: [
+        {id: 6, duration: 0.0}
       ]
     },
   })
