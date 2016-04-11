@@ -10,7 +10,7 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
   .refs({
     texture: 'goomba.png',
     frames: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
-    walkSpeed: 0.04
+    walkSpeed: -0.04
   })
   .methods({
     collidedLeft: function() {

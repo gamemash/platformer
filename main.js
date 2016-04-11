@@ -71,7 +71,6 @@ function render() {
       renderer.camera.position.x = (16 - player1.position.x);
     }
 
-    Debug(1, renderer.camera.position.x)
     if (relativeCameraPosition < 4 && renderer.camera.position.x < 0){
       renderer.camera.position.x = (4 - player1.position.x);
     }

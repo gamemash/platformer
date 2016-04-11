@@ -19,7 +19,7 @@ let Player1 = stampit.compose(Mario, Entity)
     onGround: false,
     timeSinceJump: 10,
     jumpLength: 0.3,
-    maxVelocity: 12,
+    maxVelocity: 15,
     airJumpCount: 0,
     maxAirJumps: 2,
     dead: false
