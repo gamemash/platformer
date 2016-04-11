@@ -59,11 +59,14 @@ mouseState.addListener(function(x,y) {
 
 function render() {
   let dt = 1/60;
-
   if (!paused) {
     let relativeCameraPosition = player1.position.x + renderer.camera.position.x;
     if (relativeCameraPosition > 16){
       renderer.camera.position.x = (16 - player1.position.x);
+    }
+
+    if (relativeCameraPosition < 4){
+      renderer.camera.position.x = (4 - player1.position.x);
     }
 
     selector.update(dt);

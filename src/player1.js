@@ -11,16 +11,50 @@ let Player1 = stampit.compose(Mario, Entity)
   .refs({
     velocity: new THREE.Vector2(0, 0),
     acceleration: new THREE.Vector2(0, 0),
-    groundResistance: 3,
-    accelerationConstant: 0.1 * scale,
-    gravity: 9.8 * scale,
+    groundResistance: 3.6,
+    accelerationConstant: 0.14 * scale,
+    gravity: 20 * scale,
     mass: 80,
-    jumpForce: 3 * 9.8 * scale,
+    jumpForce: 0.5 * 7.8 * scale,
     onGround: false,
     timeSinceJump: 10,
-    jumpLength: 0.2
+    jumpLength: 0.3,
+    maxVelocity: 12,
+    airJumpCount: 0,
+    canAirJump: true,
+    maxAirJumps: 2,
   })
   .init(function(){
+    jumpStream.onValue((x) => {
+      if (this.onGround) {
+
+        // this.acceleration.y += this.jumpForce / this.mass;
+      }
+    });
+
+    jumpStream.onValue(function(x) {
+      if(this.onGround) {
+        this.airJumpCount = 0;
+      }
+
+      if(this.onGround || (this.canAirJump && this.airJumpCount < this.maxAirJumps)){
+        this.timeSinceJump = 0;
+        this.airJumpCount += 1;
+        this.velocity.y = this.jumpForce / this.mass;
+
+        if (this.airJumpCount == 1) {
+          sounds.jumpSmall.currentTime = 0;
+          sounds.jumpSmall.volume = 0.4;
+          sounds.jumpSmall.play();
+        } else {
+          sounds.kick.currentTime = 0;
+          sounds.kick.playbackRate = 1;
+          sounds.kick.play();
+        }
+
+      }
+    }.bind(this));
+
   })
   .methods({
     update: function(dt){
@@ -28,47 +62,48 @@ let Player1 = stampit.compose(Mario, Entity)
       this.acceleration.y = -this.gravity / this.mass;
 
       if (inputState.pressed("jump")) {
-        if (this.onGround)
-          this.timeSinceJump = 0;
-
         if (this.timeSinceJump < this.jumpLength){ // Jump further while jump button is held down
-          this.acceleration.y += this.jumpForce / this.mass;
+          this.velocity.y = this.jumpForce / this.mass;
         }
       }
+
       this.timeSinceJump += dt;
 
-      jumpStream.onValue((x) => {
-        if (this.onGround) {
-          sounds.jumpSmall.currentTime = 0;
-          // sounds.jumpSmall.play();
-          this.acceleration.y += this.jumpForce / this.mass;
-        }
-      });
-
+      let slidingSpeed = this.velocity.x / (this.direction == "left" ? -1 : 1);
       this.animationState = "moving";
-      if (this.onGround || this.timeSinceJump < this.jumpLength){
-        if (inputState.pressed("right")) {
-          this.direction = "right";
-          this.acceleration.x = this.accelerationConstant;
-        } else if(inputState.pressed("left")) {
-          this.direction = "left";
-          this.acceleration.x = -this.accelerationConstant;
-        } else {
-          this.animationState = "standing";
-          this.acceleration.x =  - this.velocity.x * this.groundResistance;
-        }
+
+      if (inputState.pressed("right")) {
+        this.direction = "right";
+        this.acceleration.x = this.accelerationConstant;
+      } else if(inputState.pressed("left")) {
+        this.direction = "left";
+        this.acceleration.x = -this.accelerationConstant;
       } else {
-          this.animationState = "jumping";
+        this.animationState = "standing";
       }
 
-      let slidingSpeed = this.velocity.x / (this.direction == "left" ? -1 : 1);
       if (slidingSpeed < -1){
         this.animationState = "sliding";
+      }
+
+      if (this.onGround){
+        this.acceleration.x -=  this.velocity.x * this.groundResistance;
+      } else {
+        this.acceleration.x -=  this.velocity.x * this.groundResistance / 2;
+        this.animationState = "jumping";
+      }
+
+      if (Math.abs(this.velocity.x) < 0.5) {
+        this.velocity.x = 0;
       }
 
       this.position.addScaledVector(this.velocity, dt)
       this.position.addScaledVector(this.acceleration, dt * dt)
       this.velocity.addScaledVector(this.acceleration, dt)
+
+      if (Math.abs(this.velocity.x) > this.maxVelocity){
+        this.velocity.x = this.maxVelocity * this.velocity.x / Math.abs(this.velocity.x);
+      }
 
       this.updateCollisions(dt);
       this.updateSprite(dt);
