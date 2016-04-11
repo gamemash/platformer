@@ -53,7 +53,7 @@ let WebGLRenderer = stampit()
       this.renderer.render(this.scene, this.camera);
 
       for (let item of this.toUpdate) {
-        item.update(dt);
+        item.updateSprite(dt);
       };
     },
     loadLevel: function(levelData){

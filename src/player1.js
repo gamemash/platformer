@@ -20,6 +20,8 @@ let Player1 = stampit.compose(Mario)
     jumpLength: 0.2
 
   })
+  .init(function(){
+  })
   .methods({
     boundingBox: function(obj_a, obj_b){
       return (obj_a.position.x < obj_b.position.x + obj_b.size &&
@@ -28,6 +30,7 @@ let Player1 = stampit.compose(Mario)
          obj_a.size + obj_a.position.y > obj_a.position.y);
     },
     update: function(dt){
+      this.updateSprite(dt);
       this.acceleration.x = 0;
       this.acceleration.y = -this.gravity / this.mass;
 
@@ -63,6 +66,10 @@ let Player1 = stampit.compose(Mario)
       this.position.addScaledVector(this.velocity, dt)
       this.position.addScaledVector(this.acceleration, dt * dt)
       this.velocity.addScaledVector(this.acceleration, dt)
+
+      if (Math.abs(this.velocity.x) > 0.1){
+        this.selectDirection(this.velocity.x < 0);
+      }
 
       let position = this.gridPosition();
       let collision = PhysicsEngine.checkCollision(position);

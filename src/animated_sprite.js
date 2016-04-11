@@ -14,7 +14,7 @@ let AnimatedSprite = stampit.compose(Sprite)
     this.timeElapsed = 0;
   })
   .methods({
-    update: function(dt) {
+    updateSprite: function(dt) {
       this.timeElapsed += dt;
 
       if (this.timeElapsed > this.frames[this.frame].duration) {
