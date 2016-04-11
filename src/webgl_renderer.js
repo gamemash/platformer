@@ -76,10 +76,10 @@ let WebGLRenderer = stampit()
     this.width = this.renderer.domElement.offsetWidth;
     this.height = this.renderer.domElement.offsetHeight;
     this.renderer.setSize(this.width, this.height);
-    this.width /= 1.5;
-    this.height /= 1.5;
+    this.width /= 2;
+    this.height /= 2;
     this.renderer.setClearColor(0x5c94fc, 0);
-    this.camera = new THREE.OrthographicCamera(this.width / 2, this.width / 2, this.height / 2, this.height / 2, 0.1, 100 );
+    this.camera = new THREE.OrthographicCamera(0, this.width, 0, this.height, 0.1, 100 );
   });
 
 

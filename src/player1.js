@@ -5,7 +5,7 @@ let PhysicsEngine = require('./physics_engine.js');
 let {jumpStream, inputState} = require("./input_stream.js");
 let sounds = require('./sounds.js');
 
-let scale = 10000; //pixel to reality ratio
+let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario)
   .refs({
     velocity: new THREE.Vector2(0, 0),

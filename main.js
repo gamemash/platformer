@@ -60,8 +60,8 @@ function render() {
 
   if (!paused) {
     let relativeCameraPosition = player1.position.x + renderer.camera.position.x;
-    if (relativeCameraPosition > renderer.width){
-      renderer.camera.position.x = (renderer.width - player1.position.x);
+    if (relativeCameraPosition > 16){
+      renderer.camera.position.x = (16 - player1.position.x);
     }
 
     selector.update(dt);
