@@ -34,7 +34,7 @@ let Player1 = stampit.compose(Mario, Entity)
       this.acceleration.x = 0;
       this.acceleration.y = -this.gravity / this.mass;
 
-      if (inputState.pressed("jump")) { 
+      if (inputState.pressed("jump")) {
         if (this.onGround)
           this.timeSinceJump = 0;
 
@@ -46,9 +46,8 @@ let Player1 = stampit.compose(Mario, Entity)
 
       jumpStream.onValue((x) => {
         if (this.onGround) {
-          new Promise(function(resolve, reject) {
-            sounds.jumpSmall.play();
-          });
+          sounds.jumpSmall.currentTime = 0;
+          sounds.jumpSmall.play();
           this.acceleration.y += this.jumpForce / this.mass;
         }
       });
