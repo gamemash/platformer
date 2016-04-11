@@ -44,6 +44,16 @@ var Entity = stampit().methods({
           this.onGround = true;
         }
       }
+
+      if (collision.blockUp) {
+        let block = collision.blockUp;
+        if (this.boundingBox(this, block)){
+          if (this.velocity.y > 0.0){
+            this.position.y = block.position.y - block.size - 0.1;
+            this.velocity.y -= this.velocity.y;
+          }
+        }
+      }
     }
   }
 });

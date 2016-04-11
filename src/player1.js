@@ -11,15 +11,16 @@ let Player1 = stampit.compose(Mario, Entity)
   .refs({
     velocity: new THREE.Vector2(0, 0),
     acceleration: new THREE.Vector2(0, 0),
-    groundResistance: 3,
+    groundResistance: 5,
     accelerationConstant: 0.1 * scale,
-    gravity: 9.8 * scale,
+    gravity: 20 * scale,
     mass: 80,
-    jumpForce: 3 * 9.8 * scale,
+    jumpForce: 0.5 * 9.8 * scale,
     onGround: false,
     timeSinceJump: 10,
-    jumpLength: 0.2
-
+    jumpLength: 0.3,
+    maxVelocity: 12
+    
   })
   .init(function(){
   })
@@ -33,7 +34,7 @@ let Player1 = stampit.compose(Mario, Entity)
           this.timeSinceJump = 0;
 
         if (this.timeSinceJump < this.jumpLength){ // Jump further while jump button is held down
-          this.acceleration.y += this.jumpForce / this.mass;
+          this.velocity.y = this.jumpForce / this.mass;
         }
       }
       this.timeSinceJump += dt;
@@ -43,7 +44,7 @@ let Player1 = stampit.compose(Mario, Entity)
           new Promise(function(resolve, reject) {
             sounds.jumpSmall.play();
           });
-          this.acceleration.y += this.jumpForce / this.mass;
+          //this.acceleration.y += this.jumpForce / this.mass;
         }
       });
 
@@ -60,17 +61,23 @@ let Player1 = stampit.compose(Mario, Entity)
           this.acceleration.x =  - this.velocity.x * this.groundResistance;
         }
       } else {
-          this.animationState = "jumping";
+        this.animationState = "jumping";
       }
+      Debug('animationState', this.animationState);
 
       let slidingSpeed = this.velocity.x / (this.direction == "left" ? -1 : 1);
       if (slidingSpeed < -1){
         this.animationState = "sliding";
       }
 
+
       this.position.addScaledVector(this.velocity, dt)
       this.position.addScaledVector(this.acceleration, dt * dt)
       this.velocity.addScaledVector(this.acceleration, dt)
+
+      if (Math.abs(this.velocity.x) > this.maxVelocity){
+        this.velocity.x = this.maxVelocity * this.velocity.x / Math.abs(this.velocity.x);
+      }
 
       this.updateCollisions(dt);
       this.updateSprite(dt);
