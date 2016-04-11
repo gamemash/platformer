@@ -3,7 +3,7 @@ let sounds = require('./sounds.js');
 
 let GameRules = stampit.compose().refs().init().methods({
   update: function(player, game) {
-    if (player.position.y < 0) {
+    if (player.position.y < -2) {
       console.log('dead');
       sounds.die.play();
       game.paused = true;
