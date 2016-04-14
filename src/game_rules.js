@@ -23,6 +23,8 @@ let GameRules = stampit.compose().refs().init().methods({
         //that time point should be in the past. The position should be (player + size < x < entity + size)
         if (time < 0 && entity.position.x - player.size < x && x < entity.position.x + entity.size){
           entity.die();
+          player.velocity.y = 17;
+          sounds.stomp.play();
         } else {
           player.die();
         }
