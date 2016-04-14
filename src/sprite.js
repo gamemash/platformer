@@ -30,9 +30,6 @@ let Sprite = stampit()
     gridPosition: function(){
       return [Math.round(this.position.x / this.size), Math.round(this.position.y / this.size)];
     }
-
-
-
   })
   .init(function(){
     this.material = new THREE.ShaderMaterial();
@@ -41,7 +38,8 @@ let Sprite = stampit()
       screenSize: {type: "v2", value: new THREE.Vector2(this.renderer.width, this.renderer.height) },
       tileSize: {type: "f", value: this.size },
       spriteLayout: {type: "v2", value: new THREE.Vector2(1, 1) },
-      spritePosition: {type: "v2", value: new THREE.Vector2(0, 0) }
+      spritePosition: {type: "v2", value: new THREE.Vector2(0, 0) },
+      spriteFlipped: {type: 'i', value: false }
     };
     this.geometry = SpriteGeometry.create();
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);

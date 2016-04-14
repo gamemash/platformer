@@ -1,5 +1,4 @@
 let MouseState = require("./mouse_state.js");
-let debug = require('./debug.js');
 let Kefir = require('kefir');
 let sounds = require('./sounds')
 
@@ -28,9 +27,6 @@ directionStream = mouseStream.bufferWithCount(2).map((x) => {
     return "up"
   }
 }).skipDuplicates();
-
-directionStream.onValue((x) => {debug("mouse_direction", x)});
-// directionStream.log();
 
 shakeStream = directionStream.bufferWithTimeOrCount(600, 7).filter((x) => x.length == 7).map(() => {return "shake"})
 
