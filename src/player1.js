@@ -9,8 +9,6 @@ let Debug = require('./debug.js');
 let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario, Entity)
   .refs({
-    velocity: new THREE.Vector2(0, 0),
-    acceleration: new THREE.Vector2(0, 0),
     groundResistance: 3.6,
     accelerationConstant: 0.14 * scale,
     gravity: 20 * scale,
@@ -75,12 +73,32 @@ let Player1 = stampit.compose(Mario, Entity)
 
       this.dead = true;
     },
+
+    collidedAbove: function(block){
+      this.position.y = block.position.y - block.size;
+      this.velocity.y = 0;
+    },
+    collidedBelow: function(block){
+      this.position.y = block.position.y + block.size;
+      this.velocity.y = 0;
+      this.onGround = true;
+    },
+    collidedRight: function(block){
+      this.position.x = block.position.x - block.size;
+      this.velocity.x = 0;
+    },
+    collidedLeft: function(block){
+      this.position.x = block.position.x + block.size;
+      this.velocity.x = 0;
+    },
     update: function(dt){
       if (this.dead) {
         this.animationState = "dead";
         this.position.y -= 0.02;
         return;
       }
+
+      this.oldPosition = this.position.clone();
 
       this.acceleration.x = 0;
       this.acceleration.y = -this.gravity / this.mass;
@@ -132,6 +150,6 @@ let Player1 = stampit.compose(Mario, Entity)
       this.updateCollisions(dt);
       this.updateSprite(dt);
     }
-  })
+  });
 
 module.exports = Player1;

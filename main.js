@@ -50,7 +50,7 @@ let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canva
 renderer.loadLevel(levelData);
 
 let player1  = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 4) });
-let goomba   = Goomba.create({renderer: renderer, position: new THREE.Vector2(22, 2)});
+let goomba   = Goomba.create({renderer: renderer, position: new THREE.Vector2(22, 6)});
 let selector = Selector.create({renderer: renderer, position: new THREE.Vector2(0, 0)});
 
 let mouseState = MouseState.create({canvasId: "game-canvas"});

@@ -1,69 +1,57 @@
 let PhysicsEngine = require('./physics_engine.js');
-var stampit = require('stampit');
+let stampit = require('stampit');
+let THREE = require('three');
+let Debug = require('./debug.js');
 
-var Entity = stampit().methods({
-  collidedLeft: function(){
-
-  },
-  collidedRight: function(){
-
-  },
-  boundingBox: function(obj_a, obj_b){
-    return (obj_a.position.x < obj_b.position.x + obj_b.size &&
-       obj_a.position.x + obj_a.size > obj_b.position.x &&
-       obj_a.position.y < obj_b.position.y + obj_b.size &&
-       obj_a.size + obj_a.position.y > obj_b.position.y);
-  },
-  updateCollisions: function(dt){
-    let position = this.gridPosition();
-    let collision = PhysicsEngine.checkCollision(position);
-    if (collision){
-      if (collision.blockLeft) {
-        this.collidedLeft();
-        if (this.boundingBox(this, collision.blockLeft)){
-          this.position.x = collision.blockLeft.size + collision.blockLeft.position.x;
-          if (this.velocity.x < 0.0){
-            this.velocity.x = 0.0;
-            this.acceleration.x = 0.0;
-          }
-        }
-      }
-
-
-      if (collision.blockRight) {
-        this.collidedRight();
-        if (this.boundingBox(this, collision.blockRight)){
-          this.position.x = collision.blockRight.position.x - collision.blockRight.size;
-          if (this.velocity.x > 0.0){
-            this.velocity.x = 0.0;
-            this.acceleration.x = 0.0;
-          }
-        }
-      }
-
+let Entity = stampit()
+  .methods({
+    collidedLeft: function(){ },
+    collidedRight: function(){ },
+    collidedAbove: function(){ },
+    collidedBelow: function(){ },
+    updateCollisions: function(dt){
+      if (this.velocity == undefined) return;
+      let position = [Math.floor(this.oldPosition.x), Math.floor(this.oldPosition.y)];
       this.onGround = false;
-      if (collision.blockDown) {
-        let block = collision.blockDown;
-        if (this.boundingBox(this, block)){
-          this.position.y = block.position.y + block.size;
-          if (this.velocity.y < 0.0){
-            this.velocity.y = 0.0;
+      if (this.velocity.y < 0) {
+        for (let i = -1; i < 2; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + i, position[1] - 1);
+          if (block && PhysicsEngine.boundingBox(this, block)){
+            this.collidedBelow(block);
+            break;
           }
-          this.onGround = true;
+        }
+      } else if (this.velocity.y > 0) {
+        for (let i = -1; i < 2; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + i, position[1] + 1);
+          if (block && PhysicsEngine.boundingBox(this, block)){
+            this.collidedAbove(block);
+            break;
+          }
         }
       }
-
-      if (collision.blockUp) {
-        let block = collision.blockUp;
-        if (this.boundingBox(this, block)){
-          if (this.velocity.y > 0.0){
-            this.position.y = block.position.y - block.size - 0.1;
-            this.velocity.y -= this.velocity.y;
+      if (this.velocity.x > 0) {
+        for (let i = -1; i < 2; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + 1, position[1] + i);
+          if (block && PhysicsEngine.boundingBox(this, block)){
+            this.collidedRight(block);
+            break;
+          }
+        }
+      } else if (this.velocity.x < 0) {
+        for (let i = -1; i < 2; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] - 1, position[1] + i);
+          if (block && PhysicsEngine.boundingBox(this, block)){
+            this.collidedLeft(block);
+            break;
           }
         }
       }
     }
-  }
-});
+  }).
+  init(function(){
+    this.velocity = new THREE.Vector2(0, 0),
+    this.acceleration =  new THREE.Vector2(0, 0)
+  });
 
 module.exports = Entity;
