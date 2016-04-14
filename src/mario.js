@@ -28,24 +28,11 @@ let Mario = stampit.compose(AnimatedSprite)
     },
   })
   .methods({
-    updateSprite: function(dt){
-      this.timeElapsed += dt;
-
-      this.frame = this.frame % this.animations[this.animationState].length;
-      let duration = this.animations[this.animationState][this.frame].duration;
+    duration: function(){
       if (this.animationState == "moving"){
-        let duration = 0.2 - this.velocity.x / 100
+        return 0.2 - this.velocity.x / 100
       }
-
-      Debug('animation', this.animationState);
-      if (this.timeElapsed > duration) {
-        this.frame = (this.frame + 1) % this.animations[this.animationState].length;;
-        this.timeElapsed = 0;
-      }
-
-      this.material.uniforms['spriteFlipped'] = {type: 'i', value: this.direction == "left" };
-      this.material.uniforms['spritePosition']['value'].x = this.animations[this.animationState][this.frame].id;
-      this.material.needsUpdate = true;
+      return this.animations[this.animationState][this.frame].duration;
     },
     selectAnimation: function(name, facingLeft){
       if (this.animationState == name)

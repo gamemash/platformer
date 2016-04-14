@@ -10,7 +10,11 @@ let Debug = require('./debug.js');
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
   .refs({
     texture: 'goomba.png',
-    frames: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
+    animationState: "walking",
+    animations: {
+      walking: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
+      dead: [{id:2, duration: 1}]
+    },
     walkSpeed: 3.0,
     onGround: false,
     dead: false
@@ -36,6 +40,11 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
     },
     die: function(){
       this.dead = true;
+      this.velocity.set(0, 0);
+      this.animationState = 'dead';
+      setTimeout((function(){
+        this.delete();
+      }.bind(this)),1000);
     }
   })
   .init(function(){
