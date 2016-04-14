@@ -16,18 +16,22 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
 
   })
   .methods({
-    collidedLeft: function(block) {
-      this.position.x = block.position.x + block.size;
-      this.velocity.x = -this.velocity.x;
-    },
-    collidedRight: function(block) {
-      this.position.x = block.position.x - block.size;
-      this.velocity.x = -this.velocity.x;
-    },
-    collidedBelow: function(block) {
-      this.position.y = block.position.y + block.size;
-      this.velocity.y = 0;
-      this.onGround = true;
+    collided: function(block, direction){
+      switch(direction){
+        case 'left':
+          this.position.x = block.position.x + block.size;
+          this.velocity.x = -this.velocity.x;
+          break;
+        case 'right':
+          this.position.x = block.position.x - block.size;
+          this.velocity.x = -this.velocity.x;
+          break;
+        case 'below':
+          this.position.y = block.position.y + block.size;
+          this.velocity.y = 0;
+          this.onGround = true;
+          break;
+      }
     },
     collidedAbove: function(block) {
 

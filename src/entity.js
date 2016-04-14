@@ -5,10 +5,7 @@ let Debug = require('./debug.js');
 
 let Entity = stampit()
   .methods({
-    collidedLeft: function(){ },
-    collidedRight: function(){ },
-    collidedAbove: function(){ },
-    collidedBelow: function(){ },
+    collided: function(block, direction){  },
     updateCollisions: function(dt){
       if (this.velocity == undefined) return;
       let position = [Math.floor(this.oldPosition.x), Math.floor(this.oldPosition.y)];
@@ -17,7 +14,7 @@ let Entity = stampit()
         for (let i = -1; i < 2; i += 1){
           let block = PhysicsEngine.checkPosition(position[0] + i, position[1] - 1);
           if (block && PhysicsEngine.boundingBox(this, block)){
-            this.collidedBelow(block);
+            this.collided(block, 'below');
             break;
           }
         }
@@ -25,7 +22,7 @@ let Entity = stampit()
         for (let i = -1; i < 2; i += 1){
           let block = PhysicsEngine.checkPosition(position[0] + i, position[1] + 1);
           if (block && PhysicsEngine.boundingBox(this, block)){
-            this.collidedAbove(block);
+            this.collided(block, 'up');
             break;
           }
         }
@@ -34,7 +31,7 @@ let Entity = stampit()
         for (let i = -1; i < 2; i += 1){
           let block = PhysicsEngine.checkPosition(position[0] + 1, position[1] + i);
           if (block && PhysicsEngine.boundingBox(this, block)){
-            this.collidedRight(block);
+            this.collided(block, 'right');
             break;
           }
         }
@@ -42,11 +39,12 @@ let Entity = stampit()
         for (let i = -1; i < 2; i += 1){
           let block = PhysicsEngine.checkPosition(position[0] - 1, position[1] + i);
           if (block && PhysicsEngine.boundingBox(this, block)){
-            this.collidedLeft(block);
+            this.collided(block, 'left');
             break;
           }
         }
       }
+
     }
   }).
   init(function(){
