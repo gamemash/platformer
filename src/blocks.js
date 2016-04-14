@@ -7,13 +7,16 @@ let Collidable = require('./collidable.js')
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
     texture: 'item_block.png',
-    frames: [
-      {id: 0, duration: 0.05},
-      {id: 1, duration: 0.05},
-      {id: 2, duration: 0.60},
-      {id: 1, duration: 0.05},
-      {id: 0, duration: 0.05}
-    ]
+    animationState: "blinking",
+    animations: {
+      blinking: [
+        {id: 0, duration: 0.05},
+        {id: 1, duration: 0.05},
+        {id: 2, duration: 0.60},
+        {id: 1, duration: 0.05},
+        {id: 0, duration: 0.05}
+      ]
+    }
   })
   .init(function() {
     this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
