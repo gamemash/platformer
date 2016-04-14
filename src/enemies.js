@@ -12,7 +12,8 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
     texture: 'goomba.png',
     frames: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
     walkSpeed: 3.0,
-    onGround: false
+    onGround: false,
+    dead: false
 
   })
   .methods({
@@ -33,8 +34,8 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
           break;
       }
     },
-    collidedAbove: function(block) {
-
+    die: function(){
+      this.dead = true;
     }
   })
   .init(function(){
