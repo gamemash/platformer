@@ -62,8 +62,8 @@ mouseState.addListener(function(x,y) {
 
 let entities = []
 
-for(var i=0; i<10; i++) {
-  let goom = Goomba.create({renderer: renderer, position: new THREE.Vector2(10+i*2, 4)})
+for(var i=0; i<1; i++) {
+  let goom = Goomba.create({renderer: renderer, position: new THREE.Vector2(20+i*2, 6)})
   entities.push(goom);
 }
 
