@@ -1,11 +1,12 @@
 let stampit             = require('stampit');
 let THREE               = require('three');
 let gameState           = require('./game_state.js');
-let gameRules           = require('./game_rules.js').create();
+let GameRules           = require('./game_rules.js');
 
 var Game = stampit()
   .refs({
-    entities: []
+    entities: [],
+    gameRules: GameRules.create()
   })
   .methods({
     start: function(){
@@ -31,7 +32,7 @@ var Game = stampit()
         this.renderer.render(dt);
         this.gui.updateTime();
 
-        gameRules.update(this.player, this.entities, gameState);
+        this.gameRules.update(this.player, this.entities, gameState);
       }
 
       requestAnimationFrame(this.render.bind(this));

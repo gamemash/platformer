@@ -17,7 +17,7 @@ let Interface = stampit()
       this.score.setText(padZero(this.player.score, 6));
     },
     updateTime: function(){
-      this.time.setText(padZero(Math.round(this.gameRules.time),3));
+      this.time.setText(padZero(Math.round(this.game.gameRules.time),3));
     }
   })
   .init(function(){

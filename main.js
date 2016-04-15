@@ -7,8 +7,6 @@ let Player1             = require('./src/player1.js');
 let Selector            = require('./src/selector.js');
 let MouseState          = require('./src/mouse_state.js');
 let MouseStream         = require('./src/mouse_stream.js');
-let gameRules           = require('./src/game_rules.js').create();
-let gameState           = require('./src/game_state.js');
 let gameStateController = require('./src/game_state_controller.js');
 let Interface           = require('./src/interface.js');
 let Game                = require('./src/game.js');
@@ -23,7 +21,7 @@ let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canva
 game.renderer = renderer;
 game.loadLevel(Level.create());
 let player1  = Player1.create({game: game, position: new THREE.Vector2(5, 4) });
-let gui      = Interface.create({game: game, player: player1, gameRules: gameRules});
+let gui      = Interface.create({game: game, player: player1});
 game.player = player1;
 game.gui = gui;
 
