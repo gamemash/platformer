@@ -57,7 +57,6 @@ let Player1 = stampit.compose(Mario, Entity)
   .methods({
     die: function() {
       if (!this.dead){
-        console.log('died');
         sounds.die.play();
 
         window.setTimeout(function() { // Respawn the player after 3 seconds
