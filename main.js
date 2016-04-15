@@ -71,7 +71,7 @@ for(var i=-2; i<3; i++) {
 }
 
 
-let gui = Interface.create({renderer: renderer, player: player1});
+let gui = Interface.create({renderer: renderer, player: player1, gameRules: gameRules});
 
 function render() {
   let dt = 1/60;
@@ -88,6 +88,7 @@ function render() {
     selector.update(dt);
     player1.update(dt);
     renderer.render(dt);
+    gui.updateTime();
 
     gameRules.update(player1, entities, gameState);
   }

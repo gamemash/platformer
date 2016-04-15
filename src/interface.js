@@ -13,15 +13,18 @@ let Interface = stampit()
   .refs({
   })
   .methods({
-    update: function(){
+    updateScore: function(){
       this.score.setText(padZero(this.player.score, 6));
+    },
+    updateTime: function(){
+      this.time.setText(padZero(Math.round(this.gameRules.time),3));
     }
   })
   .init(function(){
 
     Font.create({position: new THREE.Vector2(5,15), text: this.player.name, renderer: this.renderer});
     this.score = Font.create({text: padZero(this.player.score, 6), position: new THREE.Vector2(5,14.5), renderer: this.renderer});
-    this.player.stateChanged = this.update.bind(this);
+    this.player.stateChanged = this.updateScore.bind(this);
 
 
     Font.create({position: new THREE.Vector2(10,14.5), text: ("x" + padZero(this.player.coins, 2)),    renderer: this.renderer});
@@ -32,7 +35,7 @@ let Interface = stampit()
     Font.create({position: new THREE.Vector2(13,14.5), text: " 1-1",   renderer: this.renderer});
 
     Font.create({position: new THREE.Vector2(17,15),   text: "TIME",    renderer: this.renderer});
-    this.time = Font.create({text: " 000",  position: new THREE.Vector2(17,14.5), renderer: this.renderer});
+    this.time = Font.create({text: "000",  position: new THREE.Vector2(17.5,14.5), renderer: this.renderer});
 
 
   });
