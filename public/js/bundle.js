@@ -51,7 +51,6 @@ let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canva
 renderer.loadLevel(levelData);
 
 let player1  = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 4) });
-let goomba   = Goomba.create({renderer: renderer, position: new THREE.Vector2(22, 2)});
 let selector = Selector.create({renderer: renderer, position: new THREE.Vector2(0, 0)});
 
 let mouseState = MouseState.create({canvasId: "game-canvas"});
@@ -62,7 +61,12 @@ mouseState.addListener(function(x,y) {
   selector.moveTo(x,y);
 });
 
-let entities = [goomba]
+let entities = []
+
+for(var i=0; i<1; i++) {
+  let goom = Goomba.create({renderer: renderer, position: new THREE.Vector2(20+i*2, 6)})
+  entities.push(goom);
+}
 
 function render() {
   let dt = 1/60;
@@ -51411,23 +51415,38 @@ let Debug = require('./debug.js');
 let Updatable = require('./updatable.js');
 
 let AnimatedSprite = stampit.compose(Updatable, Sprite)
+  .methods({
+    duration: function(){ 
+      return this.animations[this.animationState][this.frame].duration;
+    }
+  })
   .refs({
-    frames: [{id:0, duration: 1}]
+    frames: [{id:0, duration: 1}],
+    animationState: false,
+    animations: {}
   })
   .init(function(){
+
     this.animated = true;
+
     this.frame = 0;
     this.timeElapsed = 0;
-    this.registerUpdateCallback(function(dt) {
-      this.timeElapsed += dt;
 
-      if (this.timeElapsed > this.frames[this.frame].duration) {
-        this.frame += 1;
-        this.frame = this.frame % this.frames.length;
+    this.registerUpdateCallback(function(dt) {
+      if (!this.animations[this.animationState]) return;
+      this.timeElapsed += dt;
+      this.frame = this.frame % this.animations[this.animationState].length; // in case animation state changes
+
+      if (this.timeElapsed > this.duration()) {
+        this.frame = (this.frame + 1) % this.animations[this.animationState].length;;
         this.timeElapsed = 0;
       }
 
-      this.material.uniforms['spritePosition']['value'].x = this.frames[this.frame].id;
+      this.material.uniforms['spritePosition']['value'].x = this.animations[this.animationState][this.frame].id;
+      if (this.direction){
+        this.material.uniforms['spriteFlipped'] = {type: 'i', value: this.direction == "left" };
+      }
+      this.material.needsUpdate = true;
     });
   });
 
@@ -51444,13 +51463,16 @@ let Collidable = require('./collidable.js')
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
     texture: 'item_block.png',
-    frames: [
-      {id: 0, duration: 0.05},
-      {id: 1, duration: 0.05},
-      {id: 2, duration: 0.60},
-      {id: 1, duration: 0.05},
-      {id: 0, duration: 0.05}
-    ]
+    animationState: "blinking",
+    animations: {
+      blinking: [
+        {id: 0, duration: 0.05},
+        {id: 1, duration: 0.05},
+        {id: 2, duration: 0.60},
+        {id: 1, duration: 0.05},
+        {id: 0, duration: 0.05}
+      ]
+    }
   })
   .init(function() {
     this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
@@ -51475,6 +51497,7 @@ module.exports = {
   PipeTopRight: PipeTopRight,
   PipeTopLeft: PipeTopLeft
 }
+
 },{"./animated_sprite.js":48,"./collidable.js":50,"./sprite.js":67,"stampit":4,"three":47}],50:[function(require,module,exports){
 let stampit = require('stampit');
 let PhysicsEngine = require('./physics_engine.js');
@@ -51513,27 +51536,61 @@ let THREE = require('three');
 let Updateable = require('./updatable.js');
 let Entity = require('./entity.js');
 let Collidable = require('./collidable.js');
+let Debug = require('./debug.js');
 
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
   .refs({
     texture: 'goomba.png',
-    frames: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
-    walkSpeed: -0.04
+    animationState: "walking",
+    animations: {
+      walking: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
+      dead: [{id:2, duration: 1}]
+    },
+    walkSpeed: 3.0,
+    onGround: false,
+    dead: false
+
   })
   .methods({
-    collidedLeft: function() {
-      this.walkSpeed = -this.walkSpeed
+    collided: function(block, direction){
+      switch(direction){
+        case 'left':
+          this.position.x = block.position.x + block.size;
+          this.velocity.x = -this.velocity.x;
+          break;
+        case 'right':
+          this.position.x = block.position.x - block.size;
+          this.velocity.x = -this.velocity.x;
+          break;
+        case 'below':
+          this.position.y = block.position.y + block.size;
+          this.velocity.y = 0;
+          this.onGround = true;
+          break;
+      }
     },
-    collidedRight: function() {
-      this.walkSpeed = -this.walkSpeed
-    },
+    die: function(){
+      this.dead = true;
+      this.velocity.set(0, 0);
+      this.animationState = 'dead';
+      setTimeout((function(){
+        this.delete();
+      }.bind(this)),1000);
+    }
   })
   .init(function(){
     this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
     this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 0, 0) };
+    this.velocity.x = -this.walkSpeed;
 
     this.registerUpdateCallback(function(dt) {
-      this.position.x += this.walkSpeed
+      this.acceleration.y = -60;
+      this.oldPosition = this.position.clone();
+      this.position.addScaledVector(this.velocity, dt)
+      if (this.onGround == false){
+        this.position.y += this.acceleration.y * dt * dt * .5;
+        this.velocity.y += this.acceleration.y * dt;
+      }
       this.updateCollisions(dt);
     });
   });
@@ -51541,89 +51598,68 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
 module.exports = {
   Goomba: Goomba
 }
-},{"./animated_sprite.js":48,"./collidable.js":50,"./entity.js":53,"./sprite.js":67,"./updatable.js":70,"stampit":4,"three":47}],53:[function(require,module,exports){
+
+},{"./animated_sprite.js":48,"./collidable.js":50,"./debug.js":51,"./entity.js":53,"./sprite.js":67,"./updatable.js":70,"stampit":4,"three":47}],53:[function(require,module,exports){
 let PhysicsEngine = require('./physics_engine.js');
-var stampit = require('stampit');
+let stampit = require('stampit');
+let THREE = require('three');
+let Debug = require('./debug.js');
 
-var Entity = stampit().methods({
-  collidedLeft: function(){
-
-  },
-  collidedRight: function(){
-
-  },
-  boundingBox: function(obj_a, obj_b){
-    return (obj_a.position.x < obj_b.position.x + obj_b.size &&
-       obj_a.position.x + obj_a.size > obj_b.position.x &&
-       obj_a.position.y < obj_b.position.y + obj_b.size &&
-       obj_a.size + obj_a.position.y > obj_b.position.y);
-  },
-  updateCollisions: function(dt){
-    let position = this.gridPosition();
-    let collision = PhysicsEngine.checkCollision(position);
-    if (collision){
-      if (collision.blockLeft) {
-        this.collidedLeft();
-        if (this.boundingBox(this, collision.blockLeft)){
-          this.position.x = collision.blockLeft.size + collision.blockLeft.position.x;
-          if (this.velocity.x < 0.0){
-            this.velocity.x = 0.0;
-            this.acceleration.x = 0.0;
-          }
-        }
-      }
-
-
-      if (collision.blockRight) {
-        this.collidedRight();
-        if (this.boundingBox(this, collision.blockRight)){
-          this.position.x = collision.blockRight.position.x - collision.blockRight.size;
-          if (this.velocity.x > 0.0){
-            this.velocity.x = 0.0;
-            this.acceleration.x = 0.0;
-          }
-        }
-      }
-
+let Entity = stampit()
+  .methods({
+    collided: function(block, direction){  },
+    updateCollisions: function(dt){
+      if (this.velocity == undefined) return;
+      let position = [Math.floor(this.oldPosition.x), Math.floor(this.oldPosition.y)];
       this.onGround = false;
-      if (collision.blockDown) {
-        let block = collision.blockDown;
-        if (this.boundingBox(this, block)){
-          this.position.y = block.position.y + block.size;
-          if (this.velocity.y < 0.0){
-            this.velocity.y = 0.0;
+      if (this.velocity.y < 0) {
+        for (let i = -1; i < 2; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + i, position[1] - 1);
+          if (block && PhysicsEngine.boundingBox(this, block)){
+            this.collided(block, 'below');
+            break;
           }
-          this.onGround = true;
+        }
+      } else if (this.velocity.y > 0) {
+        for (let i = -1; i < 2; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + i, position[1] + 1);
+          if (block && PhysicsEngine.boundingBox(this, block)){
+            this.collided(block, 'above');
+            break;
+          }
+        }
+      }
+      if (this.velocity.x > 0) {
+        for (let i = -1; i < 2; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + 1, position[1] + i);
+          if (block && PhysicsEngine.boundingBox(this, block)){
+            this.collided(block, 'right');
+            break;
+          }
+        }
+      } else if (this.velocity.x < 0) {
+        for (let i = -1; i < 2; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] - 1, position[1] + i);
+          if (block && PhysicsEngine.boundingBox(this, block)){
+            this.collided(block, 'left');
+            break;
+          }
         }
       }
 
-      if (collision.blockUp) {
-        let block = collision.blockUp;
-        if (this.boundingBox(this, block)){
-          if (this.velocity.y > 0.0){
-            this.position.y = block.position.y - block.size - 0.1;
-            this.velocity.y -= this.velocity.y;
-          }
-        }
-      }
     }
-  }
-});
+  }).
+  init(function(){
+    this.velocity = new THREE.Vector2(0, 0),
+    this.acceleration =  new THREE.Vector2(0, 0)
+  });
 
 module.exports = Entity;
 
-},{"./physics_engine.js":62,"stampit":4}],54:[function(require,module,exports){
+},{"./debug.js":51,"./physics_engine.js":62,"stampit":4,"three":47}],54:[function(require,module,exports){
 let stampit = require('stampit');
 let sounds = require('./sounds.js');
-
-let boundingBox = function(obj_a, obj_b){
-  return (
-     obj_a.position.x < obj_b.position.x + obj_b.size   &&
-     obj_a.position.x + obj_a.size > obj_b.position.x   &&
-     obj_a.position.y < obj_b.position.y + obj_b.size   &&
-     obj_a.size + obj_a.position.y > obj_b.position.y
-  );
-}
+let PhysicsEngine = require('./physics_engine.js');
 
 let GameRules = stampit.compose().refs().init().methods({
   update: function(player, entities, game) {
@@ -51632,15 +51668,33 @@ let GameRules = stampit.compose().refs().init().methods({
     }
 
     for(let entity of entities) {
-      if (boundingBox(entity, player)) {
-        player.die();
+      if (entity.dead) continue;
+      if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
+        //difference in current position and top of goomba
+        let dy = (player.position.y - entity.position.y - entity.size);
+
+        //time since it had that y position, assuming no acceleration
+        let time = (dy / -player.velocity.y);
+
+        //x position at that time
+        let x = player.position.x + player.velocity.x * time;
+
+        //that time point should be in the past. The position should be (player + size < x < entity + size)
+        if (time < 0 && entity.position.x - player.size < x && x < entity.position.x + entity.size){
+          entity.die();
+          player.velocity.y = 17;
+          sounds.stomp.play();
+        } else {
+          player.die();
+        }
       }
     }
   }
 });
 
 module.exports = GameRules;
-},{"./sounds.js":66,"stampit":4}],55:[function(require,module,exports){
+
+},{"./physics_engine.js":62,"./sounds.js":66,"stampit":4}],55:[function(require,module,exports){
 GamepadState  = function() {
   this.controllers = {};
   this.debug = true; // Set to true for some debug out in console
@@ -51883,24 +51937,11 @@ let Mario = stampit.compose(AnimatedSprite)
     },
   })
   .methods({
-    updateSprite: function(dt){
-      this.timeElapsed += dt;
-
-      this.frame = this.frame % this.animations[this.animationState].length;
-      let duration = this.animations[this.animationState][this.frame].duration;
+    duration: function(){
       if (this.animationState == "moving"){
-        let duration = 0.2 - this.velocity.x / 100
+        return 0.2 - this.velocity.x / 100
       }
-
-      Debug('animation', this.animationState);
-      if (this.timeElapsed > duration) {
-        this.frame = (this.frame + 1) % this.animations[this.animationState].length;;
-        this.timeElapsed = 0;
-      }
-
-      this.material.uniforms['spriteFlipped'] = {type: 'i', value: this.direction == "left" };
-      this.material.uniforms['spritePosition']['value'].x = this.animations[this.animationState][this.frame].id;
-      this.material.needsUpdate = true;
+      return this.animations[this.animationState][this.frame].duration;
     },
     selectAnimation: function(name, facingLeft){
       if (this.animationState == name)
@@ -52011,26 +52052,18 @@ let PhysicsEngine = stampit()
     height: 16
   })
   .methods({
+    boundingBox: function(obj_a, obj_b){
+      return (obj_a.position.x < obj_b.position.x + obj_b.size &&
+         obj_a.position.x + obj_a.size > obj_b.position.x &&
+         obj_a.position.y < obj_b.position.y + obj_b.size &&
+         obj_a.size + obj_a.position.y > obj_b.position.y);
+    },
     key: function(obj){
       return obj.gridPosition()[0] + "x" + obj.gridPosition()[1];
     },
     addObject: function(obj){
       this.objects[this.key(obj)] = obj;
     },
-    checkCollision: function(position){
-      let blockLeft   = this.checkPosition(position[0] - 1, position[1]);
-      let blockRight  = this.checkPosition(position[0] + 1, position[1]);
-      let blockDown   = this.checkPosition(position[0], position[1] - 1);
-      let blockUp     = this.checkPosition(position[0], position[1] + 1);
-
-      return {
-        blockLeft: blockLeft,
-        blockDown: blockDown,
-        blockRight: blockRight,
-        blockUp: blockUp
-      }
-    },
-
     checkPosition: function(x, y){
       let key = x + "x" + y;
       if (key in this.objects)
@@ -52055,8 +52088,6 @@ let Debug = require('./debug.js');
 let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario, Entity)
   .refs({
-    velocity: new THREE.Vector2(0, 0),
-    acceleration: new THREE.Vector2(0, 0),
     groundResistance: 3.6,
     accelerationConstant: 0.14 * scale,
     gravity: 20 * scale,
@@ -52121,12 +52152,37 @@ let Player1 = stampit.compose(Mario, Entity)
 
       this.dead = true;
     },
+
+    collided: function(block, direction){
+      switch(direction){
+        case 'above':
+          this.position.y = block.position.y - block.size;
+          this.velocity.y = 0;
+          break;
+        case 'below':
+          this.position.y = block.position.y + block.size;
+          this.velocity.y = 0;
+          this.onGround = true;
+          break;
+        case 'right':
+          this.position.x = block.position.x - block.size;
+          this.velocity.x = 0;
+          break;
+        case 'left':
+          this.position.x = block.position.x + block.size;
+          this.velocity.x = 0;
+          break;
+
+      }
+    },
     update: function(dt){
       if (this.dead) {
         this.animationState = "dead";
         this.position.y -= 0.02;
         return;
       }
+
+      this.oldPosition = this.position.clone();
 
       this.acceleration.x = 0;
       this.acceleration.y = -this.gravity / this.mass;
@@ -52178,7 +52234,7 @@ let Player1 = stampit.compose(Mario, Entity)
       this.updateCollisions(dt);
       this.updateSprite(dt);
     }
-  })
+  });
 
 module.exports = Player1;
 
@@ -52257,6 +52313,7 @@ var jumpSmall = new Audio('sounds/smb_jump-small.wav');
 var coin = new Audio('sounds/smb_coin.wav');
 var groundTheme = new Audio('sounds/smb_ground_theme.mp3');
 var kick = new Audio('sounds/smb_kick.wav');
+var stomp = new Audio('sounds/smb_stomp.wav');
 var die = new Audio('sounds/smb_mariodie.wav');
 
 module.exports = {
@@ -52265,7 +52322,8 @@ module.exports = {
   coin: coin,
   groundTheme: groundTheme,
   kick: kick,
-  die: die
+  die: die,
+  stomp: stomp
 }
 },{}],67:[function(require,module,exports){
 let stampit = require('stampit');
@@ -52316,7 +52374,7 @@ let Sprite = stampit()
 
     TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
     Promise.all(this.shaders).then(this.shadersReceived.bind(this));
-    this.renderer.scene.add(this.mesh);
+    this.renderer.addToScene(this.mesh);
   });
 
 
@@ -52380,6 +52438,10 @@ let Updatable = stampit
     registerUpdateCallback: function(callback){
       this.updateCallbacks.push(callback);
     },
+    delete: function(){
+      this.renderer.toUpdate.delete(this);
+      this.renderer.deleteFromScene(this.mesh);
+    },
     updateSprite: function(dt) {
       for(let callback of this.updateCallbacks) {
         callback.bind(this)(dt);
@@ -52406,6 +52468,12 @@ let WebGLRenderer = stampit()
       for (let item of this.toUpdate) {
         item.updateSprite(dt);
       };
+    },
+    addToScene: function(obj){
+      this.scene.add(obj);
+    },
+    deleteFromScene: function(obj){
+      this.scene.remove(obj);
     },
     loadLevel: function(levelData){
       for (let y = levelData.length - 1; y >= 0; y -= 1){

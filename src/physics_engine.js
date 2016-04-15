@@ -9,26 +9,18 @@ let PhysicsEngine = stampit()
     height: 16
   })
   .methods({
+    boundingBox: function(obj_a, obj_b){
+      return (obj_a.position.x < obj_b.position.x + obj_b.size &&
+         obj_a.position.x + obj_a.size > obj_b.position.x &&
+         obj_a.position.y < obj_b.position.y + obj_b.size &&
+         obj_a.size + obj_a.position.y > obj_b.position.y);
+    },
     key: function(obj){
       return obj.gridPosition()[0] + "x" + obj.gridPosition()[1];
     },
     addObject: function(obj){
       this.objects[this.key(obj)] = obj;
     },
-    checkCollision: function(position){
-      let blockLeft   = this.checkPosition(position[0] - 1, position[1]);
-      let blockRight  = this.checkPosition(position[0] + 1, position[1]);
-      let blockDown   = this.checkPosition(position[0], position[1] - 1);
-      let blockUp     = this.checkPosition(position[0], position[1] + 1);
-
-      return {
-        blockLeft: blockLeft,
-        blockDown: blockDown,
-        blockRight: blockRight,
-        blockUp: blockUp
-      }
-    },
-
     checkPosition: function(x, y){
       let key = x + "x" + y;
       if (key in this.objects)

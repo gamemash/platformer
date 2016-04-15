@@ -46,7 +46,7 @@ let Sprite = stampit()
 
     TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
     Promise.all(this.shaders).then(this.shadersReceived.bind(this));
-    this.renderer.scene.add(this.mesh);
+    this.renderer.addToScene(this.mesh);
   });
 
 

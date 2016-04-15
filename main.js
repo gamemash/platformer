@@ -50,7 +50,6 @@ let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canva
 renderer.loadLevel(levelData);
 
 let player1  = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 4) });
-let goomba   = Goomba.create({renderer: renderer, position: new THREE.Vector2(22, 2)});
 let selector = Selector.create({renderer: renderer, position: new THREE.Vector2(0, 0)});
 
 let mouseState = MouseState.create({canvasId: "game-canvas"});
@@ -61,7 +60,12 @@ mouseState.addListener(function(x,y) {
   selector.moveTo(x,y);
 });
 
-let entities = [goomba]
+let entities = []
+
+for(var i=0; i<1; i++) {
+  let goom = Goomba.create({renderer: renderer, position: new THREE.Vector2(20+i*2, 6)})
+  entities.push(goom);
+}
 
 function render() {
   let dt = 1/60;

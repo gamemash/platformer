@@ -14,6 +14,12 @@ let WebGLRenderer = stampit()
         item.updateSprite(dt);
       };
     },
+    addToScene: function(obj){
+      this.scene.add(obj);
+    },
+    deleteFromScene: function(obj){
+      this.scene.remove(obj);
+    },
     loadLevel: function(levelData){
       for (let y = levelData.length - 1; y >= 0; y -= 1){
         for (let x = 0; x < levelData[y].length; x += 1){

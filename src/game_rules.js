@@ -1,14 +1,6 @@
 let stampit = require('stampit');
 let sounds = require('./sounds.js');
-
-let boundingBox = function(obj_a, obj_b){
-  return (
-     obj_a.position.x < obj_b.position.x + obj_b.size   &&
-     obj_a.position.x + obj_a.size > obj_b.position.x   &&
-     obj_a.position.y < obj_b.position.y + obj_b.size   &&
-     obj_a.size + obj_a.position.y > obj_b.position.y
-  );
-}
+let PhysicsEngine = require('./physics_engine.js');
 
 let GameRules = stampit.compose().refs().init().methods({
   update: function(player, entities, game) {
@@ -17,8 +9,25 @@ let GameRules = stampit.compose().refs().init().methods({
     }
 
     for(let entity of entities) {
-      if (boundingBox(entity, player)) {
-        player.die();
+      if (entity.dead) continue;
+      if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
+        //difference in current position and top of goomba
+        let dy = (player.position.y - entity.position.y - entity.size);
+
+        //time since it had that y position, assuming no acceleration
+        let time = (dy / -player.velocity.y);
+
+        //x position at that time
+        let x = player.position.x + player.velocity.x * time;
+
+        //that time point should be in the past. The position should be (player + size < x < entity + size)
+        if (time < 0 && entity.position.x - player.size < x && x < entity.position.x + entity.size){
+          entity.die();
+          player.velocity.y = 17;
+          sounds.stomp.play();
+        } else {
+          player.die();
+        }
       }
     }
   }
