@@ -2,7 +2,8 @@ let stampit = require('stampit');
 let Sprite = require('./sprite.js');
 let AnimatedSprite = require('./animated_sprite.js');
 let THREE = require('three');
-let Collidable = require('./collidable.js')
+let Collidable = require('./collidable.js');
+let sounds = require('./sounds.js');
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -19,6 +20,15 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
     },
     spritePosition: new THREE.Vector2( 2, 0),
     spriteLayout: new THREE.Vector2( 3, 1)
+  })
+  .methods({
+    collided: function(entity, direction) {
+      if(direction == "below") {
+        console.log("I should produce an item! ^.^");
+        sounds.coin.currentTime = 0;
+        sounds.coin.play();
+      }
+    }
   });
 
 let Coin = stampit.compose(AnimatedSprite, Collidable)

@@ -6,7 +6,7 @@ let Updatable = require('./updatable.js');
 
 let AnimatedSprite = stampit.compose(Updatable, Sprite)
   .methods({
-    duration: function(){ 
+    duration: function(){
       return this.animations[this.animationState][this.frame].duration;
     }
   })

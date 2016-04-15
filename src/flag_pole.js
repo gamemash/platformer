@@ -4,6 +4,9 @@ let SpriteGeometry = require('./sprite_geometry.js');
 let ShaderLoader = require('./shader_loader.js');
 let TextureLoader = require('./texture_loader.js');
 let Sprite = require('./sprite.js');
+let Entity = require('./entity.js');
+let Collidable = require('./collidable.js');
+let Updateable = require('./updatable.js');
 
 var Flag = stampit
   .compose(Sprite)
@@ -12,16 +15,18 @@ var Flag = stampit
   });
 
 var Top = stampit
-  .compose(Sprite)
+  .compose(Collidable, Entity, Sprite)
   .refs({
     texture: 'flagpole.png',
   });
 
 var Rod = stampit
-  .compose(Sprite)
+  .compose(Collidable, Entity, Sprite)
+  .init(function(){
+  })
   .refs({
     texture: 'flagpole_rod.png',
-  });
+  })
 
 var FlagPole = stampit
   .compose()
