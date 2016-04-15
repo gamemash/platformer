@@ -20,9 +20,11 @@ let Player1 = stampit.compose(Mario, Entity)
     maxVelocity: 15,
     airJumpCount: 0,
     maxAirJumps: 2,
-    dead: false
+    dead: false,
+    score: 0
   })
   .init(function(){
+    Debug('score', this.score);
     jumpStream.onValue((x) => {
       if (this.onGround) {
 
@@ -55,6 +57,10 @@ let Player1 = stampit.compose(Mario, Entity)
 
   })
   .methods({
+    killed: function(entity){
+      this.score += 100;
+      Debug('score', this.score);
+    },
     die: function() {
       if (!this.dead){
         console.log('died');
