@@ -10,13 +10,13 @@ var Game = stampit()
   })
   .methods({
     start: function(){
-      this.render();
+      this.gameloop();
     },
     loadLevel: function(level){
       this.level = level;
       this.level.load(this);
     },
-    render: function(){
+    gameloop: function(){
       let dt = 1/60;
       if (!gameState.paused) {
         let relativeCameraPosition = this.player.position.x + this.renderer.camera.position.x;
@@ -35,7 +35,7 @@ var Game = stampit()
         this.gameRules.update(this.player, this.entities, gameState);
       }
 
-      requestAnimationFrame(this.render.bind(this));
+      requestAnimationFrame(this.gameloop.bind(this));
     }
   });
 

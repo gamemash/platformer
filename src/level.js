@@ -14,9 +14,6 @@ let Level = stampit()
         for (let x = 0; x < this.levelData[y].length; x += 1){
           if (this.levelData[y][x] != 0) {
             let block = Blocks[this.levelData[y][x]].create({game: game, position: new THREE.Vector2(x, this.levelData.length - 1 - y)});
-            if (block.animated) {
-              game.renderer.toUpdate.add(block);
-            }
           }
         }
       }
