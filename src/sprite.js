@@ -36,9 +36,12 @@ let Sprite = stampit()
   })
   .init(function(){
     this.material = new THREE.ShaderMaterial();
+    if (!this.game){
+      console.log(this);
+    }
     this.material.uniforms = {
       tileLocation: { type: "v2", value: this.position.multiplyScalar(this.size) },
-      screenSize: {type: "v2", value: new THREE.Vector2(this.renderer.width, this.renderer.height) },
+      screenSize: {type: "v2", value: new THREE.Vector2(this.game.renderer.width, this.game.renderer.height) },
       tileSize: {type: "f", value: this.size },
       spriteLayout: {type: "v2", value: this.spriteLayout },
       spritePosition: {type: "v2", value: this.spritePosition },
@@ -50,7 +53,7 @@ let Sprite = stampit()
 
     TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
     Promise.all(this.shaders).then(this.shadersReceived.bind(this));
-    this.renderer.addToScene(this.mesh);
+    this.game.renderer.addToScene(this.mesh);
   });
 
 

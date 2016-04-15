@@ -14,49 +14,25 @@ let gameState           = require('./src/game_state.js');
 let gameStateController = require('./src/game_state_controller.js');
 let levelData           = require('./src/level_data.js');
 let Interface           = require('./src/interface.js');
+let Game                = require('./src/game.js');
 
 let {inputStream, menuStream, jumpStream, inputState} = require("./src/input_stream.js");
 
+
+let game = Game.create();
 let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canvas')});
-let player1  = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 4) });
-let gui      = Interface.create({renderer: renderer, player: player1, gameRules: gameRules});
-renderer.loadLevel(levelData['1-1']);
 
-let entities = []
+game.renderer = renderer;
+game.loadLevel(levelData['1-1']);
+let player1  = Player1.create({game: game, position: new THREE.Vector2(5, 4) });
+let gui      = Interface.create({game: game, player: player1, gameRules: gameRules});
+game.player = player1;
+game.gui = gui;
 
-for(var i=-2; i<3; i++) {
-  let goom = Goomba.create({renderer: renderer, position: new THREE.Vector2(20+i*2, 6)})
-  entities.push(goom);
-}
 
-function render() {
-  let dt = 1/60;
-  if (!gameState.paused) {
-    let relativeCameraPosition = player1.position.x + renderer.camera.position.x;
-    if (relativeCameraPosition > 16){
-      renderer.camera.position.x = (16 - player1.position.x);
-    }
+game.start();
 
-    if (relativeCameraPosition < 4 && renderer.camera.position.x < 0){
-      renderer.camera.position.x = (4 - player1.position.x);
-    }
-
-    player1.update(dt);
-    renderer.render(dt);
-    gui.updateTime();
-
-    gameRules.update(player1, entities, gameState);
-  }
-
-  Debug('mario-x', player1.position.x);
-  Debug('mario-y', player1.position.y);
-
-  requestAnimationFrame(render);
-}
-
-render();
-
-let selector = Selector.create({renderer: renderer, position: new THREE.Vector2(0, 0)});
+let selector = Selector.create({game: game, position: new THREE.Vector2(0, 0)});
 let mouseState = MouseState.create({canvasId: "game-canvas"});
 
 mouseState.addListener(function(x,y) {
