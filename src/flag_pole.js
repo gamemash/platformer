@@ -34,8 +34,7 @@ var FlagPole = stampit
 
     this.top = Top.create({renderer: this.renderer, position: new THREE.Vector2(x_pos, y_pos + this.height)})
 
-    for (var i = 0; i < this.height; i++) {
-      console.log(i)
+    for (let i = 0; i < this.height; i++) {
       Rod.create({renderer: this.renderer, position: new THREE.Vector2(x_pos, y_pos + i)})
     };
 
