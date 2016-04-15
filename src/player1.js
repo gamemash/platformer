@@ -9,6 +9,7 @@ let Debug = require('./debug.js');
 let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario, Entity)
   .refs({
+    name: "MARIO",
     groundResistance: 3.6,
     accelerationConstant: 0.14 * scale,
     gravity: 20 * scale,
@@ -21,7 +22,9 @@ let Player1 = stampit.compose(Mario, Entity)
     airJumpCount: 0,
     maxAirJumps: 2,
     dead: false,
-    score: 0
+    score: 0,
+    coins: 0
+
   })
   .init(function(){
     Debug('score', this.score);
@@ -59,7 +62,9 @@ let Player1 = stampit.compose(Mario, Entity)
   .methods({
     killed: function(entity){
       this.score += 100;
-      Debug('score', this.score);
+      if (this.stateChanged){
+        this.stateChanged();
+      }
     },
     die: function() {
       if (!this.dead){

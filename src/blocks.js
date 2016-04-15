@@ -23,6 +23,25 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
     this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
   });
 
+let Coin = stampit.compose(AnimatedSprite, Collidable)
+  .refs({
+    texture: 'coin.png',
+    animationState: "blinking",
+    animations: {
+      blinking: [
+        {id: 0, duration: 0.05},
+        {id: 1, duration: 0.05},
+        {id: 2, duration: 0.60},
+        {id: 1, duration: 0.05},
+        {id: 0, duration: 0.05}
+      ]
+    }
+  })
+  .init(function() {
+    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
+    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
+  });
+
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
 let Brick           = stampit.compose(Sprite, Collidable).refs({ texture: 'brick.png' });
@@ -39,5 +58,6 @@ module.exports = {
   PipeBottomRight: PipeBottomRight,
   PipeBottomLeft: PipeBottomLeft,
   PipeTopRight: PipeTopRight,
-  PipeTopLeft: PipeTopLeft
+  PipeTopLeft: PipeTopLeft,
+  Coin: Coin
 }
