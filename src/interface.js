@@ -25,7 +25,7 @@ let Interface = stampit()
 
 
     Font.create({position: new THREE.Vector2(10,14.5), text: ("x" + padZero(this.player.coins, 2)),    renderer: this.renderer});
-    Coin.create({position: new THREE.Vector2(9,14.5), renderer: this.renderer});
+    Coin.create({position: new THREE.Vector2(9,14.5), renderer: this.renderer, fixed: true});
 
 
     Font.create({position: new THREE.Vector2(13,15),   text: "WORLD",  renderer: this.renderer});

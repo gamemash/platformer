@@ -3,6 +3,7 @@ let THREE = require('three');
 let SpriteGeometry = require('./sprite_geometry.js');
 let ShaderLoader = require('./shader_loader.js');
 let TextureLoader = require('./texture_loader.js');
+let Sprite = require('./sprite.js');
 
 let charMap = [
         ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', 'x', '!'],
@@ -10,15 +11,18 @@ let charMap = [
         ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
       ];
 
-var Font = stampit()
+var Font = stampit.compose(Sprite)
   .refs({
+    spriteLayout: new THREE.Vector2(16, 3),
+    spritePosition: new THREE.Vector2(0, 0),
     position: new THREE.Vector2(5, 5),
     text: "NO TEXT",
-    fixed: false,
+    texture: "font_white.png",
     shaders: [
       ShaderLoader.load('font.vert'),
       ShaderLoader.load('font.frag')
     ],
+    fixed: true,
     fontSize: 2,
     size: 1
   })
@@ -46,17 +50,6 @@ var Font = stampit()
       }
       return data;
     },
-    shadersReceived: function(result){
-      this.material.vertexShader = result[0];
-      this.material.fragmentShader = result[1];
-      this.material.needsUpdate = true;
-    },
-    updateMaterial: function(texture){
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      this.material.uniforms.texture1 = { type: "t", value: texture };
-      this.material.needsUpdate = true;
-    },
     setText: function(text){
       let length = text.length;
       let data = this.textToData(text);
@@ -69,25 +62,8 @@ var Font = stampit()
     }
   })
   .init(function(){
-    this.material = new THREE.ShaderMaterial();
-    this.material.uniforms = {
-      tileLocation: { type: "v2", value: this.position.multiplyScalar(this.size) },
-      screenSize: {type: "v2", value: new THREE.Vector2(this.renderer.width, this.renderer.height) },
-      spriteLayout: {type: "v2", value: new THREE.Vector2(16, 3) },
-      fontSize: {type: "f", value: this.fontSize},
-      fixedPosition: {type: "i", value: this.fixed}
-    
-    }
-
-    TextureLoader.get("font_white.png").then(this.updateMaterial.bind(this));
-    Promise.all(this.shaders).then(this.shadersReceived.bind(this));
-
-    this.geometry = SpriteGeometry.create();
-    this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
-
+    this.material.uniforms.fontSize = {type: "f", value: this.fontSize};
     this.setText(this.text);
-
-    this.renderer.addToScene(this.mesh);
   });
 
 module.exports = Font;

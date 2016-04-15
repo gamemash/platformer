@@ -16,11 +16,9 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
         {id: 1, duration: 0.05},
         {id: 0, duration: 0.05}
       ]
-    }
-  })
-  .init(function() {
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
+    },
+    spritePosition: new THREE.Vector2( 2, 0),
+    spriteLayout: new THREE.Vector2( 3, 1)
   });
 
 let Coin = stampit.compose(AnimatedSprite, Collidable)
@@ -35,11 +33,9 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
         {id: 1, duration: 0.05},
         {id: 0, duration: 0.05}
       ]
-    }
-  })
-  .init(function() {
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
+    },
+    spritePosition: new THREE.Vector2( 2, 0),
+    spriteLayout: new THREE.Vector2( 3, 1)
   });
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
