@@ -23,7 +23,8 @@ let Player1 = stampit.compose(Mario, Entity)
     maxAirJumps: 2,
     dead: false,
     score: 0,
-    coins: 0
+    coins: 0,
+    streak: 0
 
   })
   .init(function(){
@@ -61,7 +62,8 @@ let Player1 = stampit.compose(Mario, Entity)
   })
   .methods({
     killed: function(entity){
-      this.score += 100;
+      this.score += 100 * Math.pow(2, this.streak);
+      this.streak += 1;
       if (this.stateChanged){
         this.stateChanged();
       }
@@ -104,7 +106,9 @@ let Player1 = stampit.compose(Mario, Entity)
           this.position.x = block.position.x + block.size;
           this.velocity.x = 0;
           break;
-
+      }
+      if (this.onGround){
+        this.streak = 0;
       }
     },
     update: function(dt){
