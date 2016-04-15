@@ -6,6 +6,7 @@ var kick = new Audio('sounds/smb_kick.wav');
 var stomp = new Audio('sounds/smb_stomp.wav');
 var die = new Audio('sounds/smb_mariodie.wav');
 var stageClear = new Audio('sounds/smb_stage_clear.wav');
+var breakBlock = new Audio('sounds/smb_breakblock.wav');
 
 module.exports = {
   pauseSound: pauseSound,
@@ -15,5 +16,6 @@ module.exports = {
   kick: kick,
   die: die,
   stomp: stomp,
-  stageClear: stageClear
+  stageClear: stageClear,
+  breakBlock: breakBlock
 }
