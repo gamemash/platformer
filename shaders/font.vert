@@ -8,7 +8,7 @@ uniform int fixedPosition;
 void main() {
   vec2 correctedPosition = vec2(position.x * textLength, position.y);
   vec2 pixelPosition = (correctedPosition * fontSize / 4.0 + tileLocation.xy);
-  if (fixedPosition == 1){ 
+  if (fixedPosition == 0){ 
     pixelPosition = pixelPosition + cameraPosition.xy;
   }
   pixelPosition = pixelPosition * 32.0;
