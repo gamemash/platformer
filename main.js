@@ -29,8 +29,6 @@ for(var i=-2; i<3; i++) {
   entities.push(goom);
 }
 
-entities.push();
-
 function render() {
   let dt = 1/60;
   if (!gameState.paused) {
