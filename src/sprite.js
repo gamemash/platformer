@@ -7,7 +7,10 @@ let TextureLoader = require('./texture_loader.js');
 let loader = new THREE.TextureLoader();
 let Sprite = stampit()
   .refs({
+    spriteLayout: new THREE.Vector2(1, 1),
+    spritePosition: new THREE.Vector2(0, 0),
     position: new THREE.Vector2(0, 0),
+    fixed: false,
     shaders: [
       ShaderLoader.load('tile.vert'),
       ShaderLoader.load('tile.frag')
@@ -37,9 +40,10 @@ let Sprite = stampit()
       tileLocation: { type: "v2", value: this.position.multiplyScalar(this.size) },
       screenSize: {type: "v2", value: new THREE.Vector2(this.renderer.width, this.renderer.height) },
       tileSize: {type: "f", value: this.size },
-      spriteLayout: {type: "v2", value: new THREE.Vector2(1, 1) },
-      spritePosition: {type: "v2", value: new THREE.Vector2(0, 0) },
-      spriteFlipped: {type: 'i', value: false }
+      spriteLayout: {type: "v2", value: this.spriteLayout },
+      spritePosition: {type: "v2", value: this.spritePosition },
+      spriteFlipped: {type: 'i', value: false },
+      fixedPosition: {type: "i", value: this.fixed}
     };
     this.geometry = SpriteGeometry.create();
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);

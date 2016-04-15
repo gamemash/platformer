@@ -8,19 +8,20 @@ let Entity = stampit()
     collided: function(block, direction){  },
     updateCollisions: function(dt){
       if (this.velocity == undefined) return;
-      let position = [Math.floor(this.oldPosition.x), Math.floor(this.oldPosition.y)];
+      let position = [Math.round(this.oldPosition.x), Math.round(this.oldPosition.y)];
       this.onGround = false;
+      let pos = [0, 1, -1];
       if (this.velocity.y < 0) {
-        for (let i = -1; i < 2; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] + i, position[1] - 1);
+        for (let i = 0; i < 3; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + pos[i], position[1] - 1);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'below');
             break;
           }
         }
       } else if (this.velocity.y > 0) {
-        for (let i = -1; i < 2; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] + i, position[1] + 1);
+        for (let i = 0; i < 1; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + pos[i], position[1] + 1);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'above');
             break;
@@ -28,16 +29,16 @@ let Entity = stampit()
         }
       }
       if (this.velocity.x > 0) {
-        for (let i = -1; i < 2; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] + 1, position[1] + i);
+        for (let i = 0; i < 3; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + 1, position[1] + pos[i]);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'right');
             break;
           }
         }
       } else if (this.velocity.x < 0) {
-        for (let i = -1; i < 2; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] - 1, position[1] + i);
+        for (let i = 0; i < 3; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] - 1, position[1] + pos[i]);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'left');
             break;
