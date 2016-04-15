@@ -13,17 +13,21 @@ let gameRules           = require('./src/game_rules.js').create();
 let gameState           = require('./src/game_state.js');
 let gameStateController = require('./src/game_state_controller.js');
 let levelData           = require('./src/level_data.js');
+let Interface           = require('./src/interface.js');
+
+let {inputStream, menuStream, jumpStream, inputState} = require("./src/input_stream.js");
 
 let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canvas')});
 let player1  = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 4) });
+let gui      = Interface.create({renderer: renderer, player: player1, gameRules: gameRules});
+renderer.loadLevel(levelData['1-1']);
+
 let entities = []
 
-for(var i=0; i<1; i++) {
+for(var i=-2; i<3; i++) {
   let goom = Goomba.create({renderer: renderer, position: new THREE.Vector2(20+i*2, 6)})
   entities.push(goom);
 }
-
-renderer.loadLevel(levelData['1-1']);
 
 function render() {
   let dt = 1/60;
@@ -39,6 +43,7 @@ function render() {
 
     player1.update(dt);
     renderer.render(dt);
+    gui.updateTime();
 
     gameRules.update(player1, entities, gameState);
   }

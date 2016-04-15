@@ -9,6 +9,7 @@ let Debug = require('./debug.js');
 let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario, Entity)
   .refs({
+    name: "MARIO",
     groundResistance: 3.6,
     accelerationConstant: 0.14 * scale,
     gravity: 20 * scale,
@@ -20,9 +21,14 @@ let Player1 = stampit.compose(Mario, Entity)
     maxVelocity: 15,
     airJumpCount: 0,
     maxAirJumps: 2,
-    dead: false
+    dead: false,
+    score: 0,
+    coins: 0,
+    streak: 0
+
   })
   .init(function(){
+    Debug('score', this.score);
     jumpStream.onValue((x) => {
       if (this.onGround) {
 
@@ -55,6 +61,13 @@ let Player1 = stampit.compose(Mario, Entity)
 
   })
   .methods({
+    killed: function(entity){
+      this.score += 100 * Math.pow(2, this.streak);
+      this.streak += 1;
+      if (this.stateChanged){
+        this.stateChanged();
+      }
+    },
     die: function() {
       if (!this.dead){
         sounds.die.play();
@@ -92,7 +105,9 @@ let Player1 = stampit.compose(Mario, Entity)
           this.position.x = block.position.x + block.size;
           this.velocity.x = 0;
           break;
-
+      }
+      if (this.onGround){
+        this.streak = 0;
       }
     },
     update: function(dt){
