@@ -37,13 +37,13 @@ var FlagPole = stampit
     let x_pos = this.position.x;
     let y_pos = this.position.y;
 
-    this.top = Top.create({renderer: this.renderer, position: new THREE.Vector2(x_pos, y_pos + this.height)})
+    this.top = Top.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + this.height)})
 
     for (let i = 0; i < this.height; i++) {
-      Rod.create({renderer: this.renderer, position: new THREE.Vector2(x_pos, y_pos + i)})
+      Rod.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + i)})
     };
 
-    this.flag = Flag.create({renderer: this.renderer, position: new THREE.Vector2(x_pos-0.5, y_pos + this.height - 0.8)})
+    this.flag = Flag.create({game: this.game, position: new THREE.Vector2(x_pos-0.5, y_pos + this.height - 0.8)})
   });
 
 module.exports = FlagPole;

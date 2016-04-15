@@ -20,18 +20,6 @@ let WebGLRenderer = stampit()
     },
     deleteFromScene: function(obj){
       this.scene.remove(obj);
-    },
-    loadLevel: function(levelData){
-      for (let y = levelData.length - 1; y >= 0; y -= 1){
-        for (let x = 0; x < levelData[y].length; x += 1){
-          if (levelData[y][x] != 0) {
-            let block = Blocks[levelData[y][x]].create({renderer: this, position: new THREE.Vector2(x, levelData.length - 1 - y)});
-            if (block.animated) {
-              this.toUpdate.add(block);
-            }
-          }
-        }
-      }
     }
   })
   .init(function(){
