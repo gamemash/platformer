@@ -7,6 +7,7 @@ let Entity = require('./entity.js');
 let Collidable = require('./collidable.js');
 let Debug = require('./debug.js');
 let SimpleAI = require('./simple_ai.js');
+let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
 
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
   .refs({
@@ -37,6 +38,9 @@ let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
   .refs({
     texture: 'mushroom.png',
     walkSpeed: -2
+  })
+  .init(function(){
+    NewMushroomAnimation.create({game: this.game, subject: this});
   });
 
 module.exports = {

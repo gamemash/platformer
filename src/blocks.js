@@ -4,8 +4,26 @@ let AnimatedSprite = require('./animated_sprite.js');
 let THREE = require('three');
 let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
-let {BumpAnimation} = require('./animations.js')
+let {BumpAnimation, BrickAnimation} = require('./animations.js')
 let {Goomba, Mushroom} = require('./enemies.js')
+
+let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
+let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
+let PipeTopLeft     = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
+let PipeTopRight    = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
+let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
+let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
+
+let MushroomBlockAnimation = stampit.compose(BumpAnimation)
+  .methods({
+    handleStop: function(){
+      let shroomPosition = this.subject.position.clone();
+      shroomPosition.y += 1;
+      Mushroom.create({game: this.game, position: shroomPosition })
+      Block.create({game: this.game, position: this.subject.position.clone() })
+    }
+  });
+
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -29,9 +47,11 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
         console.log("I should produce an item! ^.^");
         sounds.coin.currentTime = 0;
         sounds.coin.play();
-        let shroomPosition = this.position.clone();
-        shroomPosition.y += 1;
-        Mushroom.create({game: this.game, position: shroomPosition })
+
+        
+        this.game.renderer.deleteFromScene(this.mesh);
+        let block = Block.create({game: this.game, position: this.position.clone() });
+        MushroomBlockAnimation.create({game: this.game, subject: block});
       }
     }
   });
@@ -70,17 +90,10 @@ let Brick = stampit.compose(Sprite, Collidable)
         if(direction == "below") {
           sounds.breakBlock.currentTime = 0;
           sounds.breakBlock.play();
-          BumpAnimation.create({game: this.game, subject: this});
+          BrickAnimation.create({game: this.game, subject: this});
         }
       }
     });
-
-let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
-let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
-let PipeTopLeft     = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
-let PipeTopRight    = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
-let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
-let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
 
 module.exports = {
   ItemBlock: ItemBlock,

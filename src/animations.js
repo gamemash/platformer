@@ -2,7 +2,6 @@ let stampit = require('stampit');
 let THREE = require('three');
 let Animation = require('./animation.js');
 
-
 let BumpAnimation = stampit.compose(Animation)
   .refs({
     speed: 5,
@@ -19,8 +18,34 @@ let BumpAnimation = stampit.compose(Animation)
     handleStart: function() {
       this.startPosition = this.subject.position.clone();
     }
+  });
+
+let BrickAnimation = stampit.compose(BumpAnimation);
+
+let NewMushroomAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 2.5,
+    amplitude: 1,
   })
+  .methods({
+    handleStop: function() {
+      this.subject.position.copy(this.startPosition);
+      this.subject.velocity.copy(this.objVelocity);
+    },
+    handleAnimation: function(dt) {
+      this.subject.position.y = this.startPosition.y - 1 + this.time * this.speed * this.amplitude;
+    },
+    handleStart: function() {
+      this.startPosition = this.subject.position.clone();
+      this.objVelocity = this.subject.velocity.clone();
+      this.subject.velocity.set(0, 0);
+    }
+  });
+
+
 
 module.exports = {
-  BumpAnimation: BumpAnimation
+  BumpAnimation: BumpAnimation,
+  BrickAnimation: BrickAnimation,
+  NewMushroomAnimation: NewMushroomAnimation
 }
