@@ -3,18 +3,21 @@ let stampit = require('stampit');
 let Animation = stampit()
   .refs({
     duration: 1,
-    amplitude: 0.5,
-    speed: 5
+    speed: 1
 
   })
   .methods({
+    handleAnimation: function() {},
+    handleStart: function() {},
+    handleStop: function() {},
+
     start: function(dt){
-      this.startPosition = this.subject.position.clone();
       this.time = 0;
+      this.handleStart();
       this.game.renderer.toAnimate.add(this);
     },
     stop: function(){
-      this.subject.position.copy(this.startPosition);
+      this.handleStop();
       this.game.renderer.toAnimate.delete(this);
     },
     updateAnimation: function(dt){
@@ -22,7 +25,7 @@ let Animation = stampit()
       if (this.time * this.speed > this.duration){
         this.stop();
       } else {
-        this.subject.position.y = this.startPosition.y + Math.sin(this.time * Math.PI * this.speed) * this.amplitude;
+        this.handleAnimation(dt);
       }
     }
   })

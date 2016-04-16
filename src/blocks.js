@@ -49,7 +49,23 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
     spriteLayout: new THREE.Vector2( 3, 1)
   });
 
-//let BumpAnimation = stampit.compose(Animation)
+let BumpAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 5,
+    amplitude: 0.5,
+  })
+  .methods({
+    
+    handleStop: function() {
+      this.subject.position.copy(this.startPosition);
+    },
+    handleAnimation: function(dt) {
+      this.subject.position.y = this.startPosition.y + Math.sin(this.time * Math.PI * this.speed) * this.amplitude;
+    },
+    handleStart: function() {
+      this.startPosition = this.subject.position.clone();
+    }
+  })
 
 let Brick = stampit.compose(Sprite, Collidable)
     .refs({
@@ -67,7 +83,7 @@ let Brick = stampit.compose(Sprite, Collidable)
         if(direction == "below") {
           sounds.breakBlock.currentTime = 0;
           sounds.breakBlock.play();
-          Animation.create({game: this.game, subject: this});
+          BumpAnimation.create({game: this.game, subject: this});
         }
       }
     });
