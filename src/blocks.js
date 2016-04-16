@@ -48,9 +48,19 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
     spriteLayout: new THREE.Vector2( 3, 1)
   });
 
+let Brick = stampit.compose(Sprite, Collidable)
+            .refs({ texture: 'brick.png' })
+            .methods({
+              collided: function(entity, direction) {
+                if(direction == "below") {
+                  sounds.breakBlock.currentTime = 0;
+                  sounds.breakBlock.play();
+                }
+              }
+            });
+
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
-let Brick           = stampit.compose(Sprite, Collidable).refs({ texture: 'brick.png' });
 let PipeTopLeft     = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
 let PipeTopRight    = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
 let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
