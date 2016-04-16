@@ -35,10 +35,14 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
   .init(function(){
     this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
     this.material.uniforms['spritePosition'] = {type: 'v2', value: new THREE.Vector2( 0, 0) };
-    this.collisionsWithMario = this.collisionStream.filter((x) => {return (x.entity.name == "MARIO")})
 
-    this.collisionsWithMario
-        .filter((x) => {return (x.direction == "above")})
+    function isMario(collision) { return (collision.entity.name == "MARIO"); }
+    function cameFromAbove(collision){ return (collision.direction == "above"); }
+    function didntComeFromAbove(collision){ return ! cameFromAbove(collision); }
+
+    this.collisionsWithMario = this.collisionStream.filter(isMario)
+
+    this.collisionsWithMario.filter(cameFromAbove)
         .onValue(function(collision) {
           if (!this.dead) {
             this.die();
@@ -48,11 +52,9 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
           }
         }.bind(this));
 
-    this.collisionsWithMario
-        .filter((x) => {return (x.direction != "above")})
-        .onValue(function(collision) {
-          collision.entity.die();
-        });
+    this.collisionsWithMario.filter(didntComeFromAbove).onValue(function(collision) {
+      collision.entity.die();
+    });
   });
 
 let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
