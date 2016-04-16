@@ -7,6 +7,9 @@ let Collidable = stampit()
   })
   .init(function(){
     this.physicsEngine.addObject(this);
+  })
+  .methods({
+    collided: function(entity, direction) {}
   });
 
 module.exports = Collidable;

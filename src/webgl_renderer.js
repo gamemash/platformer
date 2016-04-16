@@ -3,8 +3,9 @@ let THREE = require('three');
 let Sprite = require('./sprite.js');
 let PhysicsEngine = require('./physics_engine.js');
 let {ItemBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight} = require('./blocks.js');
+let FlagPole = require('./flag_pole.js');
 
-let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock];
+let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock, FlagPole];
 let WebGLRenderer = stampit()
   .methods({
     render: function(dt){
@@ -19,18 +20,6 @@ let WebGLRenderer = stampit()
     },
     deleteFromScene: function(obj){
       this.scene.remove(obj);
-    },
-    loadLevel: function(levelData){
-      for (let y = levelData.length - 1; y >= 0; y -= 1){
-        for (let x = 0; x < levelData[y].length; x += 1){
-          if (levelData[y][x] != 0) {
-            let block = Blocks[levelData[y][x]].create({renderer: this, position: new THREE.Vector2(x, levelData.length - 1 - y)});
-            if (block.animated) {
-              this.toUpdate.add(block);
-            }
-          }
-        }
-      }
     }
   })
   .init(function(){
