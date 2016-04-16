@@ -91,6 +91,7 @@ let Player1 = stampit.compose(Mario, Entity)
         case 'above':
           this.position.y = block.position.y - this.size.y;
           this.velocity.y = 0;
+          this.timeSinceJump = this.jumpLength;
           break;
         case 'below':
           this.position.y = block.position.y + block.size.y;
