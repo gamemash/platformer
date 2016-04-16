@@ -24,7 +24,7 @@ var Font = stampit.compose(Sprite)
     ],
     fixed: true,
     fontSize: 2,
-    size: 1
+    size: new THREE.Vector2(1,1)
   })
   .methods({
     charToCoordinates: function(character){

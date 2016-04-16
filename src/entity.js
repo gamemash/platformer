@@ -22,7 +22,7 @@ let Entity = stampit()
         }
       } else if (this.velocity.y > 0) {
         for (let i = 0; i < 1; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] + pos[i], position[1] + 1);
+          let block = PhysicsEngine.checkPosition(position[0] + pos[i], position[1] + this.size.y);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'above');
             block.collided(this, 'below');

@@ -15,7 +15,7 @@ let Sprite = stampit()
       ShaderLoader.load('tile.vert'),
       ShaderLoader.load('tile.frag')
     ],
-    size: 1
+    size: new THREE.Vector2(1,1)
 
   })
   .methods({
@@ -31,7 +31,7 @@ let Sprite = stampit()
       this.material.needsUpdate = true;
     },
     gridPosition: function(){
-      return [Math.round(this.position.x / this.size), Math.round(this.position.y / this.size)];
+      return [Math.round(this.position.x / this.size.x), Math.round(this.position.y / this.size.y)];
     }
   })
   .init(function(){
@@ -40,15 +40,15 @@ let Sprite = stampit()
       console.log(this);
     }
     this.material.uniforms = {
-      tileLocation: { type: "v2", value: this.position.multiplyScalar(this.size) },
+      tileLocation: { type: "v2", value: this.position },
       screenSize: {type: "v2", value: new THREE.Vector2(this.game.renderer.width, this.game.renderer.height) },
-      tileSize: {type: "f", value: this.size },
+      tileSize: {type: "v2", value: this.size },
       spriteLayout: {type: "v2", value: this.spriteLayout },
       spritePosition: {type: "v2", value: this.spritePosition },
       spriteFlipped: {type: 'i', value: false },
       fixedPosition: {type: "i", value: this.fixed}
     };
-    this.geometry = SpriteGeometry.create();
+    this.geometry = SpriteGeometry.create({size: this.size});
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
 
     TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));

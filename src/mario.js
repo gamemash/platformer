@@ -5,7 +5,7 @@ let Debug = require('./debug.js');
 
 let Mario = stampit.compose(AnimatedSprite)
   .refs({
-    texture: 'mario_small.png',
+    texture: 'mario_big.png',
     animationState: 'standing',
     animations: {
       standing: [
@@ -26,6 +26,7 @@ let Mario = stampit.compose(AnimatedSprite)
         {id: 6, duration: 0.0}
       ]
     },
+    size: new THREE.Vector2(1, 2)
   })
   .methods({
     duration: function(){
@@ -48,7 +49,7 @@ let Mario = stampit.compose(AnimatedSprite)
     }
   })
   .init(function(){
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 14, 1) };
+    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 21, 1) };
     this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
     this.selectAnimation('standing', false);
   });

@@ -10,10 +10,10 @@ let PhysicsEngine = stampit()
   })
   .methods({
     boundingBox: function(obj_a, obj_b){
-      return (obj_a.position.x < obj_b.position.x + obj_b.size &&
-         obj_a.position.x + obj_a.size > obj_b.position.x &&
-         obj_a.position.y < obj_b.position.y + obj_b.size &&
-         obj_a.size + obj_a.position.y > obj_b.position.y);
+      return (obj_a.position.x < obj_b.position.x + obj_b.size.x &&
+         obj_a.position.x + obj_a.size.x > obj_b.position.x &&
+         obj_a.position.y < obj_b.position.y + obj_b.size.y &&
+         obj_a.size.y + obj_a.position.y > obj_b.position.y);
     },
     key: function(obj){
       return obj.gridPosition()[0] + "x" + obj.gridPosition()[1];
