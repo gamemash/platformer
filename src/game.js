@@ -5,7 +5,7 @@ let GameRules           = require('./game_rules.js');
 
 var Game = stampit()
   .refs({
-    entities: [],
+    entities: new Set(),
     gameRules: GameRules.create()
   })
   .methods({

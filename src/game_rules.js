@@ -29,6 +29,7 @@ let GameRules = stampit.compose()
             break;
           case 'Mushroom':
             player.grow();
+            entity.remove();
             break;
         }
       }

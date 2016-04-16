@@ -6,6 +6,12 @@ let Debug = require('./debug.js');
 let Entity = stampit()
   .methods({
     collided: function(block, direction){ },
+    remove: function(){
+      this.game.renderer.deleteFromScene(this.mesh);
+      this.mesh.geometry.dispose();
+      this.mesh.material.dispose();
+      this.game.entities.delete(this);
+    },
     updateCollisions: function(dt){
       if (this.velocity == undefined) return;
       let position = [Math.round(this.oldPosition.x), Math.round(this.oldPosition.y)];
@@ -52,7 +58,7 @@ let Entity = stampit()
   init(function(){
     this.velocity = new THREE.Vector2(0, 0),
     this.acceleration =  new THREE.Vector2(0, 0)
-    this.game.entities.push(this);
+    this.game.entities.add(this);
   });
 
 module.exports = Entity;
