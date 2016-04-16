@@ -52,6 +52,7 @@ let Entity = stampit()
   init(function(){
     this.velocity = new THREE.Vector2(0, 0),
     this.acceleration =  new THREE.Vector2(0, 0)
+    this.game.entities.push(this);
   });
 
 module.exports = Entity;

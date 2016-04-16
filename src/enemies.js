@@ -11,6 +11,8 @@ let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animation
 
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
   .refs({
+    name: "Goomba",
+    deadly: true,
     texture: 'goomba.png',
     animationState: "walking",
     animations: {
@@ -31,11 +33,12 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
   })
   .init(function(){
     this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 0, 0) };
+    this.material.uniforms['spritePosition'] = {type: 'v2', value: new THREE.Vector2( 0, 0) };
   });
 
 let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
   .refs({
+    name: "Mushroom",
     texture: 'mushroom.png',
     walkSpeed: -2
   })
