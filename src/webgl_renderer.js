@@ -3,8 +3,9 @@ let THREE = require('three');
 let Sprite = require('./sprite.js');
 let PhysicsEngine = require('./physics_engine.js');
 let {ItemBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight} = require('./blocks.js');
+let FlagPole = require('./flag_pole.js');
 
-let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock];
+let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock, FlagPole];
 let WebGLRenderer = stampit()
   .methods({
     render: function(dt){
