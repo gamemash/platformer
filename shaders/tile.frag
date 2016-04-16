@@ -1,6 +1,6 @@
 uniform sampler2D texture1;
 varying vec2 textureCoord;
-uniform float tileSize;
+uniform vec2 tileSize;
 uniform vec2 spriteLayout;
 uniform vec2 spritePosition;
 uniform int spriteFlipped;
