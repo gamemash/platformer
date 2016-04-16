@@ -5,6 +5,7 @@ let THREE = require('three');
 let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
 let {BumpAnimation} = require('./animations.js')
+let {Goomba, Mushroom} = require('./enemies.js')
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -28,6 +29,9 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
         console.log("I should produce an item! ^.^");
         sounds.coin.currentTime = 0;
         sounds.coin.play();
+        let shroomPosition = this.position.clone();
+        shroomPosition.y += 1;
+        Mushroom.create({game: this.game, position: shroomPosition })
       }
     }
   });

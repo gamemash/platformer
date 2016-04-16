@@ -33,6 +33,13 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
     this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 0, 0) };
   });
 
+let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
+  .refs({
+    texture: 'mushroom.png',
+    walkSpeed: -2
+  });
+
 module.exports = {
-  Goomba: Goomba
+  Goomba: Goomba,
+  Mushroom: Mushroom
 }
