@@ -1,58 +1,35 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-let stampit = require('stampit');
-let THREE = require('three');
-let WebGLRenderer = require('./src/webgl_renderer.js');
-let Player1 = require('./src/player1.js');
-let sounds = require('./src/sounds.js');
-let Selector = require('./src/selector.js');
-let MouseState = require('./src/mouse_state.js');
-let MouseStream = require('./src/mouse_stream.js');
-let Debug = require('./src/debug.js');
-let {Goomba} = require('./src/enemies.js')
-let gameRules = require('./src/game_rules.js').create();
+let stampit             = require('stampit');
+let THREE               = require('three');
+let WebGLRenderer       = require('./src/webgl_renderer.js');
+let Player1             = require('./src/player1.js');
+let Selector            = require('./src/selector.js');
+let MouseState          = require('./src/mouse_state.js');
+let MouseStream         = require('./src/mouse_stream.js');
+let gameStateController = require('./src/game_state_controller.js');
+let Interface           = require('./src/interface.js');
+let Game                = require('./src/game.js');
+let Level               = require('./src/levels/level_1.js');
 
 let {inputStream, menuStream, jumpStream, inputState} = require("./src/input_stream.js");
 
-let gameState = {
-  paused: false
-}
 
-menuStream.onValue((x) => {
-  sounds.pauseSound.pause();
-  sounds.pauseSound.currentTime = 0;
-  sounds.pauseSound.play();
-  document.getElementById("game-wrapper").classList.toggle("paused");
-  gameState.paused = ! gameState.paused;
-});
-
-
-let levelData = [
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 3, 8, 3, 8, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
-
+let game = Game.create();
 let renderer = WebGLRenderer.create({canvas: document.getElementById('game-canvas')});
-renderer.loadLevel(levelData);
 
-let player1  = Player1.create({renderer: renderer, position: new THREE.Vector2(5, 4) });
-let selector = Selector.create({renderer: renderer, position: new THREE.Vector2(0, 0)});
+game.renderer = renderer;
+game.loadLevel(Level.create());
+let player1  = Player1.create({game: game, position: new THREE.Vector2(5, 4) });
+let gui      = Interface.create({game: game, player: player1});
+game.player = player1;
+game.gui = gui;
 
+
+game.start();
+
+let selector = Selector.create({game: game, position: new THREE.Vector2(0, 0)});
 let mouseState = MouseState.create({canvasId: "game-canvas"});
 
 mouseState.addListener(function(x,y) {
@@ -61,52 +38,7 @@ mouseState.addListener(function(x,y) {
   selector.moveTo(x,y);
 });
 
-let entities = []
-
-for(var i=0; i<1; i++) {
-  let goom = Goomba.create({renderer: renderer, position: new THREE.Vector2(20+i*2, 6)})
-  entities.push(goom);
-}
-
-function render() {
-  let dt = 1/60;
-  if (!gameState.paused) {
-    let relativeCameraPosition = player1.position.x + renderer.camera.position.x;
-    if (relativeCameraPosition > 16){
-      renderer.camera.position.x = (16 - player1.position.x);
-    }
-
-    if (relativeCameraPosition < 4 && renderer.camera.position.x < 0){
-      renderer.camera.position.x = (4 - player1.position.x);
-    }
-
-    selector.update(dt);
-    player1.update(dt);
-    renderer.render(dt);
-
-    gameRules.update(player1, entities, gameState);
-  }
-  Debug('mario-x', player1.position.x);
-  Debug('mario-y', player1.position.y);
-
-  requestAnimationFrame(render);
-}
-
-window.player = player1;
-
-render();
-
-
-document.getElementById('play-music').onclick = function() {
-  sounds.groundTheme.play();
-};
-
-document.getElementById('stop-music').onclick = function() {
-  sounds.groundTheme.pause();
-  sounds.groundTheme.currentTime = 0;
-};
-
-},{"./src/debug.js":51,"./src/enemies.js":52,"./src/game_rules.js":54,"./src/input_stream.js":57,"./src/mouse_state.js":60,"./src/mouse_stream.js":61,"./src/player1.js":63,"./src/selector.js":64,"./src/sounds.js":66,"./src/webgl_renderer.js":71,"stampit":4,"three":47}],2:[function(require,module,exports){
+},{"./src/game.js":56,"./src/game_state_controller.js":59,"./src/input_stream.js":62,"./src/interface.js":63,"./src/levels/level_1.js":66,"./src/mouse_state.js":68,"./src/mouse_stream.js":69,"./src/player1.js":71,"./src/selector.js":72,"./src/webgl_renderer.js":79,"stampit":4,"three":47}],2:[function(require,module,exports){
 (function (process,global){
 /* @preserve
  * The MIT License (MIT)
@@ -5522,7 +5454,7 @@ module.exports = ret;
 },{"./es5":13}]},{},[4])(4)
 });                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":72}],3:[function(require,module,exports){
+},{"_process":80}],3:[function(require,module,exports){
 /*! Kefir.js v3.2.1
  *  https://github.com/rpominov/kefir
  */
@@ -51416,7 +51348,7 @@ let Updatable = require('./updatable.js');
 
 let AnimatedSprite = stampit.compose(Updatable, Sprite)
   .methods({
-    duration: function(){ 
+    duration: function(){
       return this.animations[this.animationState][this.frame].duration;
     }
   })
@@ -51453,12 +51385,13 @@ let AnimatedSprite = stampit.compose(Updatable, Sprite)
 
 module.exports = AnimatedSprite;
 
-},{"./debug.js":51,"./sprite.js":67,"./updatable.js":70,"stampit":4,"three":47}],49:[function(require,module,exports){
+},{"./debug.js":51,"./sprite.js":75,"./updatable.js":78,"stampit":4,"three":47}],49:[function(require,module,exports){
 let stampit = require('stampit');
 let Sprite = require('./sprite.js');
 let AnimatedSprite = require('./animated_sprite.js');
 let THREE = require('three');
-let Collidable = require('./collidable.js')
+let Collidable = require('./collidable.js');
+let sounds = require('./sounds.js');
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -51472,11 +51405,35 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
         {id: 1, duration: 0.05},
         {id: 0, duration: 0.05}
       ]
-    }
+    },
+    spritePosition: new THREE.Vector2( 2, 0),
+    spriteLayout: new THREE.Vector2( 3, 1)
   })
-  .init(function() {
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
+  .methods({
+    collided: function(entity, direction) {
+      if(direction == "below") {
+        console.log("I should produce an item! ^.^");
+        sounds.coin.currentTime = 0;
+        sounds.coin.play();
+      }
+    }
+  });
+
+let Coin = stampit.compose(AnimatedSprite, Collidable)
+  .refs({
+    texture: 'coin.png',
+    animationState: "blinking",
+    animations: {
+      blinking: [
+        {id: 0, duration: 0.05},
+        {id: 1, duration: 0.05},
+        {id: 2, duration: 0.60},
+        {id: 1, duration: 0.05},
+        {id: 0, duration: 0.05}
+      ]
+    },
+    spritePosition: new THREE.Vector2( 2, 0),
+    spriteLayout: new THREE.Vector2( 3, 1)
   });
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
@@ -51495,10 +51452,11 @@ module.exports = {
   PipeBottomRight: PipeBottomRight,
   PipeBottomLeft: PipeBottomLeft,
   PipeTopRight: PipeTopRight,
-  PipeTopLeft: PipeTopLeft
+  PipeTopLeft: PipeTopLeft,
+  Coin: Coin
 }
 
-},{"./animated_sprite.js":48,"./collidable.js":50,"./sprite.js":67,"stampit":4,"three":47}],50:[function(require,module,exports){
+},{"./animated_sprite.js":48,"./collidable.js":50,"./sounds.js":74,"./sprite.js":75,"stampit":4,"three":47}],50:[function(require,module,exports){
 let stampit = require('stampit');
 let PhysicsEngine = require('./physics_engine.js');
 
@@ -51508,10 +51466,13 @@ let Collidable = stampit()
   })
   .init(function(){
     this.physicsEngine.addObject(this);
+  })
+  .methods({
+    collided: function(entity, direction) {}
   });
 
 module.exports = Collidable;
-},{"./physics_engine.js":62,"stampit":4}],51:[function(require,module,exports){
+},{"./physics_engine.js":70,"stampit":4}],51:[function(require,module,exports){
 let stampit = require('stampit');
 
 let debugParent = document.getElementById('debugParent');
@@ -51555,15 +51516,15 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
     collided: function(block, direction){
       switch(direction){
         case 'left':
-          this.position.x = block.position.x + block.size;
+          this.position.x = block.position.x + block.size.x;
           this.velocity.x = -this.velocity.x;
           break;
         case 'right':
-          this.position.x = block.position.x - block.size;
+          this.position.x = block.position.x - block.size.x;
           this.velocity.x = -this.velocity.x;
           break;
         case 'below':
-          this.position.y = block.position.y + block.size;
+          this.position.y = block.position.y + block.size.y;
           this.velocity.y = 0;
           this.onGround = true;
           break;
@@ -51599,7 +51560,7 @@ module.exports = {
   Goomba: Goomba
 }
 
-},{"./animated_sprite.js":48,"./collidable.js":50,"./debug.js":51,"./entity.js":53,"./sprite.js":67,"./updatable.js":70,"stampit":4,"three":47}],53:[function(require,module,exports){
+},{"./animated_sprite.js":48,"./collidable.js":50,"./debug.js":51,"./entity.js":53,"./sprite.js":75,"./updatable.js":78,"stampit":4,"three":47}],53:[function(require,module,exports){
 let PhysicsEngine = require('./physics_engine.js');
 let stampit = require('stampit');
 let THREE = require('three');
@@ -51607,41 +51568,46 @@ let Debug = require('./debug.js');
 
 let Entity = stampit()
   .methods({
-    collided: function(block, direction){  },
+    collided: function(block, direction){ },
     updateCollisions: function(dt){
       if (this.velocity == undefined) return;
-      let position = [Math.floor(this.oldPosition.x), Math.floor(this.oldPosition.y)];
+      let position = [Math.round(this.oldPosition.x), Math.round(this.oldPosition.y)];
       this.onGround = false;
+      let pos = [0, 1, -1];
       if (this.velocity.y < 0) {
-        for (let i = -1; i < 2; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] + i, position[1] - 1);
+        for (let i = 0; i < 3; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + pos[i], position[1] - 1);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'below');
+            block.collided(this, 'above');
             break;
           }
         }
       } else if (this.velocity.y > 0) {
-        for (let i = -1; i < 2; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] + i, position[1] + 1);
+        for (let i = 0; i < 1; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + pos[i], position[1] + this.size.y);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'above');
+            block.collided(this, 'below');
             break;
           }
         }
       }
       if (this.velocity.x > 0) {
-        for (let i = -1; i < 2; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] + 1, position[1] + i);
+        for (let i = 0; i < 3; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] + 1, position[1] + pos[i]);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'right');
+            block.collided(this, 'left');
             break;
           }
         }
       } else if (this.velocity.x < 0) {
-        for (let i = -1; i < 2; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] - 1, position[1] + i);
+        for (let i = 0; i < 3; i += 1){
+          let block = PhysicsEngine.checkPosition(position[0] - 1, position[1] + pos[i]);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'left');
+            block.collided(this, 'right');
             break;
           }
         }
@@ -51656,13 +51622,186 @@ let Entity = stampit()
 
 module.exports = Entity;
 
-},{"./debug.js":51,"./physics_engine.js":62,"stampit":4,"three":47}],54:[function(require,module,exports){
+},{"./debug.js":51,"./physics_engine.js":70,"stampit":4,"three":47}],54:[function(require,module,exports){
+let stampit = require('stampit');
+let THREE = require('three');
+let SpriteGeometry = require('./sprite_geometry.js');
+let ShaderLoader = require('./shader_loader.js');
+let TextureLoader = require('./texture_loader.js');
+let Sprite = require('./sprite.js');
+let Entity = require('./entity.js');
+let Collidable = require('./collidable.js');
+let Updateable = require('./updatable.js');
+
+var Flag = stampit
+  .compose(Sprite)
+  .refs({
+    texture: 'flag.png'
+  });
+
+var Top = stampit
+  .compose(Collidable, Entity, Sprite)
+  .refs({
+    texture: 'flagpole.png',
+  });
+
+var Rod = stampit
+  .compose(Collidable, Entity, Sprite)
+  .init(function(){
+  })
+  .refs({
+    texture: 'flagpole_rod.png',
+  })
+
+var FlagPole = stampit
+  .compose()
+  .refs({
+    height: 10,
+  })
+  .init(function() {
+    let x_pos = this.position.x;
+    let y_pos = this.position.y;
+
+    this.top = Top.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + this.height)})
+
+    for (let i = 0; i < this.height; i++) {
+      Rod.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + i)})
+    };
+
+    this.flag = Flag.create({game: this.game, position: new THREE.Vector2(x_pos-0.5, y_pos + this.height - 0.8)})
+  });
+
+module.exports = FlagPole;
+
+},{"./collidable.js":50,"./entity.js":53,"./shader_loader.js":73,"./sprite.js":75,"./sprite_geometry.js":76,"./texture_loader.js":77,"./updatable.js":78,"stampit":4,"three":47}],55:[function(require,module,exports){
+let stampit = require('stampit');
+let THREE = require('three');
+let SpriteGeometry = require('./sprite_geometry.js');
+let ShaderLoader = require('./shader_loader.js');
+let TextureLoader = require('./texture_loader.js');
+let Sprite = require('./sprite.js');
+
+let charMap = [
+        ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', 'x', '!'],
+        ['Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+        ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
+      ];
+
+var Font = stampit.compose(Sprite)
+  .refs({
+    spriteLayout: new THREE.Vector2(16, 3),
+    spritePosition: new THREE.Vector2(0, 0),
+    position: new THREE.Vector2(5, 5),
+    text: "NO TEXT",
+    texture: "font_white.png",
+    shaders: [
+      ShaderLoader.load('font.vert'),
+      ShaderLoader.load('font.frag')
+    ],
+    fixed: true,
+    fontSize: 2,
+    size: new THREE.Vector2(1,1)
+  })
+  .methods({
+    charToCoordinates: function(character){
+      for (let y = 0; y < charMap.length; y += 1){
+        let row = charMap[y];
+        for (let x = 0; x < row.length; x += 1){
+          if (row[x] == character){
+            return [x, y, 0];
+          }
+        }
+      }
+      return [15, 0, 0];
+    },
+    textToData: function(text){
+      let data = new Uint8Array(text.length * 3);
+      for (let i = 0; i < text.length; i += 1){
+        let character = text[i];
+        let coordinates = this.charToCoordinates(character);
+
+        data[i * 3 + 0] = coordinates[0];
+        data[i * 3 + 1] = coordinates[1];
+        data[i * 3 + 2] = coordinates[2];
+      }
+      return data;
+    },
+    setText: function(text){
+      let length = text.length;
+      let data = this.textToData(text);
+
+      let dataTexture = new THREE.DataTexture(data, length, 1, THREE.RGBFormat);
+      dataTexture.needsUpdate = true;
+      this.material.uniforms.textData = { type: "t", value: dataTexture };
+      this.material.uniforms.textLength = { type: "f", value: length };
+      this.material.needsUpdate = true;
+    }
+  })
+  .init(function(){
+    this.material.uniforms.fontSize = {type: "f", value: this.fontSize};
+    this.setText(this.text);
+  });
+
+module.exports = Font;
+
+},{"./shader_loader.js":73,"./sprite.js":75,"./sprite_geometry.js":76,"./texture_loader.js":77,"stampit":4,"three":47}],56:[function(require,module,exports){
+let stampit             = require('stampit');
+let THREE               = require('three');
+let gameState           = require('./game_state.js');
+let GameRules           = require('./game_rules.js');
+
+var Game = stampit()
+  .refs({
+    entities: [],
+    gameRules: GameRules.create()
+  })
+  .methods({
+    start: function(){
+      this.gameloop();
+    },
+    loadLevel: function(level){
+      this.level = level;
+      this.level.load(this);
+    },
+    gameloop: function(){
+      let dt = 1/60;
+      if (!gameState.paused) {
+        let relativeCameraPosition = this.player.position.x + this.renderer.camera.position.x;
+        if (relativeCameraPosition > 16){
+          this.renderer.camera.position.x = (16 - this.player.position.x);
+        }
+
+        if (relativeCameraPosition < 4 && this.renderer.camera.position.x < 0){
+          this.renderer.camera.position.x = (4 - this.player.position.x);
+        }
+
+        this.player.update(dt);
+        this.renderer.render(dt);
+        this.gui.updateTime();
+
+        this.gameRules.update(this.player, this.entities, gameState);
+      }
+
+      requestAnimationFrame(this.gameloop.bind(this));
+    }
+  });
+
+
+
+module.exports = Game;
+
+},{"./game_rules.js":57,"./game_state.js":58,"stampit":4,"three":47}],57:[function(require,module,exports){
 let stampit = require('stampit');
 let sounds = require('./sounds.js');
 let PhysicsEngine = require('./physics_engine.js');
 
-let GameRules = stampit.compose().refs().init().methods({
+let GameRules = stampit.compose()
+  .refs({
+    time: 400, 
+  })
+  .init().methods({
   update: function(player, entities, game) {
+    this.time -= 1/60 / 0.65;
     if (player.position.y < -2) {
       player.die();
     }
@@ -51671,7 +51810,7 @@ let GameRules = stampit.compose().refs().init().methods({
       if (entity.dead) continue;
       if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
         //difference in current position and top of goomba
-        let dy = (player.position.y - entity.position.y - entity.size);
+        let dy = (player.position.y - entity.position.y - entity.size.y);
 
         //time since it had that y position, assuming no acceleration
         let time = (dy / -player.velocity.y);
@@ -51680,7 +51819,8 @@ let GameRules = stampit.compose().refs().init().methods({
         let x = player.position.x + player.velocity.x * time;
 
         //that time point should be in the past. The position should be (player + size < x < entity + size)
-        if (time < 0 && entity.position.x - player.size < x && x < entity.position.x + entity.size){
+        if (time < 0 && entity.position.x - player.size.x < x && x < entity.position.x + entity.size.x){
+          player.killed(entity);
           entity.die();
           player.velocity.y = 17;
           sounds.stomp.play();
@@ -51694,7 +51834,52 @@ let GameRules = stampit.compose().refs().init().methods({
 
 module.exports = GameRules;
 
-},{"./physics_engine.js":62,"./sounds.js":66,"stampit":4}],55:[function(require,module,exports){
+},{"./physics_engine.js":70,"./sounds.js":74,"stampit":4}],58:[function(require,module,exports){
+let sounds = require('./sounds.js');
+
+let gameState = {
+  paused: false,
+  musicPlaying: false,
+
+  playMusic: function() {
+    musicPlaying = true;
+    sounds.groundTheme.play();
+  },
+
+  stopMusic: function() {
+    musicPlaying = false;
+    sounds.groundTheme.pause();
+    sounds.groundTheme.currentTime = 0;
+  },
+
+  togglePause: function() {
+    sounds.pauseSound.pause();
+    sounds.pauseSound.currentTime = 0;
+    sounds.pauseSound.play();
+    document.getElementById("game-wrapper").classList.toggle("paused");
+    this.paused = ! this.paused;
+  }
+};
+
+module.exports = gameState;
+},{"./sounds.js":74}],59:[function(require,module,exports){
+let {menuStream} = require("./input_stream.js");
+let gameState = require('./game_state.js');
+
+menuStream.onValue((x) => {
+  gameState.togglePause();
+});
+
+document.getElementById('play-music').onclick = function() {
+  gameState.playMusic();
+};
+
+document.getElementById('stop-music').onclick = function() {
+  gameState.stopMusic();
+};
+
+
+},{"./game_state.js":58,"./input_stream.js":62}],60:[function(require,module,exports){
 GamepadState  = function() {
   this.controllers = {};
   this.debug = true; // Set to true for some debug out in console
@@ -51757,7 +51942,7 @@ GamepadState.prototype._buttonPressed = function(b) {
 }
 
 module.exports = new GamepadState;
-},{}],56:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 var keyboard = require('./keyboard_state.js');
 var gamepad = require('./gamepad_state.js');
 
@@ -51797,7 +51982,7 @@ InputState.prototype.pressed = function(button_id) {
 // Triangle => 3
 //
 module.exports = new InputState;
-},{"./gamepad_state.js":55,"./keyboard_state.js":58}],57:[function(require,module,exports){
+},{"./gamepad_state.js":60,"./keyboard_state.js":64}],62:[function(require,module,exports){
 let inputState = require("./input_state.js");
 let Kefir = require('kefir');
 
@@ -51825,7 +52010,53 @@ module.exports = {
   jumpStream: jumpStream,
   inputState: inputState,
 };
-},{"./input_state.js":56,"kefir":3}],58:[function(require,module,exports){
+},{"./input_state.js":61,"kefir":3}],63:[function(require,module,exports){
+let stampit = require('stampit');
+let THREE = require('three');
+let Font = require('./font.js');
+let Coin = require('./blocks.js').Coin;
+
+let padZero = function(number, digits) {
+    return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
+}
+
+
+
+let Interface = stampit()
+  .refs({
+  })
+  .methods({
+    updateScore: function(){
+      this.score.setText(padZero(this.player.score, 6));
+    },
+    updateTime: function(){
+      this.time.setText(padZero(Math.round(this.game.gameRules.time),3));
+    }
+  })
+  .init(function(){
+
+    Font.create({position: new THREE.Vector2(5,15), text: this.player.name, game: this.game});
+    this.score = Font.create({text: padZero(this.player.score, 6), position: new THREE.Vector2(5,14.5), game: this.game});
+    this.player.stateChanged = this.updateScore.bind(this);
+
+
+    Font.create({position: new THREE.Vector2(10,14.5), text: ("x" + padZero(this.player.coins, 2)),    game: this.game});
+    Coin.create({position: new THREE.Vector2(9,14.5), game: this.game, fixed: true});
+
+
+    Font.create({position: new THREE.Vector2(13,15),   text: "WORLD",  game: this.game});
+    Font.create({position: new THREE.Vector2(13,14.5), text: " 1-1",   game: this.game});
+
+    Font.create({position: new THREE.Vector2(17,15),   text: "TIME",    game: this.game});
+    this.time = Font.create({text: "000",  position: new THREE.Vector2(17.5,14.5), game: this.game});
+
+
+  });
+
+
+module.exports = Interface;
+
+},{"./blocks.js":49,"./font.js":55,"stampit":4,"three":47}],64:[function(require,module,exports){
 KeyboardState  = function(){
   // to store the current state
   this.keyCodes = {};
@@ -51906,7 +52137,78 @@ KeyboardState.prototype.pressed  = function(keyDesc){
 }
 
 module.exports = new KeyboardState;
-},{}],59:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
+let stampit             = require('stampit');
+let THREE               = require('three');
+let {ItemBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight} = require('./blocks.js');
+let FlagPole = require('./flag_pole.js');
+let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock, FlagPole];
+
+let Level = stampit()
+  .refs({
+    entities: [],
+    levelData: []
+  })
+  .methods({
+    load: function(game){
+      for (let y = this.levelData.length - 1; y >= 0; y -= 1){
+        for (let x = 0; x < this.levelData[y].length; x += 1){
+          if (this.levelData[y][x] != 0) {
+            let block = Blocks[this.levelData[y][x]].create({game: game, position: new THREE.Vector2(x, this.levelData.length - 1 - y)});
+          }
+        }
+      }
+
+      this.loadEntities(game);
+    }
+
+  });
+
+module.exports = Level;
+
+
+},{"./blocks.js":49,"./flag_pole.js":54,"stampit":4,"three":47}],66:[function(require,module,exports){
+let stampit = require('stampit');
+let Level = require('../level.js');
+let {Goomba} = require('../enemies.js')
+let THREE               = require('three');
+
+let levelData = [
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 3, 8, 3, 8, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 9, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+];
+
+let Level1_1 = stampit.compose(Level)
+  .refs({
+    levelData: levelData
+  })
+  .methods({
+    loadEntities: function(game){
+      for(var i=-2; i<3; i++) {
+        let goom = Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 6)})
+        game.entities.push(goom);
+      }
+    }
+  });
+
+
+module.exports = Level1_1;
+
+},{"../enemies.js":52,"../level.js":65,"stampit":4,"three":47}],67:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let AnimatedSprite = require('./animated_sprite.js');
@@ -51914,7 +52216,7 @@ let Debug = require('./debug.js');
 
 let Mario = stampit.compose(AnimatedSprite)
   .refs({
-    texture: 'mario_small.png',
+    texture: 'mario_big.png',
     animationState: 'standing',
     animations: {
       standing: [
@@ -51935,6 +52237,7 @@ let Mario = stampit.compose(AnimatedSprite)
         {id: 6, duration: 0.0}
       ]
     },
+    size: new THREE.Vector2(1, 2)
   })
   .methods({
     duration: function(){
@@ -51957,7 +52260,7 @@ let Mario = stampit.compose(AnimatedSprite)
     }
   })
   .init(function(){
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 14, 1) };
+    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 21, 1) };
     this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
     this.selectAnimation('standing', false);
   });
@@ -51965,7 +52268,7 @@ let Mario = stampit.compose(AnimatedSprite)
 
 module.exports = Mario;
 
-},{"./animated_sprite.js":48,"./debug.js":51,"stampit":4,"three":47}],60:[function(require,module,exports){
+},{"./animated_sprite.js":48,"./debug.js":51,"stampit":4,"three":47}],68:[function(require,module,exports){
 let debug = require('./debug.js');
 let stampit = require('stampit');
 
@@ -52000,7 +52303,7 @@ let MouseState = stampit()
 
 module.exports = MouseState;
 
-},{"./debug.js":51,"stampit":4}],61:[function(require,module,exports){
+},{"./debug.js":51,"stampit":4}],69:[function(require,module,exports){
 let MouseState = require("./mouse_state.js");
 let Kefir = require('kefir');
 let sounds = require('./sounds')
@@ -52040,7 +52343,7 @@ shakeStream.onValue(() => {
 });
 
 module.exports = mouseStream;
-},{"./mouse_state.js":60,"./sounds":66,"kefir":3}],62:[function(require,module,exports){
+},{"./mouse_state.js":68,"./sounds":74,"kefir":3}],70:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 
@@ -52053,10 +52356,10 @@ let PhysicsEngine = stampit()
   })
   .methods({
     boundingBox: function(obj_a, obj_b){
-      return (obj_a.position.x < obj_b.position.x + obj_b.size &&
-         obj_a.position.x + obj_a.size > obj_b.position.x &&
-         obj_a.position.y < obj_b.position.y + obj_b.size &&
-         obj_a.size + obj_a.position.y > obj_b.position.y);
+      return (obj_a.position.x < obj_b.position.x + obj_b.size.x &&
+         obj_a.position.x + obj_a.size.x > obj_b.position.x &&
+         obj_a.position.y < obj_b.position.y + obj_b.size.y &&
+         obj_a.size.y + obj_a.position.y > obj_b.position.y);
     },
     key: function(obj){
       return obj.gridPosition()[0] + "x" + obj.gridPosition()[1];
@@ -52076,7 +52379,7 @@ let PhysicsEngine = stampit()
 
 module.exports = PhysicsEngine.create();
 
-},{"stampit":4,"three":47}],63:[function(require,module,exports){
+},{"stampit":4,"three":47}],71:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Mario = require('./mario.js');
@@ -52088,6 +52391,7 @@ let Debug = require('./debug.js');
 let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario, Entity)
   .refs({
+    name: "MARIO",
     groundResistance: 3.6,
     accelerationConstant: 0.14 * scale,
     gravity: 20 * scale,
@@ -52099,9 +52403,14 @@ let Player1 = stampit.compose(Mario, Entity)
     maxVelocity: 15,
     airJumpCount: 0,
     maxAirJumps: 2,
-    dead: false
+    dead: false,
+    score: 0,
+    coins: 0,
+    streak: 0
+
   })
   .init(function(){
+    Debug('score', this.score);
     jumpStream.onValue((x) => {
       if (this.onGround) {
 
@@ -52134,9 +52443,15 @@ let Player1 = stampit.compose(Mario, Entity)
 
   })
   .methods({
+    killed: function(entity){
+      this.score += 100 * Math.pow(2, this.streak);
+      this.streak += 1;
+      if (this.stateChanged){
+        this.stateChanged();
+      }
+    },
     die: function() {
       if (!this.dead){
-        console.log('died');
         sounds.die.play();
 
         window.setTimeout(function() { // Respawn the player after 3 seconds
@@ -52156,23 +52471,25 @@ let Player1 = stampit.compose(Mario, Entity)
     collided: function(block, direction){
       switch(direction){
         case 'above':
-          this.position.y = block.position.y - block.size;
+          this.position.y = block.position.y - this.size.y;
           this.velocity.y = 0;
           break;
         case 'below':
-          this.position.y = block.position.y + block.size;
+          this.position.y = block.position.y + block.size.y;
           this.velocity.y = 0;
           this.onGround = true;
           break;
         case 'right':
-          this.position.x = block.position.x - block.size;
+          this.position.x = block.position.x - this.size.x;
           this.velocity.x = 0;
           break;
         case 'left':
-          this.position.x = block.position.x + block.size;
+          this.position.x = block.position.x + block.size.x;
           this.velocity.x = 0;
           break;
-
+      }
+      if (this.onGround){
+        this.streak = 0;
       }
     },
     update: function(dt){
@@ -52238,7 +52555,7 @@ let Player1 = stampit.compose(Mario, Entity)
 
 module.exports = Player1;
 
-},{"./debug.js":51,"./entity.js":53,"./input_stream.js":57,"./mario.js":59,"./sounds.js":66,"stampit":4,"three":47}],64:[function(require,module,exports){
+},{"./debug.js":51,"./entity.js":53,"./input_stream.js":62,"./mario.js":67,"./sounds.js":74,"stampit":4,"three":47}],72:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Sprite = require('./sprite.js');
@@ -52261,7 +52578,7 @@ let Selector = stampit.compose(Sprite)
 
 module.exports = Selector;
 
-},{"./sprite.js":67,"stampit":4,"three":47}],65:[function(require,module,exports){
+},{"./sprite.js":75,"stampit":4,"three":47}],73:[function(require,module,exports){
 var Promise = require("bluebird");
 
 function ShaderLoader(){
@@ -52307,7 +52624,7 @@ function ShaderLoader(){
 
 module.exports = new ShaderLoader;
 
-},{"bluebird":2}],66:[function(require,module,exports){
+},{"bluebird":2}],74:[function(require,module,exports){
 var pauseSound = new Audio('sounds/smb_pause.wav');
 var jumpSmall = new Audio('sounds/smb_jump-small.wav');
 var coin = new Audio('sounds/smb_coin.wav');
@@ -52315,6 +52632,7 @@ var groundTheme = new Audio('sounds/smb_ground_theme.mp3');
 var kick = new Audio('sounds/smb_kick.wav');
 var stomp = new Audio('sounds/smb_stomp.wav');
 var die = new Audio('sounds/smb_mariodie.wav');
+var stageClear = new Audio('sounds/smb_stage_clear.wav');
 
 module.exports = {
   pauseSound: pauseSound,
@@ -52323,9 +52641,10 @@ module.exports = {
   groundTheme: groundTheme,
   kick: kick,
   die: die,
-  stomp: stomp
+  stomp: stomp,
+  stageClear: stageClear
 }
-},{}],67:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let SpriteGeometry = require('./sprite_geometry.js');
@@ -52335,12 +52654,15 @@ let TextureLoader = require('./texture_loader.js');
 let loader = new THREE.TextureLoader();
 let Sprite = stampit()
   .refs({
+    spriteLayout: new THREE.Vector2(1, 1),
+    spritePosition: new THREE.Vector2(0, 0),
     position: new THREE.Vector2(0, 0),
+    fixed: false,
     shaders: [
       ShaderLoader.load('tile.vert'),
       ShaderLoader.load('tile.frag')
     ],
-    size: 1
+    size: new THREE.Vector2(1,1)
 
   })
   .methods({
@@ -52356,25 +52678,29 @@ let Sprite = stampit()
       this.material.needsUpdate = true;
     },
     gridPosition: function(){
-      return [Math.round(this.position.x / this.size), Math.round(this.position.y / this.size)];
+      return [Math.round(this.position.x / this.size.x), Math.round(this.position.y / this.size.y)];
     }
   })
   .init(function(){
     this.material = new THREE.ShaderMaterial();
+    if (!this.game){
+      console.log(this);
+    }
     this.material.uniforms = {
-      tileLocation: { type: "v2", value: this.position.multiplyScalar(this.size) },
-      screenSize: {type: "v2", value: new THREE.Vector2(this.renderer.width, this.renderer.height) },
-      tileSize: {type: "f", value: this.size },
-      spriteLayout: {type: "v2", value: new THREE.Vector2(1, 1) },
-      spritePosition: {type: "v2", value: new THREE.Vector2(0, 0) },
-      spriteFlipped: {type: 'i', value: false }
+      tileLocation: { type: "v2", value: this.position },
+      screenSize: {type: "v2", value: new THREE.Vector2(this.game.renderer.width, this.game.renderer.height) },
+      tileSize: {type: "v2", value: this.size },
+      spriteLayout: {type: "v2", value: this.spriteLayout },
+      spritePosition: {type: "v2", value: this.spritePosition },
+      spriteFlipped: {type: 'i', value: false },
+      fixedPosition: {type: "i", value: this.fixed}
     };
-    this.geometry = SpriteGeometry.create();
+    this.geometry = SpriteGeometry.create({size: this.size});
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
 
     TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
     Promise.all(this.shaders).then(this.shadersReceived.bind(this));
-    this.renderer.addToScene(this.mesh);
+    this.game.renderer.addToScene(this.mesh);
   });
 
 
@@ -52382,28 +52708,30 @@ let Sprite = stampit()
 module.exports = Sprite;
 
 
-},{"./shader_loader.js":65,"./sprite_geometry.js":68,"./texture_loader.js":69,"stampit":4,"three":47}],68:[function(require,module,exports){
+},{"./shader_loader.js":73,"./sprite_geometry.js":76,"./texture_loader.js":77,"stampit":4,"three":47}],76:[function(require,module,exports){
 var stampit = require('stampit');
 var THREE = require('three');
 
-var size = 1;
-var rectShape = new THREE.Shape();
-rectShape.moveTo( 0,0 );
-rectShape.lineTo( 0, size );
-rectShape.lineTo( size, size );
-rectShape.lineTo( size, 0 );
-rectShape.lineTo( 0, 0 );
+let rectShape = function(size){
+  var rectShape = new THREE.Shape();
+  rectShape.moveTo( 0,0 );
+  rectShape.lineTo( 0, size.y );
+  rectShape.lineTo( size.x, size.y );
+  rectShape.lineTo( size.x, 0 );
+  rectShape.lineTo( 0, 0 );
+  return rectShape;
+}
   
 
 var SpriteGeometry = stampit().refs({
 }).init(function(){
-  this.geometry = new THREE.ShapeGeometry(rectShape);
+  this.geometry = new THREE.ShapeGeometry(rectShape(this.size));
 });
 
 module.exports = SpriteGeometry;
 
 
-},{"stampit":4,"three":47}],69:[function(require,module,exports){
+},{"stampit":4,"three":47}],77:[function(require,module,exports){
 var THREE = require('three');
 
 let loader = new THREE.TextureLoader();
@@ -52426,21 +52754,21 @@ let TextureLoader = {
 }
 module.exports = TextureLoader;
 
-},{"three":47}],70:[function(require,module,exports){
+},{"three":47}],78:[function(require,module,exports){
 let stampit = require('stampit');
 
 let Updatable = stampit
   .init(function(){
     this.updateCallbacks = [];
-    this.renderer.toUpdate.add(this);
+    this.game.renderer.toUpdate.add(this);
   })
   .methods({
     registerUpdateCallback: function(callback){
       this.updateCallbacks.push(callback);
     },
     delete: function(){
-      this.renderer.toUpdate.delete(this);
-      this.renderer.deleteFromScene(this.mesh);
+      this.game.renderer.toUpdate.delete(this);
+      this.game.renderer.deleteFromScene(this.mesh);
     },
     updateSprite: function(dt) {
       for(let callback of this.updateCallbacks) {
@@ -52452,14 +52780,15 @@ let Updatable = stampit
 
 module.exports = Updatable;
 
-},{"stampit":4}],71:[function(require,module,exports){
+},{"stampit":4}],79:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Sprite = require('./sprite.js');
 let PhysicsEngine = require('./physics_engine.js');
 let {ItemBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight} = require('./blocks.js');
+let FlagPole = require('./flag_pole.js');
 
-let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock];
+let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock, FlagPole];
 let WebGLRenderer = stampit()
   .methods({
     render: function(dt){
@@ -52474,18 +52803,6 @@ let WebGLRenderer = stampit()
     },
     deleteFromScene: function(obj){
       this.scene.remove(obj);
-    },
-    loadLevel: function(levelData){
-      for (let y = levelData.length - 1; y >= 0; y -= 1){
-        for (let x = 0; x < levelData[y].length; x += 1){
-          if (levelData[y][x] != 0) {
-            let block = Blocks[levelData[y][x]].create({renderer: this, position: new THREE.Vector2(x, levelData.length - 1 - y)});
-            if (block.animated) {
-              this.toUpdate.add(block);
-            }
-          }
-        }
-      }
     }
   })
   .init(function(){
@@ -52504,7 +52821,7 @@ let WebGLRenderer = stampit()
 
 module.exports = WebGLRenderer;
 
-},{"./blocks.js":49,"./physics_engine.js":62,"./sprite.js":67,"stampit":4,"three":47}],72:[function(require,module,exports){
+},{"./blocks.js":49,"./flag_pole.js":54,"./physics_engine.js":70,"./sprite.js":75,"stampit":4,"three":47}],80:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
