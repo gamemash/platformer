@@ -1,8 +1,6 @@
 let stampit = require('stampit');
 let THREE = require('three');
 
-
-
 let PhysicsEngine = stampit()
   .refs({
     objects: {},
@@ -26,6 +24,19 @@ let PhysicsEngine = stampit()
       if (key in this.objects)
         return this.objects[key];
       return false;
+    },
+    hitFromAbove: function(entity_a, entity_b){
+        //difference in current position and top of goomba
+        let dy = (entity_a.position.y - entity_b.position.y - entity_b.size.y);
+
+        //time since it had that y position, assuming no acceleration
+        let time = (dy / -entity_a.velocity.y);
+
+        //x position at that time
+        let x = entity_a.position.x + entity_a.velocity.x * time;
+
+        //that time point should be in the past. The position should be (player + size < x < entity + size)
+        return (time < 0 && entity_b.position.x - entity_a.size.x < x && x < entity_b.position.x + entity_b.size.x);
     }
 
 

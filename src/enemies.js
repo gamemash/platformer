@@ -6,64 +6,78 @@ let Updateable = require('./updatable.js');
 let Entity = require('./entity.js');
 let Collidable = require('./collidable.js');
 let Debug = require('./debug.js');
+let SimpleAI = require('./simple_ai.js');
+let sounds = require('./sounds.js');
+let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
 
-let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
+let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
   .refs({
+    name: "Goomba",
+    deadly: true,
     texture: 'goomba.png',
     animationState: "walking",
     animations: {
       walking: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
       dead: [{id:2, duration: 1}]
     },
-    walkSpeed: 3.0,
-    onGround: false,
-    dead: false
-
+    walkSpeed: 3
   })
   .methods({
-    collided: function(block, direction){
-      switch(direction){
-        case 'left':
-          this.position.x = block.position.x + block.size.x;
-          this.velocity.x = -this.velocity.x;
-          break;
-        case 'right':
-          this.position.x = block.position.x - block.size.x;
-          this.velocity.x = -this.velocity.x;
-          break;
-        case 'below':
-          this.position.y = block.position.y + block.size.y;
-          this.velocity.y = 0;
-          this.onGround = true;
-          break;
-      }
-    },
     die: function(){
       this.dead = true;
       this.velocity.set(0, 0);
       this.animationState = 'dead';
       setTimeout((function(){
-        this.delete();
+        this.remove();
       }.bind(this)),1000);
     }
   })
   .init(function(){
     this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 0, 0) };
-    this.velocity.x = -this.walkSpeed;
+    this.material.uniforms['spritePosition'] = {type: 'v2', value: new THREE.Vector2( 0, 0) };
+    this.collisionsWithMario = this.collisionStream.filter((x) => {return (x.entity.name == "MARIO")})
 
-    this.registerUpdateCallback(function(dt) {
-      this.acceleration.y = -60;
-      this.oldPosition = this.position.clone();
-      this.position.addScaledVector(this.velocity, dt)
-      if (this.onGround == false){
-        this.position.y += this.acceleration.y * dt * dt * .5;
-        this.velocity.y += this.acceleration.y * dt;
-      }
-      this.updateCollisions(dt);
-    });
+    this.collisionsWithMario
+        .filter((x) => {return (x.direction == "above")})
+        .onValue(function(collision) {
+          if (!this.dead) {
+            this.die();
+            collision.entity.killed(this);
+            collision.entity.velocity.y = 17;
+            sounds.stomp.play();
+          }
+        }.bind(this));
+
+    this.collisionsWithMario
+        .filter((x) => {return (x.direction != "above")})
+        .onValue(function(collision) {
+          collision.entity.die();
+        });
+  });
+
+let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
+  .refs({
+    name: "Mushroom",
+    texture: 'mushroom.png',
+    walkSpeed: -2
+  })
+  .init(function(){
+    NewMushroomAnimation.create({game: this.game, subject: this});
+    this.collisionStream
+        .filter((x) => {return (x.entity.name == "MARIO")})
+        .onValue(function(collision) {
+          console.log("collide");
+          // TODO: Refactor this somehow?
+          // modules need to register 'cleanup' callbacks
+          // to a 'cleanupable' component?
+          sounds.powerUp.play();
+          this.delete(); // Updateable
+          this.remove(); // Entity
+          collision.entity.grow();
+        }.bind(this))
   });
 
 module.exports = {
-  Goomba: Goomba
+  Goomba: Goomba,
+  Mushroom: Mushroom
 }

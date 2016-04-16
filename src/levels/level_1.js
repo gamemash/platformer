@@ -29,8 +29,7 @@ let Level1_1 = stampit.compose(Level)
   .methods({
     loadEntities: function(game){
       for(var i=-2; i<3; i++) {
-        let goom = Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 7)})
-        game.entities.push(goom);
+        Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 7)})
       }
     }
   });

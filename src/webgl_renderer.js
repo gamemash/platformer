@@ -9,11 +9,15 @@ let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBo
 let WebGLRenderer = stampit()
   .methods({
     render: function(dt){
-      this.renderer.render(this.scene, this.camera);
-
       for (let item of this.toUpdate) {
         item.updateSprite(dt);
       };
+
+      for (let item of this.toAnimate) {
+        item.updateAnimation(dt);
+      };
+
+      this.renderer.render(this.scene, this.camera);
     },
     addToScene: function(obj){
       this.scene.add(obj);
@@ -25,6 +29,7 @@ let WebGLRenderer = stampit()
   .init(function(){
     this.scene = new THREE.Scene();
     this.toUpdate = new Set();
+    this.toAnimate = new Set();
     this.renderer = new THREE.WebGLRenderer({canvas: this.canvas, alpha: true});
     this.width = this.renderer.domElement.offsetWidth;
     this.height = this.renderer.domElement.offsetHeight;
