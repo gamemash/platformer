@@ -4,7 +4,7 @@ let AnimatedSprite = require('./animated_sprite.js');
 let THREE = require('three');
 let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
-let Animation = require('./animation.js');
+let {BumpAnimation} = require('./animations.js')
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -49,23 +49,6 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
     spriteLayout: new THREE.Vector2( 3, 1)
   });
 
-let BumpAnimation = stampit.compose(Animation)
-  .refs({
-    speed: 5,
-    amplitude: 0.5,
-  })
-  .methods({
-    
-    handleStop: function() {
-      this.subject.position.copy(this.startPosition);
-    },
-    handleAnimation: function(dt) {
-      this.subject.position.y = this.startPosition.y + Math.sin(this.time * Math.PI * this.speed) * this.amplitude;
-    },
-    handleStart: function() {
-      this.startPosition = this.subject.position.clone();
-    }
-  })
 
 let Brick = stampit.compose(Sprite, Collidable)
     .refs({
