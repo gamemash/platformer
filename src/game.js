@@ -11,6 +11,7 @@ var Game = stampit()
   .methods({
     start: function(){
       this.gameloop();
+      gameState.togglePause();
     },
     loadLevel: function(level){
       this.level = level;

@@ -4,6 +4,7 @@ let AnimatedSprite = require('./animated_sprite.js');
 let THREE = require('three');
 let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
+let Animation = require('./animation.js');
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -48,16 +49,28 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
     spriteLayout: new THREE.Vector2( 3, 1)
   });
 
+//let BumpAnimation = stampit.compose(Animation)
+
 let Brick = stampit.compose(Sprite, Collidable)
-            .refs({ texture: 'brick.png' })
-            .methods({
-              collided: function(entity, direction) {
-                if(direction == "below") {
-                  sounds.breakBlock.currentTime = 0;
-                  sounds.breakBlock.play();
-                }
-              }
-            });
+    .refs({
+      bumptime: 0,
+      texture: 'brick.png'
+    })
+    .methods({
+      bump: function(){
+        if (this.bumptime < 0.4){
+          this.position.y += Math.sin(bumptime);
+          this.bumptime = 0;
+        }
+      },
+      collided: function(entity, direction) {
+        if(direction == "below") {
+          sounds.breakBlock.currentTime = 0;
+          sounds.breakBlock.play();
+          Animation.create({game: this.game, subject: this});
+        }
+      }
+    });
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
