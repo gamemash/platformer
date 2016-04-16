@@ -51436,9 +51436,19 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
     spriteLayout: new THREE.Vector2( 3, 1)
   });
 
+let Brick = stampit.compose(Sprite, Collidable)
+            .refs({ texture: 'brick.png' })
+            .methods({
+              collided: function(entity, direction) {
+                if(direction == "below") {
+                  sounds.breakBlock.currentTime = 0;
+                  sounds.breakBlock.play();
+                }
+              }
+            });
+
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
-let Brick           = stampit.compose(Sprite, Collidable).refs({ texture: 'brick.png' });
 let PipeTopLeft     = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
 let PipeTopRight    = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
 let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
@@ -51576,7 +51586,7 @@ let Entity = stampit()
       let pos = [0, 1, -1];
       if (this.velocity.y < 0) {
         for (let i = 0; i < 3; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] + pos[i], position[1] - 1);
+          let block = PhysicsEngine.checkPosition(position[0], position[1] - 1);
           if (block && PhysicsEngine.boundingBox(this, block)){
             this.collided(block, 'below');
             block.collided(this, 'above');
@@ -51584,13 +51594,10 @@ let Entity = stampit()
           }
         }
       } else if (this.velocity.y > 0) {
-        for (let i = 0; i < 1; i += 1){
-          let block = PhysicsEngine.checkPosition(position[0] + pos[i], position[1] + this.size.y);
-          if (block && PhysicsEngine.boundingBox(this, block)){
-            this.collided(block, 'above');
-            block.collided(this, 'below');
-            break;
-          }
+        let block = PhysicsEngine.checkPosition(position[0], position[1] + this.size.y);
+        if (block && PhysicsEngine.boundingBox(this, block)){
+          this.collided(block, 'above');
+          block.collided(this, 'below');
         }
       }
       if (this.velocity.x > 0) {
@@ -52199,7 +52206,7 @@ let Level1_1 = stampit.compose(Level)
   .methods({
     loadEntities: function(game){
       for(var i=-2; i<3; i++) {
-        let goom = Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 6)})
+        let goom = Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 7)})
         game.entities.push(goom);
       }
     }
@@ -52633,6 +52640,7 @@ var kick = new Audio('sounds/smb_kick.wav');
 var stomp = new Audio('sounds/smb_stomp.wav');
 var die = new Audio('sounds/smb_mariodie.wav');
 var stageClear = new Audio('sounds/smb_stage_clear.wav');
+var breakBlock = new Audio('sounds/smb_breakblock.wav');
 
 module.exports = {
   pauseSound: pauseSound,
@@ -52642,7 +52650,8 @@ module.exports = {
   kick: kick,
   die: die,
   stomp: stomp,
-  stageClear: stageClear
+  stageClear: stageClear,
+  breakBlock: breakBlock
 }
 },{}],75:[function(require,module,exports){
 let stampit = require('stampit');
