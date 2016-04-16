@@ -13,7 +13,7 @@ void main(){
     position = vec2(1.0 - textureCoord.x, textureCoord.y);
   } 
 
-  vec4 result = texture2D(texture1, (position / tileSize  + spritePosition) / spriteLayout );
+  vec4 result = texture2D(texture1, (position * tileSize + spritePosition ) / spriteLayout );
   if (result.w < 0.01)
     discard;
   gl_FragColor = result;
