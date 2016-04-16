@@ -7,6 +7,7 @@ let Entity = require('./entity.js');
 let Collidable = require('./collidable.js');
 let Debug = require('./debug.js');
 let SimpleAI = require('./simple_ai.js');
+let sounds = require('./sounds.js');
 let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
 
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
@@ -27,13 +28,31 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
       this.velocity.set(0, 0);
       this.animationState = 'dead';
       setTimeout((function(){
-        this.delete();
+        this.remove();
       }.bind(this)),1000);
     }
   })
   .init(function(){
     this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
     this.material.uniforms['spritePosition'] = {type: 'v2', value: new THREE.Vector2( 0, 0) };
+    this.collisionsWithMario = this.collisionStream.filter((x) => {return (x.entity.name == "MARIO")})
+
+    this.collisionsWithMario
+        .filter((x) => {return (x.direction == "above")})
+        .onValue(function(collision) {
+          if (!this.dead) {
+            this.die();
+            collision.entity.killed(this);
+            collision.entity.velocity.y = 17;
+            sounds.stomp.play();
+          }
+        }.bind(this));
+
+    this.collisionsWithMario
+        .filter((x) => {return (x.direction != "above")})
+        .onValue(function(collision) {
+          collision.entity.die();
+        });
   });
 
 let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
@@ -44,6 +63,18 @@ let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
   })
   .init(function(){
     NewMushroomAnimation.create({game: this.game, subject: this});
+    this.collisionStream
+        .filter((x) => {return (x.entity.name == "MARIO")})
+        .onValue(function(collision) {
+          console.log("collide");
+          // TODO: Refactor this somehow?
+          // modules need to register 'cleanup' callbacks
+          // to a 'cleanupable' component?
+          sounds.powerUp.play();
+          this.delete(); // Updateable
+          this.remove(); // Entity
+          collision.entity.grow();
+        }.bind(this))
   });
 
 module.exports = {

@@ -3,16 +3,17 @@ let Sprite = require('./sprite.js');
 let AnimatedSprite = require('./animated_sprite.js');
 let THREE = require('three');
 let Collidable = require('./collidable.js');
+let StaticCollidable = require('./static_collidable.js');
 let sounds = require('./sounds.js');
 let {BumpAnimation, BrickAnimation} = require('./animations.js')
 let {Goomba, Mushroom} = require('./enemies.js')
 
-let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
-let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
-let PipeTopLeft     = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
-let PipeTopRight    = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
-let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
-let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
+let Ground          = stampit.compose(Sprite, StaticCollidable).refs({ name: 'ground', texture: 'ground.png' });
+let Block           = stampit.compose(Sprite, StaticCollidable).refs({ texture: 'block.png' })
+let PipeTopLeft     = stampit.compose(Sprite, StaticCollidable).refs({ texture: 'pipe_top_left.png' });
+let PipeTopRight    = stampit.compose(Sprite, StaticCollidable).refs({ texture: 'pipe_top_right.png' });
+let PipeBottomLeft  = stampit.compose(Sprite, StaticCollidable).refs({ texture: 'pipe_bottom_left.png' });
+let PipeBottomRight = stampit.compose(Sprite, StaticCollidable).refs({ texture: 'pipe_bottom_right.png' });
 
 let MushroomBlockAnimation = stampit.compose(BumpAnimation)
   .methods({
@@ -25,7 +26,7 @@ let MushroomBlockAnimation = stampit.compose(BumpAnimation)
   });
 
 
-let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
+let ItemBlock = stampit.compose(AnimatedSprite, StaticCollidable)
   .refs({
     texture: 'item_block.png',
     animationState: "blinking",
@@ -45,10 +46,9 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
     collided: function(entity, direction) {
       if(direction == "below") {
         console.log("I should produce an item! ^.^");
-        sounds.coin.currentTime = 0;
-        sounds.coin.play();
+        sounds.powerUpAppears.currentTime = 0;
+        sounds.powerUpAppears.play();
 
-        
         this.game.renderer.deleteFromScene(this.mesh);
         let block = Block.create({game: this.game, position: this.position.clone() });
         MushroomBlockAnimation.create({game: this.game, subject: block});
@@ -56,7 +56,7 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
     }
   });
 
-let Coin = stampit.compose(AnimatedSprite, Collidable)
+let Coin = stampit.compose(AnimatedSprite, StaticCollidable)
   .refs({
     texture: 'coin.png',
     animationState: "blinking",
@@ -74,7 +74,7 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
   });
 
 
-let Brick = stampit.compose(Sprite, Collidable)
+let Brick = stampit.compose(Sprite, StaticCollidable)
     .refs({
       bumptime: 0,
       texture: 'brick.png'

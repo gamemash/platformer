@@ -5,7 +5,6 @@ let Debug = require('./debug.js');
 
 let Entity = stampit()
   .methods({
-    collided: function(block, direction){ },
     remove: function(){
       this.game.renderer.deleteFromScene(this.mesh);
       this.mesh.geometry.dispose();
@@ -13,6 +12,7 @@ let Entity = stampit()
       this.game.entities.delete(this);
     },
     updateCollisions: function(dt){
+      // Collisions with static collidables
       if (this.velocity == undefined) return;
       let position = [Math.round(this.oldPosition.x), Math.round(this.oldPosition.y)];
       this.onGround = false;
@@ -53,6 +53,38 @@ let Entity = stampit()
         }
       }
 
+      // Collisions with other entities
+
+      for(let entity of this.game.entities) {
+        if (entity == this) return; // don't collide with yourself
+        if (this.velocity == undefined) return;
+        let position = [Math.round(this.oldPosition.x), Math.round(this.oldPosition.y)];
+        if (this.velocity.y < 0) {
+          if (PhysicsEngine.boundingBox(this, entity)){
+            this.collided(entity, 'below');
+            entity.collided(this, 'above');
+            break;
+          }
+        } else if (this.velocity.y > 0) {
+          if (PhysicsEngine.boundingBox(this, entity)){
+            this.collided(entity, 'above');
+            entity.collided(this, 'below');
+          }
+        }
+        if (this.velocity.x > 0) {
+          if (PhysicsEngine.boundingBox(this, entity)){
+            this.collided(entity, 'right');
+            entity.collided(this, 'left');
+            break;
+          }
+        } else if (this.velocity.x < 0) {
+          if (PhysicsEngine.boundingBox(this, entity)){
+            this.collided(entity, 'left');
+            entity.collided(this, 'right');
+            break;
+          }
+        }
+      }
     }
   }).
   init(function(){

@@ -1,32 +1,35 @@
 let stampit = require('stampit');
+let Collidable = require('./collidable.js')
 let THREE = require('three');
 
-let SimpleAI = stampit()
+let SimpleAI = stampit().compose(Collidable)
   .refs({
     walkSpeed: 1,
     onGround: false,
     dead: false
   })
-  .methods({
-    collided: function(block, direction){
+  .init(function(){
+    this.collisionStream.onValue(function(collision) {
+      let entity = collision.entity;
+      let direction = collision.direction;
+
       switch(direction){
         case 'left':
-          this.position.x = block.position.x + block.size.x;
+          this.position.x = entity.position.x + entity.size.x;
           this.velocity.x = -this.velocity.x;
           break;
         case 'right':
-          this.position.x = block.position.x - block.size.x;
+          this.position.x = entity.position.x - entity.size.x;
           this.velocity.x = -this.velocity.x;
           break;
         case 'below':
-          this.position.y = block.position.y + block.size.y;
+          this.position.y = entity.position.y + entity.size.y;
           this.velocity.y = 0;
           this.onGround = true;
           break;
-      }
-    },
-  })
-  .init(function(){
+       }
+    }.bind(this));
+
     this.velocity.x = -this.walkSpeed;
 
     this.registerUpdateCallback(function(dt) {

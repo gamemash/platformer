@@ -3,6 +3,8 @@ let THREE = require('three');
 let AnimatedSprite = require('./animated_sprite.js');
 let Debug = require('./debug.js');
 let SpriteGeometry = require('./sprite_geometry.js');
+let Collidable = require('./collidable.js');
+let Entity = require('./entity.js');
 
 let Mario = stampit.compose(AnimatedSprite)
   .refs({
