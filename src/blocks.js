@@ -112,7 +112,7 @@ let CoinBlock = stampit.compose(ItemBlock)
   });
 
 
-let Coin = stampit.compose(AnimatedSprite, Collidable)
+let Coin = stampit.compose(AnimatedSprite)
   .refs({
     texture: 'coin.png',
     animationState: "blinking",
