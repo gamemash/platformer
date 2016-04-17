@@ -13,6 +13,7 @@ let GrowAnimation = stampit.compose(Animation)
   .methods({
     handleStop: function() {
       this.subject.animated = true;
+      this.game.renderer.updating = true;
       this.subject.uniforms.tileSize.value = this.subject.size = new THREE.Vector2(1, 2);
       this.subject.uniforms.spriteSize.value = this.subject.spriteSize = new THREE.Vector2(1, 2);
       this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 2, 1);
@@ -35,6 +36,7 @@ let GrowAnimation = stampit.compose(Animation)
     },
     handleStart: function() {
       this.subject.animated = false;
+      this.game.renderer.updating = false;
       this.subjectSize = this.subject.size.y;
       this.big = true;
       this.timeSinceAnimation = 0;

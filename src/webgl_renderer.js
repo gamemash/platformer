@@ -9,9 +9,12 @@ let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBo
 let WebGLRenderer = stampit()
   .methods({
     render: function(dt){
-      for (let item of this.toUpdate) {
-        item.updateSprite(dt);
-      };
+
+      if (this.updating){
+        for (let item of this.toUpdate) {
+          item.updateSprite(dt);
+        };
+      }
 
       for (let item of this.toAnimate) {
         item.updateAnimation(dt);
@@ -27,6 +30,7 @@ let WebGLRenderer = stampit()
     }
   })
   .init(function(){
+    this.updating = true;
     this.scene = new THREE.Scene();
     this.toUpdate = new Set();
     this.toAnimate = new Set();
