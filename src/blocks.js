@@ -162,13 +162,12 @@ module.exports = {
   ItemBlock: ItemBlock,
   CoinBlock: CoinBlock,
   Ground: Ground,
-  Block: Block,
   Brick: Brick,
-  PipeBottomRight: PipeBottomRight,
-  PipeBottomLeft: PipeBottomLeft,
-  PipeTopRight: PipeTopRight,
-  PipeTopLeft: PipeTopLeft,
-  Coin: Coin,
   Tile: Tile,
+  PipeBottomLeft: PipeBottomLeft,
+  PipeBottomRight: PipeBottomRight,
+  PipeTopLeft: PipeTopLeft,
+  PipeTopRight: PipeTopRight,
+  Coin: Coin,
   Castle: Castle
 }

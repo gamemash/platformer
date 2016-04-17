@@ -14,6 +14,7 @@ function convertToGridCoordinatesForRenderer(renderer, pixelCoordinates) {
 
 let LevelEditor = stampit
   .init(function(){
+    this.selectedBlock = Blocks.Ground;
     this.selector = Selector.create({game: this.game, position: new THREE.Vector2(0, 0)});
     let convertToGridCoordinates = convertToGridCoordinatesForRenderer.bind(this, this.game.renderer);
     let mouseMoveGridStream = mouseMoveStream.map(convertToGridCoordinates);
@@ -27,18 +28,41 @@ let LevelEditor = stampit
       .merge(dragPositionStream)
       .skipDuplicates(_.isEqual)
       .onValue((coordinates) => {
-        let block = Block.create({game: this.game, position: coordinates });
+        let block = this.selectedBlock.create({game: this.game, position: coordinates });
       });
 
-    document.getElementById('toolbox');
+    let toolbox = document.getElementById('toolbox');
 
     for (var key in Blocks) {
       if (Blocks.hasOwnProperty(key)) {
         element = document.createElement("div");
+        element.className = "block";
+
+        if (key == "Ground") {
+          element.className += " selected";
+        }
+
+        element.id = key;
+        // element.innerHTML = key;
+        toolbox.appendChild(element);
+        element.addEventListener("click", (evt) => {
+          this.selectBlock(evt.target.id);
+          let blockButtons = document.querySelectorAll(".block");
+
+          _.each(blockButtons, (button) => {
+            button.className = "block"
+          });
+
+          evt.target.className += " selected"
+        });
       }
     }
 
   })
-  .methods()
+  .methods({
+    selectBlock: function(id) {
+      this.selectedBlock = Blocks[id];
+    }
+  })
 
 module.exports = LevelEditor;
