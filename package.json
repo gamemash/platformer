@@ -13,6 +13,7 @@
     "kefir": "^3.2.1",
     "request-promise": "^2.0.1",
     "stampit": "^2.1.1",
-    "three": "^0.75.0"
+    "three": "^0.75.0",
+    "underscore": "^1.8.3"
   }
 }

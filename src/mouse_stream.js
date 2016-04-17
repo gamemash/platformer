@@ -11,8 +11,12 @@ var mouseMoveStream = Kefir.stream(emitter => {
 });
 
 var mouseClickStream = Kefir.stream(emitter => {
-  mouseState.addClickListener(function(x,y) {
-    emitter.emit([x,y])
+  mouseState.addMousedownListener(function(x,y) {
+    emitter.emit(true);
+  });
+
+  mouseState.addMouseupListener(function(x,y) {
+    emitter.emit(false);
   });
 });
 
