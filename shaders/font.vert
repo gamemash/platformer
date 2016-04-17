@@ -11,7 +11,7 @@ void main() {
   if (fixedPosition == 0){ 
     pixelPosition = pixelPosition + cameraPosition.xy;
   }
-  pixelPosition = pixelPosition * 32.0;
+  pixelPosition = pixelPosition * 64.0;
   gl_Position = vec4(pixelPosition / screenSize - 1.0, 0.0, 1.0);
   textureCoord = floor(correctedPosition + 0.5);
 }
