@@ -19,6 +19,15 @@ let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_
 let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
 let Tile            = stampit.compose(Sprite, Collidable).refs({ texture: 'tile.png' });
 
+let MushroomBlockAnimation = stampit.compose(BumpAnimation)
+  .methods({
+    handleStop: function(){
+      let shroomPosition = this.subject.position.clone();
+      shroomPosition.y += 1;
+      Mushroom.create({game: this.game, position: shroomPosition })
+      Block.create({game: this.game, position: this.subject.position.clone() })
+    }
+  });
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({

@@ -28,16 +28,22 @@ h1 {
 
 #game-wrapper {
   width: 100%;
-  height: 512px;
-  border-top: 1px solid #555;
-  border-bottom: 1px solid #555;
+
   margin-bottom: 15px;
   position: relative;
-  background-color: #111;
+  background-color: #333;
+}
+
+#toolbox {
+  height: 64px;
+  width: 85%;
+  margin: auto;
+  background-color: #222;
 }
 
 #game-canvas {
-  width: 100%;
+  width: 85%;
+  margin-left: 7.5%;
   height: 512px;
   background-color: #5c94fc;
   transition: opacity 0.2s;
