@@ -19,6 +19,10 @@ let CustomShader = stampit()
       this.material.uniforms.texture1 = { type: "t", value: texture };
       this.material.needsUpdate = true;
     },
+    updateUniforms: function(){
+      this.material.uniforms = this.uniforms;
+      this.material.needsUpdate = true;
+    },
     setupCustomShader: function(){
       this.material = new THREE.ShaderMaterial();
       this.material.uniforms = this.uniforms;

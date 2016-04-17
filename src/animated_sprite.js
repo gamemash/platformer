@@ -33,6 +33,7 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
     this.spriteLayout = new THREE.Vector2(0, 0).fromArray(this.spriteLayout);
     this.spritePosition = new THREE.Vector2(0, 0).fromArray(this.spritePosition);
     this.size = new THREE.Vector2(1, 1);
+    this.spriteSize = new THREE.Vector2(1, 1);
 
     this.frame = 0;
     this.timeElapsed = 0;
@@ -41,6 +42,7 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
       tileLocation: { type: "v2", value: this.position },
       screenSize: {type: "v2", value: this.game.renderer.screenSize},
       tileSize: {type: "v2", value: this.size },
+      spriteSize: {type: "v2", value: this.spriteSize },
       spriteLayout: {type: "v2", value: this.spriteLayout },
       spritePosition: {type: "v2", value: this.spritePosition },
       fixedPosition: {type: "i", value: this.fixed}
