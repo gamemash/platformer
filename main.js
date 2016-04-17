@@ -29,28 +29,25 @@ this.game = game;
 
 let selector = Selector.create({game: game, position: new THREE.Vector2(0, 0)});
 
-function convertToGridCoordinates(coordArray) {
-  let newCoordArray = []
-  newCoordArray[0] = Math.floor((coordArray[0] / 32)- renderer.camera.position.x);
-  newCoordArray[1] = Math.floor(coordArray[1] / 32);
-  return newCoordArray;
+function convertToGridCoordinates(pixelCoordinates) {
+  let newCoordinates = new THREE.Vector2()
+  newCoordinates.x = Math.floor((pixelCoordinates.x / 32)- renderer.camera.position.x);
+  newCoordinates.y = Math.floor(pixelCoordinates.y / 32);
+  return newCoordinates;
 }
 
 let mouseMoveGridStream = mouseMoveStream.map(convertToGridCoordinates);
 
-mouseMoveGridStream.onValue((coordArray) => {
-  selector.moveTo(coordArray[0],coordArray[1]);
-});
+mouseMoveGridStream.onValue(selector.moveToCoordinates.bind(selector));
 
 let clickPositionStream = mouseMoveGridStream.sampledBy(mouseClickStream.filter((x) => {return x}));
 let dragPositionStream = mouseMoveStream.map(convertToGridCoordinates).filterBy(mouseClickStream);
 
 clickPositionStream
-           .merge(dragPositionStream)
-           .skipDuplicates(_.isEqual)
-           .onValue((coordArray) => {
-  let position = new THREE.Vector2(coordArray[0], coordArray[1]);
-  let block = Block.create({game: this.game, position: position });
-});
+  .merge(dragPositionStream)
+  .skipDuplicates(_.isEqual)
+  .onValue((coordinates) => {
+    let block = Block.create({game: this.game, position: coordinates });
+  });
 
 game.start();

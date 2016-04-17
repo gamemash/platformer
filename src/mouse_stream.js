@@ -1,12 +1,13 @@
 let MouseState = require("./mouse_state.js");
 let Kefir = require('kefir');
-let sounds = require('./sounds')
+let sounds = require('./sounds');
+let THREE = require('three');
 
 let mouseState = MouseState.create({canvasId: "game-canvas"});
 
 var mouseMoveStream = Kefir.stream(emitter => {
   mouseState.addMoveListener(function(x,y) {
-    emitter.emit([x,y])
+    emitter.emit(new THREE.Vector2(x,y))
   });
 });
 
