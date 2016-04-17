@@ -15,7 +15,9 @@ void main(){
   } 
 
   vec4 result = texture2D(texture1, (position * spriteSize + spritePosition ) / spriteLayout );
-  if (result.w < 0.01)
+  if (result.w < 0.01){
     discard;
-  gl_FragColor = result;
+  } else {
+    gl_FragColor = result;
+  }
 }
