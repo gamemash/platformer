@@ -134,6 +134,8 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
     collided: function(entity, direction) {
       sounds.coin.currentTime = 0;
       sounds.coin.play();
+      entity.score += 50
+      entity.stateChanged();
       this.remove();
     }
   });
