@@ -7,6 +7,7 @@ let Entity = require('./entity.js');
 let Collidable = require('./collidable.js');
 let Debug = require('./debug.js');
 let SimpleAI = require('./simple_ai.js');
+let sounds = require('./sounds.js');
 let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
 
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
@@ -22,18 +23,37 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
     walkSpeed: 3
   })
   .methods({
-    die: function(){
+    die: function(killer){
+      if (!this.dead){
+        killer.killed(this);
+        killer.velocity.y = 17;
+        sounds.stomp.play();
+
+        this.velocity.set(0, 0);
+        this.animationState = 'dead';
+        setTimeout((function(){
+          this.remove();
+        }.bind(this)),1000);
+      }
       this.dead = true;
-      this.velocity.set(0, 0);
-      this.animationState = 'dead';
-      setTimeout((function(){
-        this.delete();
-      }.bind(this)),1000);
     }
   })
   .init(function(){
     this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
     this.material.uniforms['spritePosition'] = {type: 'v2', value: new THREE.Vector2( 0, 0) };
+
+    function isMario(collision) { return (collision.entity.name == "MARIO"); }
+    function cameFromAbove(collision){ return (collision.direction == "above"); }
+    function didntComeFromAbove(collision){ return ! cameFromAbove(collision); }
+
+    this.collisionsWithMario = this.collisionStream.filter(isMario)
+
+    this.collisionsWithMario.filter(cameFromAbove)
+        .onValue((collision) => { this.die(collision.entity); });
+
+    this.collisionsWithMario.filter(didntComeFromAbove).onValue(function(collision) {
+      // collision.entity.die();
+    });
   });
 
 let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
@@ -44,6 +64,17 @@ let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
   })
   .init(function(){
     NewMushroomAnimation.create({game: this.game, subject: this});
+    this.collisionStream
+        .filter((x) => {return (x.entity.name == "MARIO")})
+        .onValue(function(collision) {
+          // TODO: Refactor this somehow?
+          // modules need to register 'cleanup' callbacks
+          // to a 'cleanupable' component?
+          sounds.powerUp.play();
+          this.delete(); // Updateable
+          this.remove(); // Entity
+          collision.entity.grow();
+        }.bind(this))
   });
 
 module.exports = {

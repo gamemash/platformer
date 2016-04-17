@@ -5,9 +5,10 @@ let {jumpStream, inputState} = require("./input_stream.js");
 let sounds = require('./sounds.js');
 let Entity = require('./entity.js');
 let Debug = require('./debug.js');
+let Collidable = require('./collidable.js');
 
 let scale = 300; //pixel to reality ratio
-let Player1 = stampit.compose(Mario, Entity)
+let Player1 = stampit.compose(Mario, Entity, Collidable)
   .refs({
     name: "MARIO",
     groundResistance: 3.6,
@@ -59,6 +60,15 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     }.bind(this));
 
+    this.collisionStream.onValue(function(x) {
+      let direction = x.direction;
+      let block = x.entity;
+
+      if (this.onGround){
+        this.streak = 0;
+      }
+    }.bind(this));
+
   })
   .methods({
     killed: function(entity){
@@ -86,31 +96,6 @@ let Player1 = stampit.compose(Mario, Entity)
       this.dead = true;
     },
 
-    collided: function(block, direction){
-      switch(direction){
-        case 'above':
-          this.position.y = block.position.y - this.size.y;
-          this.velocity.y = 0;
-          this.timeSinceJump = this.jumpLength;
-          break;
-        case 'below':
-          this.position.y = block.position.y + block.size.y;
-          this.velocity.y = 0;
-          this.onGround = true;
-          break;
-        case 'right':
-          this.position.x = block.position.x - this.size.x;
-          this.velocity.x = 0;
-          break;
-        case 'left':
-          this.position.x = block.position.x + block.size.x;
-          this.velocity.x = 0;
-          break;
-      }
-      if (this.onGround){
-        this.streak = 0;
-      }
-    },
     update: function(dt){
       if (this.dead) {
         this.animationState = "dead";

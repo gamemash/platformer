@@ -1,8 +1,6 @@
 let stampit = require('stampit');
 let THREE = require('three');
 
-
-
 let PhysicsEngine = stampit()
   .refs({
     objects: {},
