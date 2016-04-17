@@ -13,7 +13,6 @@ var Game = stampit()
     start: function(){
       this.gameRules.levelInProgress = true;
       this.gameloop();
-      gameState.togglePause();
     },
     loadLevel: function(level){
       this.level = level;

@@ -12,8 +12,8 @@ let Selector = stampit.compose(Sprite)
     update: function(dt){
     },
     moveTo: function(x, y){
-      this.position.x = x * this.size
-      this.position.y = y * this.size
+      this.position.x = x
+      this.position.y = y
     }
   });
 

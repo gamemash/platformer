@@ -25,14 +25,15 @@ let gui      = Interface.create({game: game, player: player1});
 game.player = player1;
 game.gui = gui;
 
-
-game.start();
-
 let selector = Selector.create({game: game, position: new THREE.Vector2(0, 0)});
 let mouseState = MouseState.create({canvasId: "game-canvas"});
 
 mouseState.addListener(function(x,y) {
-  x = Math.floor(x/32 - renderer.camera.position.x);
-  y = Math.floor(y/32);
+  x = Math.floor((x / 32)- renderer.camera.position.x);
+  y = Math.floor(y / 32);
   selector.moveTo(x,y);
 });
+
+
+game.start();
+
