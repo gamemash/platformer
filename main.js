@@ -11,6 +11,7 @@ let Interface           = require('./src/interface.js');
 let Game                = require('./src/game.js');
 let Level               = require('./src/levels/level_1.js');
 let {Block}             = require('./src/blocks.js');
+let sounds              = require('./src/sounds.js');
 let {inputStream, menuStream, jumpStream, inputState} = require("./src/input_stream.js");
 
 

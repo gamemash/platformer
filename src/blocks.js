@@ -93,6 +93,9 @@ let CoinBlock = stampit.compose(ItemBlock)
         entity.score += 200;
         entity.statsChanged();
 
+        sounds.powerUpAppears.currentTime = 0;
+        sounds.powerUpAppears.play();
+
         let block = this.transformToBlock();
         CoinAnimation.create({game: this.game, subject: block, points: 200});
       }

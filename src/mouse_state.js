@@ -28,7 +28,7 @@ let MouseState = stampit()
       _addEventListener(this.canvas, "mousemove", callback);
     },
     addClickListener: function(callback) {
-      _addEventListener(this.canvas, "click", callback);
+      _addEventListener(this.canvas, "mousedown", callback);
     }
   });
 
