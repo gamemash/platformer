@@ -9,8 +9,8 @@ function _getMousePos(canvas, evt) {
   };
 }
 
-function _addEventListener(canvas, callback){
-  canvas.addEventListener('mousemove', (evt) => {
+function _addEventListener(canvas, event, callback){
+  canvas.addEventListener(event, (evt) => {
     var mousePos = _getMousePos(canvas, evt);
     callback(mousePos.x, mousePos.y)
   }, true);
@@ -24,8 +24,11 @@ let MouseState = stampit()
     this.canvas = document.getElementById(this.canvasId);
   })
   .methods({
-    addListener: function(callback) {
-      _addEventListener(this.canvas, callback);
+    addMoveListener: function(callback) {
+      _addEventListener(this.canvas, "mousemove", callback);
+    },
+    addClickListener: function(callback) {
+      _addEventListener(this.canvas, "click", callback);
     }
   });
 
