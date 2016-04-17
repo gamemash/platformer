@@ -3,39 +3,15 @@ let THREE = require('three');
 let Sprite = require('./sprite.js');
 let Debug = require('./debug.js');
 let Updatable = require('./updatable.js');
+let CustomShader = require('./custom_shader.js');
 
-let SpriteGeometry = require('./sprite_geometry.js');
-let ShaderLoader = require('./shader_loader.js');
-let TextureLoader = require('./texture_loader.js');
-
-let AnimatedSprite = stampit.compose(Updatable)
+let AnimatedSprite = stampit.compose(Updatable, CustomShader)
   .methods({
     duration: function(){
       return this.animations[this.animationState][this.frame].duration;
     },
-    shadersReceived: function(result){
-      this.material.vertexShader = result[0];
-      this.material.fragmentShader = result[1];
-      this.material.needsUpdate = true;
-    },
-    updateMaterial: function(texture){
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      this.material.uniforms.texture1 = { type: "t", value: texture };
-      this.material.needsUpdate = true;
-    },
     gridPosition: function(){
       return [Math.round(this.position.x), Math.round(this.position.y)];
-    },
-    setUniforms: function(){
-      this.material.uniforms = {
-        tileLocation: { type: "v2", value: this.position },
-        screenSize: {type: "v2", value: this.game.renderer.screenSize},
-        tileSize: {type: "v2", value: this.size },
-        spriteLayout: {type: "v2", value: this.spriteLayout },
-        spritePosition: {type: "v2", value: this.spritePosition },
-        fixedPosition: {type: "i", value: this.fixed}
-      };
     }
   })
   .refs({
@@ -47,10 +23,10 @@ let AnimatedSprite = stampit.compose(Updatable)
     animations: {},
     fixed: false,
     size: new THREE.Vector2(1,1),
-    shaders: [
-      ShaderLoader.load('animated.vert'),
-      ShaderLoader.load('animated.frag')
-    ]
+    shaders: {
+      vertexShader: 'animated.vert',
+      fragmentShader: 'animated.frag'
+    }
   })
   .init(function(){
     this.animated = true;
@@ -61,13 +37,16 @@ let AnimatedSprite = stampit.compose(Updatable)
     this.frame = 0;
     this.timeElapsed = 0;
 
-    this.material = new THREE.ShaderMaterial();
-    this.geometry = SpriteGeometry.create();
-    this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
+    this.uniforms = {
+      tileLocation: { type: "v2", value: this.position },
+      screenSize: {type: "v2", value: this.game.renderer.screenSize},
+      tileSize: {type: "v2", value: this.size },
+      spriteLayout: {type: "v2", value: this.spriteLayout },
+      spritePosition: {type: "v2", value: this.spritePosition },
+      fixedPosition: {type: "i", value: this.fixed}
+    };
 
-    TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
-    Promise.all(this.shaders).then(this.shadersReceived.bind(this));
-    this.setUniforms();
+    this.setupCustomShader();
     this.game.renderer.addToScene(this.mesh);
 
     this.registerUpdateCallback(function(dt) {

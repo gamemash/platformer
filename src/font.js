@@ -1,9 +1,7 @@
 let stampit = require('stampit');
 let THREE = require('three');
-let SpriteGeometry = require('./sprite_geometry.js');
-let ShaderLoader = require('./shader_loader.js');
-let TextureLoader = require('./texture_loader.js');
-let Sprite = require('./sprite.js');
+
+let CustomShader = require('./custom_shader.js');
 
 let charMap = [
         ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', 'x', '!'],
@@ -11,16 +9,16 @@ let charMap = [
         ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
       ];
 
-var Font = stampit.compose()
+var Font = stampit.compose(CustomShader)
   .refs({
     spriteLayout: [16, 3],
     spritePosition: [0, 0],
     text: "NO TEXT",
     texture: "font_white.png",
-    shaders: [
-      ShaderLoader.load('font.vert'),
-      ShaderLoader.load('font.frag')
-    ],
+    shaders: {
+      vertexShader: 'font.vert',
+      fragmentShader: 'font.frag'
+    },
     fixed: true,
     fontSize: 2,
     size: new THREE.Vector2(1,1)
@@ -59,17 +57,6 @@ var Font = stampit.compose()
       this.material.uniforms.textLength = { type: "f", value: length };
       this.material.needsUpdate = true;
     },
-    shadersReceived: function(result){
-      this.material.vertexShader = result[0];
-      this.material.fragmentShader = result[1];
-      this.material.needsUpdate = true;
-    },
-    updateMaterial: function(texture){
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      this.material.uniforms.texture1 = { type: "t", value: texture };
-      this.material.needsUpdate = true;
-    },
     gridPosition: function(){
       return [Math.round(this.position.x), Math.round(this.position.y)];
     }
@@ -78,9 +65,7 @@ var Font = stampit.compose()
     console.log("loading font");
     this.spriteLayout = new THREE.Vector2(0, 0).fromArray(this.spriteLayout);
     this.spritePosition = new THREE.Vector2(0, 0).fromArray(this.spritePosition);
-
-    this.material = new THREE.ShaderMaterial();
-    this.material.uniforms = {
+    this.uniforms = {
       fontSize: {type: "f", value: this.fontSize},
       tileLocation: { type: "v2", value: this.position },
       screenSize: {type: "v2", value: this.game.renderer.screenSize},
@@ -89,13 +74,9 @@ var Font = stampit.compose()
       spritePosition: {type: "v2", value: this.spritePosition },
       fixedPosition: {type: "i", value: this.fixed}
     };
-    this.geometry = SpriteGeometry.create();
-    this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
 
-    TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
-    Promise.all(this.shaders).then(this.shadersReceived.bind(this));
+    this.setupCustomShader();
     this.game.renderer.addToScene(this.mesh);
-
     this.setText(this.text);
   });
 
