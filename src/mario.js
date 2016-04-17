@@ -4,6 +4,44 @@ let AnimatedSprite = require('./animated_sprite.js');
 let Debug = require('./debug.js');
 let SpriteGeometry = require('./sprite_geometry.js');
 let ShaderLoader = require('./shader_loader.js');
+let Animation = require('./animation.js');
+
+let GrowAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 1,
+  })
+  .methods({
+    handleStop: function() {
+      this.subject.animated = true;
+      this.subject.uniforms.tileSize.value = this.subject.size = new THREE.Vector2(1, 2);
+      this.subject.uniforms.spriteSize.value = this.subject.spriteSize = new THREE.Vector2(1, 2);
+      this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 2, 1);
+    },
+    handleAnimation: function(dt) {
+      this.timeSinceAnimation += dt;
+      if (this.timeSinceAnimation < this.animationSpeed) return;
+      this.timeSinceAnimation = 0;
+
+      if (this.big){
+        this.subject.uniforms.tileSize.value.y = this.subject.size.y = this.subjectSize + this.time;
+        this.subject.uniforms.spriteSize.value.y = this.subject.spriteSize.y = 1.5;
+        this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 15, 1);
+      } else {
+        this.subject.uniforms.tileSize.value.y = this.subject.size.y = this.subjectSize;
+        this.subject.uniforms.spriteSize.value.y = this.subject.spriteSize.y = this.subjectSize;
+        this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 2, 0);
+      }
+      this.big = !this.big;
+    },
+    handleStart: function() {
+      this.subject.animated = false;
+      this.subjectSize = this.subject.size.y;
+      this.big = true;
+      this.timeSinceAnimation = 0;
+      this.animationSpeed = 0.1;
+    }
+  });
+
 
 let Mario = stampit.compose(AnimatedSprite)
   .refs({
@@ -44,9 +82,7 @@ let Mario = stampit.compose(AnimatedSprite)
       if (!this.superMario){
         console.log("Grow?");
         this.superMario = true;
-        this.uniforms.tileSize.value = this.size = new THREE.Vector2(1, 2);
-        this.uniforms.spriteSize.value = this.spriteSize = new THREE.Vector2(1, 2);
-        this.uniforms.spritePosition.value = this.spritePosition = new THREE.Vector2( 2, 1);
+        GrowAnimation.create({game: this.game, subject: this});
       }
     }
   });

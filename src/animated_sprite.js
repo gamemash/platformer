@@ -52,7 +52,7 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
     this.game.renderer.addToScene(this.mesh);
 
     this.registerUpdateCallback(function(dt) {
-      if (!this.animations[this.animationState]) return;
+      if (!this.animated || !this.animations[this.animationState]) return;
       this.timeElapsed += dt;
       this.frame = this.frame % this.animations[this.animationState].length; // in case animation state changes
 

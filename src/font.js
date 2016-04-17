@@ -62,7 +62,6 @@ var Font = stampit.compose(CustomShader)
     }
   })
   .init(function(){
-    console.log("loading font");
     this.spriteLayout = new THREE.Vector2(0, 0).fromArray(this.spriteLayout);
     this.spritePosition = new THREE.Vector2(0, 0).fromArray(this.spritePosition);
     this.uniforms = {
