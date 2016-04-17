@@ -3,6 +3,7 @@ varying vec2 textureCoord;
 uniform vec2 tileSize;
 uniform vec2 spriteLayout;
 uniform vec2 spritePosition;
+uniform vec2 spriteSize;
 uniform int spriteFlipped;
 
 void main(){
@@ -13,7 +14,7 @@ void main(){
     position = vec2(1.0 - textureCoord.x, textureCoord.y);
   } 
 
-  vec4 result = texture2D(texture1, (position * tileSize + spritePosition ) / spriteLayout );
+  vec4 result = texture2D(texture1, (position * spriteSize + spritePosition ) / spriteLayout );
   if (result.w < 0.01)
     discard;
   gl_FragColor = result;
