@@ -6,10 +6,11 @@ let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
 let Animation = require('./animation.js');
 let {BumpAnimation, BrickAnimation, BreakBrickAnimation} = require('./animations.js')
-let {Goomba} = require('./enemies.js')
 let PointsAnimation = require('./points_animation.js');
 let PhysicsEngine = require('./physics_engine.js');
 let Castle = require('./castle.js');
+let {Goomba, Mushroom} = require('./enemies.js')
+let Entity = require('./entity.js')
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' });
@@ -112,8 +113,9 @@ let CoinBlock = stampit.compose(ItemBlock)
   });
 
 
-let Coin = stampit.compose(AnimatedSprite)
+let Coin = stampit.compose(AnimatedSprite, Collidable)
   .refs({
+    name: "Coin",
     texture: 'coin.png',
     animationState: "blinking",
     animations: {
@@ -125,8 +127,15 @@ let Coin = stampit.compose(AnimatedSprite)
         {id: 0, duration: 0.05}
       ]
     },
-    spritePosition: [2, 0],
-    spriteLayout: [3, 1]
+    spritePosition: new THREE.Vector2( 2, 0),
+    spriteLayout: new THREE.Vector2( 3, 1)
+  })
+  .methods({
+    collided: function(entity, direction) {
+      sounds.coin.currentTime = 0;
+      sounds.coin.play();
+      this.remove();
+    }
   });
 
 

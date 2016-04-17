@@ -21,8 +21,8 @@ let PhysicsEngine = stampit()
     addObject: function(obj){
       this.objects[this.key(obj)] = obj;
     },
-    deleteObject: function(obj){
-      delete this.objects[this.key(obj)];
+    removeObject: function(obj){
+      delete this.objects[this.key(obj)]
     },
     checkPosition: function(x, y){
       let key = x + "x" + y;

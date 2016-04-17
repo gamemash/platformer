@@ -22,6 +22,7 @@ let GameRules = stampit.compose()
     for(let entity of entities) {
       if (entity.dead) continue;
       if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
+        // console.log(entity.name)
         switch(entity.name){
           case 'Goomba':
             if (PhysicsEngine.hitFromAbove(player, entity)){
