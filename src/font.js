@@ -11,11 +11,10 @@ let charMap = [
         ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
       ];
 
-var Font = stampit.compose(Sprite)
+var Font = stampit.compose()
   .refs({
-    spriteLayout: new THREE.Vector2(16, 3),
-    spritePosition: new THREE.Vector2(0, 0),
-    position: new THREE.Vector2(5, 5),
+    spriteLayout: [16, 3],
+    spritePosition: [0, 0],
     text: "NO TEXT",
     texture: "font_white.png",
     shaders: [
@@ -59,10 +58,44 @@ var Font = stampit.compose(Sprite)
       this.material.uniforms.textData = { type: "t", value: dataTexture };
       this.material.uniforms.textLength = { type: "f", value: length };
       this.material.needsUpdate = true;
+    },
+    shadersReceived: function(result){
+      this.material.vertexShader = result[0];
+      this.material.fragmentShader = result[1];
+      this.material.needsUpdate = true;
+    },
+    updateMaterial: function(texture){
+      texture.magFilter = THREE.NearestFilter;
+      texture.minFilter = THREE.NearestFilter;
+      this.material.uniforms.texture1 = { type: "t", value: texture };
+      this.material.needsUpdate = true;
+    },
+    gridPosition: function(){
+      return [Math.round(this.position.x), Math.round(this.position.y)];
     }
   })
   .init(function(){
-    this.material.uniforms.fontSize = {type: "f", value: this.fontSize};
+    console.log("loading font");
+    this.spriteLayout = new THREE.Vector2(0, 0).fromArray(this.spriteLayout);
+    this.spritePosition = new THREE.Vector2(0, 0).fromArray(this.spritePosition);
+
+    this.material = new THREE.ShaderMaterial();
+    this.material.uniforms = {
+      fontSize: {type: "f", value: this.fontSize},
+      tileLocation: { type: "v2", value: this.position },
+      screenSize: {type: "v2", value: this.game.renderer.screenSize},
+      tileSize: {type: "v2", value: this.size },
+      spriteLayout: {type: "v2", value: this.spriteLayout },
+      spritePosition: {type: "v2", value: this.spritePosition },
+      fixedPosition: {type: "i", value: this.fixed}
+    };
+    this.geometry = SpriteGeometry.create();
+    this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
+
+    TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
+    Promise.all(this.shaders).then(this.shadersReceived.bind(this));
+    this.game.renderer.addToScene(this.mesh);
+
     this.setText(this.text);
   });
 

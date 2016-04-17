@@ -7,15 +7,12 @@ let TextureLoader = require('./texture_loader.js');
 let loader = new THREE.TextureLoader();
 let Sprite = stampit()
   .refs({
-    spriteLayout: new THREE.Vector2(1, 1),
-    spritePosition: new THREE.Vector2(0, 0),
-    position: new THREE.Vector2(0, 0),
     fixed: false,
+    size: new THREE.Vector2(1, 1),
     shaders: [
       ShaderLoader.load('tile.vert'),
       ShaderLoader.load('tile.frag')
-    ],
-    size: new THREE.Vector2(1,1)
+    ]
 
   })
   .methods({
@@ -31,24 +28,18 @@ let Sprite = stampit()
       this.material.needsUpdate = true;
     },
     gridPosition: function(){
-      return [Math.round(this.position.x / this.size.x), Math.round(this.position.y / this.size.y)];
+      return [Math.round(this.position.x), Math.round(this.position.y)];
     }
   })
   .init(function(){
+    //this.position = new THREE.Vector2(0, 0);
     this.material = new THREE.ShaderMaterial();
-    if (!this.game){
-      console.log(this);
-    }
     this.material.uniforms = {
       tileLocation: { type: "v2", value: this.position },
-      screenSize: {type: "v2", value: new THREE.Vector2(this.game.renderer.width, this.game.renderer.height) },
-      tileSize: {type: "v2", value: this.size },
-      spriteLayout: {type: "v2", value: this.spriteLayout },
-      spritePosition: {type: "v2", value: this.spritePosition },
-      spriteFlipped: {type: 'i', value: false },
+      screenSize: {type: "v2", value: this.game.renderer.screenSize},
       fixedPosition: {type: "i", value: this.fixed}
     };
-    this.geometry = SpriteGeometry.create({size: this.size});
+    this.geometry = SpriteGeometry.create();
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
 
     TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));

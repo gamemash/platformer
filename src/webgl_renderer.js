@@ -33,6 +33,7 @@ let WebGLRenderer = stampit()
     this.renderer = new THREE.WebGLRenderer({canvas: this.canvas, alpha: true});
     this.width = this.renderer.domElement.offsetWidth;
     this.height = this.renderer.domElement.offsetHeight;
+    this.screenSize = new THREE.Vector2(this.width, this.height);
     this.renderer.setSize(this.width, this.height);
     this.width /= 2;
     this.height /= 2;
