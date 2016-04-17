@@ -42,10 +42,10 @@ let ItemBlock = stampit.compose(AnimatedSprite, StaticCollidable)
     spritePosition: new THREE.Vector2( 2, 0),
     spriteLayout: new THREE.Vector2( 3, 1)
   })
-  .methods({
-    collided: function(entity, direction) {
+  .init(function(){
+    this.collisionStream.onValue((collision) => {
+      let direction = collision.direction;
       if(direction == "below") {
-        console.log("I should produce an item! ^.^");
         sounds.powerUpAppears.currentTime = 0;
         sounds.powerUpAppears.play();
 
@@ -53,7 +53,7 @@ let ItemBlock = stampit.compose(AnimatedSprite, StaticCollidable)
         let block = Block.create({game: this.game, position: this.position.clone() });
         MushroomBlockAnimation.create({game: this.game, subject: block});
       }
-    }
+    });
   });
 
 let Coin = stampit.compose(AnimatedSprite, StaticCollidable)
@@ -79,18 +79,21 @@ let Brick = stampit.compose(Sprite, StaticCollidable)
       bumptime: 0,
       texture: 'brick.png'
     })
+    .init(function(){
+      this.collisionStream.onValue((collision) => {
+        let direction = collision.direction;
+        if(direction == "below") {
+          sounds.breakBlock.currentTime = 0;
+          sounds.breakBlock.play();
+          BrickAnimation.create({game: this.game, subject: this});
+        }
+      });
+    })
     .methods({
       bump: function(){
         if (this.bumptime < 0.4){
           this.position.y += Math.sin(bumptime);
           this.bumptime = 0;
-        }
-      },
-      collided: function(entity, direction) {
-        if(direction == "below") {
-          sounds.breakBlock.currentTime = 0;
-          sounds.breakBlock.play();
-          BrickAnimation.create({game: this.game, subject: this});
         }
       }
     });

@@ -23,13 +23,19 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
     walkSpeed: 3
   })
   .methods({
-    die: function(){
+    die: function(killer){
+      if (!this.dead){
+        killer.killed(this);
+        killer.velocity.y = 17;
+        sounds.stomp.play();
+
+        this.velocity.set(0, 0);
+        this.animationState = 'dead';
+        setTimeout((function(){
+          this.remove();
+        }.bind(this)),1000);
+      }
       this.dead = true;
-      this.velocity.set(0, 0);
-      this.animationState = 'dead';
-      setTimeout((function(){
-        this.remove();
-      }.bind(this)),1000);
     }
   })
   .init(function(){
@@ -43,17 +49,10 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
     this.collisionsWithMario = this.collisionStream.filter(isMario)
 
     this.collisionsWithMario.filter(cameFromAbove)
-        .onValue(function(collision) {
-          if (!this.dead) {
-            this.die();
-            collision.entity.killed(this);
-            collision.entity.velocity.y = 17;
-            sounds.stomp.play();
-          }
-        }.bind(this));
+        .onValue((collision) => { this.die(collision.entity); });
 
     this.collisionsWithMario.filter(didntComeFromAbove).onValue(function(collision) {
-      collision.entity.die();
+      // collision.entity.die();
     });
   });
 
@@ -68,7 +67,6 @@ let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
     this.collisionStream
         .filter((x) => {return (x.entity.name == "MARIO")})
         .onValue(function(collision) {
-          console.log("collide");
           // TODO: Refactor this somehow?
           // modules need to register 'cleanup' callbacks
           // to a 'cleanupable' component?

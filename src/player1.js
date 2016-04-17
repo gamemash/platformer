@@ -64,26 +64,6 @@ let Player1 = stampit.compose(Mario, Entity, Collidable)
       let direction = x.direction;
       let block = x.entity;
 
-      switch(direction){
-        case 'above':
-          this.position.y = block.position.y - this.size.y;
-          this.velocity.y = 0;
-          this.timeSinceJump = this.jumpLength;
-          break;
-        case 'below':
-          this.position.y = block.position.y + block.size.y;
-          this.velocity.y = 0;
-          this.onGround = true;
-          break;
-        case 'right':
-          this.position.x = block.position.x - this.size.x;
-          this.velocity.x = 0;
-          break;
-        case 'left':
-          this.position.x = block.position.x + block.size.x;
-          this.velocity.x = 0;
-          break;
-      }
       if (this.onGround){
         this.streak = 0;
       }

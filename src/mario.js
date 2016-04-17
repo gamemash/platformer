@@ -41,7 +41,6 @@ let Mario = stampit.compose(AnimatedSprite)
     },
     grow: function(){
       if (!this.superMario){
-        console.log("Grow?");
         this.superMario = true;
         this.size = new THREE.Vector2(1, 2);
         this.material.uniforms['tileSize'] = {type: "v2", value: this.size };
