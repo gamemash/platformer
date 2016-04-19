@@ -60,7 +60,7 @@ h1 {
 }
 
 .block.selected {
-  background-color: #553 !important;
+  background-color: #665 !important;
 }
 
 #Block {
@@ -103,6 +103,10 @@ h1 {
 
 #PipeTopLeft {
   background: url("/images/pipe_top_left.png") no-repeat #333 center;
+}
+
+#Eraser {
+
 }
 
 
