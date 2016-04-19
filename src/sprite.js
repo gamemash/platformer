@@ -25,10 +25,13 @@ let Sprite = stampit.compose(CustomShader)
       fixedPosition: {type: "i", value: this.fixed},
       size: {type: "v2", value: this.size},
       zIndex: {type: "f", value: this.zIndex}
-
     };
     this.setupCustomShader();
+    TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
+    Promise.all(this.shaders).then(this.shadersReceived.bind(this));
+
     this.game.renderer.addToScene(this.mesh);
+    this.meshId = this.mesh.id;
   });
 
 
