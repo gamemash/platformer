@@ -13,7 +13,7 @@ let InvulnerableAnimation = stampit.compose(Animation)
   .methods({
     handleStop: function() {
       this.subject.invulnerable = false;
-      this.subject.uniforms.opacity.value = 1.0;
+      this.subject.setOpacity(1);
     },
     handleAnimation: function(dt) {
       this.timeSinceAnimation += dt;
@@ -21,9 +21,9 @@ let InvulnerableAnimation = stampit.compose(Animation)
       this.timeSinceAnimation = 0;
 
       if (this.opaque){
-        this.subject.uniforms.opacity.value = 1.0;
+        this.subject.setOpacity(1);
       } else {
-        this.subject.uniforms.opacity.value = 0.5;
+        this.subject.setOpacity(0.5);
       }
       this.opaque = !this.opaque;
     },
@@ -45,8 +45,8 @@ let GrowAnimation = stampit.compose(Animation)
       this.subject.animated = true;
       this.game.renderer.updating = true;
       this.subject.uniforms.tileSize.value = this.subject.size = new THREE.Vector2(1, 2);
-      this.subject.uniforms.spriteSize.value = this.subject.spriteSize = new THREE.Vector2(1, 2);
-      this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 2, 1);
+      this.subject.setSpriteSizeY(2);
+      this.subject.setSpritePosition(new THREE.Vector2( 2, 1));
     },
     handleAnimation: function(dt) {
       this.timeSinceAnimation += dt;
@@ -55,12 +55,12 @@ let GrowAnimation = stampit.compose(Animation)
 
       if (this.big){
         this.subject.uniforms.tileSize.value.y = this.subject.size.y = this.subjectSize + this.time;
-        this.subject.uniforms.spriteSize.value.y = this.subject.spriteSize.y = 1.5;
-        this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 15, 1);
+        this.subject.setSpriteSizeY(1.5);
+        this.subject.setSpritePosition(new THREE.Vector2( 15, 1));
       } else {
         this.subject.uniforms.tileSize.value.y = this.subject.size.y = this.subjectSize;
-        this.subject.uniforms.spriteSize.value.y = this.subject.spriteSize.y = this.subjectSize;
-        this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 2, 0);
+        this.subject.setSpriteSizeY(this.subjectSize);
+        this.subject.setSpritePosition(new THREE.Vector2( 2, 0));
       }
       this.big = !this.big;
     },
@@ -83,8 +83,8 @@ let ShrinkAnimation = stampit.compose(Animation)
       this.subject.animated = true;
       this.game.renderer.updating = true;
       this.subject.uniforms.tileSize.value = this.subject.size = new THREE.Vector2(1, 1);
-      this.subject.uniforms.spriteSize.value = this.subject.spriteSize = new THREE.Vector2(1, 1);
-      this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 2, 0);
+      this.subject.setSpriteSizeY(1);
+      this.subject.setSpritePosition(new THREE.Vector2( 2, 0));
     },
     handleAnimation: function(dt) {
       this.timeSinceAnimation += dt;
@@ -93,12 +93,12 @@ let ShrinkAnimation = stampit.compose(Animation)
 
       if (this.big){
         this.subject.uniforms.tileSize.value.y = this.subject.size.y = 2 - this.time;
-        this.subject.uniforms.spriteSize.value.y = this.subject.spriteSize.y = 1.5;
-        this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 15, 1);
+        this.subject.setSpriteSizeY(1.5);
+        this.subject.setSpritePosition(new THREE.Vector2( 15, 1));
       } else {
         this.subject.uniforms.tileSize.value.y = this.subject.size.y = 1;
-        this.subject.uniforms.spriteSize.value.y = this.subject.spriteSize.y = 1;
-        this.subject.uniforms.spritePosition.value = this.subject.spritePosition = new THREE.Vector2( 11, 0);
+        this.subject.setSpriteSizeY(1);
+        this.subject.setSpritePosition(new THREE.Vector2( 11, 0));
       }
       this.big = !this.big;
     },
@@ -150,7 +150,6 @@ let Mario = stampit.compose(AnimatedSprite)
     },
     grow: function(){
       if (!this.superMario){
-        console.log("Grow?");
         this.superMario = true;
         GrowAnimation.create({game: this.game, subject: this});
       }
@@ -160,6 +159,9 @@ let Mario = stampit.compose(AnimatedSprite)
       ShrinkAnimation.create({game: this.game, subject: this});
       this.superMario = false;
     }
+  })
+  .init(function(){
+    this.updateUniforms();
   });
 
 

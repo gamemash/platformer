@@ -21,7 +21,27 @@ let CustomShader = stampit()
     },
     updateUniforms: function(){
       this.material.uniforms = this.uniforms;
+      for (let uniform in this.uniforms){
+        let propertyName = "set" + uniform.charAt(0).toUpperCase() + uniform.slice(1);
+        this.registerUniform(uniform, propertyName);
+        if (this.uniforms[uniform].type == "v2"){ //vector
+          propertyName = "set" + uniform.charAt(0).toUpperCase() + uniform.slice(1) + "X";
+          this.registerUniform(uniform, propertyName, "x");
+          propertyName = "set" + uniform.charAt(0).toUpperCase() + uniform.slice(1) + "Y";
+          this.registerUniform(uniform, propertyName, "y");
+        }
+      }
       this.material.needsUpdate = true;
+    },
+    registerUniform: function(variable, register, property){
+      this[register] = (function(value){
+        this[variable] = value;
+        if (property){
+          this.material.uniforms[variable].value[property] = value;
+        } else {
+          this.material.uniforms[variable].value = value;
+        }
+      }.bind(this));
     },
     setupCustomShader: function(){
       this.material = new THREE.ShaderMaterial();
