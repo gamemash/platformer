@@ -38,7 +38,7 @@ mouseState.addListener(function(x,y) {
   selector.moveTo(x,y);
 });
 
-},{"./src/game.js":56,"./src/game_state_controller.js":59,"./src/input_stream.js":62,"./src/interface.js":63,"./src/levels/level_1.js":66,"./src/mouse_state.js":68,"./src/mouse_stream.js":69,"./src/player1.js":71,"./src/selector.js":72,"./src/webgl_renderer.js":79,"stampit":4,"three":47}],2:[function(require,module,exports){
+},{"./src/game.js":59,"./src/game_state_controller.js":62,"./src/input_stream.js":65,"./src/interface.js":66,"./src/levels/level_1.js":69,"./src/mouse_state.js":71,"./src/mouse_stream.js":72,"./src/player1.js":74,"./src/selector.js":77,"./src/webgl_renderer.js":85,"stampit":44,"three":47}],2:[function(require,module,exports){
 (function (process,global){
 /* @preserve
  * The MIT License (MIT)
@@ -5454,7 +5454,7 @@ module.exports = ret;
 },{"./es5":13}]},{},[4])(4)
 });                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":80}],3:[function(require,module,exports){
+},{"_process":86}],3:[function(require,module,exports){
 /*! Kefir.js v3.2.1
  *  https://github.com/rpominov/kefir
  */
@@ -8759,6 +8759,1297 @@ module.exports = ret;
 
 }));
 },{}],4:[function(require,module,exports){
+var arrayEach = require('../internal/arrayEach'),
+    baseEach = require('../internal/baseEach'),
+    createForEach = require('../internal/createForEach');
+
+/**
+ * Iterates over elements of `collection` invoking `iteratee` for each element.
+ * The `iteratee` is bound to `thisArg` and invoked with three arguments:
+ * (value, index|key, collection). Iteratee functions may exit iteration early
+ * by explicitly returning `false`.
+ *
+ * **Note:** As with other "Collections" methods, objects with a "length" property
+ * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
+ * may be used for object iteration.
+ *
+ * @static
+ * @memberOf _
+ * @alias each
+ * @category Collection
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function} [iteratee=_.identity] The function invoked per iteration.
+ * @param {*} [thisArg] The `this` binding of `iteratee`.
+ * @returns {Array|Object|string} Returns `collection`.
+ * @example
+ *
+ * _([1, 2]).forEach(function(n) {
+ *   console.log(n);
+ * }).value();
+ * // => logs each value from left to right and returns the array
+ *
+ * _.forEach({ 'a': 1, 'b': 2 }, function(n, key) {
+ *   console.log(n, key);
+ * });
+ * // => logs each value-key pair and returns the object (iteration order is not guaranteed)
+ */
+var forEach = createForEach(arrayEach, baseEach);
+
+module.exports = forEach;
+
+},{"../internal/arrayEach":6,"../internal/baseEach":10,"../internal/createForEach":18}],5:[function(require,module,exports){
+/**
+ * Copies the values of `source` to `array`.
+ *
+ * @private
+ * @param {Array} source The array to copy values from.
+ * @param {Array} [array=[]] The array to copy values to.
+ * @returns {Array} Returns `array`.
+ */
+function arrayCopy(source, array) {
+  var index = -1,
+      length = source.length;
+
+  array || (array = Array(length));
+  while (++index < length) {
+    array[index] = source[index];
+  }
+  return array;
+}
+
+module.exports = arrayCopy;
+
+},{}],6:[function(require,module,exports){
+/**
+ * A specialized version of `_.forEach` for arrays without support for callback
+ * shorthands and `this` binding.
+ *
+ * @private
+ * @param {Array} array The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns `array`.
+ */
+function arrayEach(array, iteratee) {
+  var index = -1,
+      length = array.length;
+
+  while (++index < length) {
+    if (iteratee(array[index], index, array) === false) {
+      break;
+    }
+  }
+  return array;
+}
+
+module.exports = arrayEach;
+
+},{}],7:[function(require,module,exports){
+var baseCopy = require('./baseCopy'),
+    keys = require('../object/keys');
+
+/**
+ * The base implementation of `_.assign` without support for argument juggling,
+ * multiple sources, and `customizer` functions.
+ *
+ * @private
+ * @param {Object} object The destination object.
+ * @param {Object} source The source object.
+ * @returns {Object} Returns `object`.
+ */
+function baseAssign(object, source) {
+  return source == null
+    ? object
+    : baseCopy(source, keys(source), object);
+}
+
+module.exports = baseAssign;
+
+},{"../object/keys":41,"./baseCopy":9}],8:[function(require,module,exports){
+var arrayCopy = require('./arrayCopy'),
+    arrayEach = require('./arrayEach'),
+    baseAssign = require('./baseAssign'),
+    baseForOwn = require('./baseForOwn'),
+    initCloneArray = require('./initCloneArray'),
+    initCloneByTag = require('./initCloneByTag'),
+    initCloneObject = require('./initCloneObject'),
+    isArray = require('../lang/isArray'),
+    isObject = require('../lang/isObject');
+
+/** `Object#toString` result references. */
+var argsTag = '[object Arguments]',
+    arrayTag = '[object Array]',
+    boolTag = '[object Boolean]',
+    dateTag = '[object Date]',
+    errorTag = '[object Error]',
+    funcTag = '[object Function]',
+    mapTag = '[object Map]',
+    numberTag = '[object Number]',
+    objectTag = '[object Object]',
+    regexpTag = '[object RegExp]',
+    setTag = '[object Set]',
+    stringTag = '[object String]',
+    weakMapTag = '[object WeakMap]';
+
+var arrayBufferTag = '[object ArrayBuffer]',
+    float32Tag = '[object Float32Array]',
+    float64Tag = '[object Float64Array]',
+    int8Tag = '[object Int8Array]',
+    int16Tag = '[object Int16Array]',
+    int32Tag = '[object Int32Array]',
+    uint8Tag = '[object Uint8Array]',
+    uint8ClampedTag = '[object Uint8ClampedArray]',
+    uint16Tag = '[object Uint16Array]',
+    uint32Tag = '[object Uint32Array]';
+
+/** Used to identify `toStringTag` values supported by `_.clone`. */
+var cloneableTags = {};
+cloneableTags[argsTag] = cloneableTags[arrayTag] =
+cloneableTags[arrayBufferTag] = cloneableTags[boolTag] =
+cloneableTags[dateTag] = cloneableTags[float32Tag] =
+cloneableTags[float64Tag] = cloneableTags[int8Tag] =
+cloneableTags[int16Tag] = cloneableTags[int32Tag] =
+cloneableTags[numberTag] = cloneableTags[objectTag] =
+cloneableTags[regexpTag] = cloneableTags[stringTag] =
+cloneableTags[uint8Tag] = cloneableTags[uint8ClampedTag] =
+cloneableTags[uint16Tag] = cloneableTags[uint32Tag] = true;
+cloneableTags[errorTag] = cloneableTags[funcTag] =
+cloneableTags[mapTag] = cloneableTags[setTag] =
+cloneableTags[weakMapTag] = false;
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objToString = objectProto.toString;
+
+/**
+ * The base implementation of `_.clone` without support for argument juggling
+ * and `this` binding `customizer` functions.
+ *
+ * @private
+ * @param {*} value The value to clone.
+ * @param {boolean} [isDeep] Specify a deep clone.
+ * @param {Function} [customizer] The function to customize cloning values.
+ * @param {string} [key] The key of `value`.
+ * @param {Object} [object] The object `value` belongs to.
+ * @param {Array} [stackA=[]] Tracks traversed source objects.
+ * @param {Array} [stackB=[]] Associates clones with source counterparts.
+ * @returns {*} Returns the cloned value.
+ */
+function baseClone(value, isDeep, customizer, key, object, stackA, stackB) {
+  var result;
+  if (customizer) {
+    result = object ? customizer(value, key, object) : customizer(value);
+  }
+  if (result !== undefined) {
+    return result;
+  }
+  if (!isObject(value)) {
+    return value;
+  }
+  var isArr = isArray(value);
+  if (isArr) {
+    result = initCloneArray(value);
+    if (!isDeep) {
+      return arrayCopy(value, result);
+    }
+  } else {
+    var tag = objToString.call(value),
+        isFunc = tag == funcTag;
+
+    if (tag == objectTag || tag == argsTag || (isFunc && !object)) {
+      result = initCloneObject(isFunc ? {} : value);
+      if (!isDeep) {
+        return baseAssign(result, value);
+      }
+    } else {
+      return cloneableTags[tag]
+        ? initCloneByTag(value, tag, isDeep)
+        : (object ? value : {});
+    }
+  }
+  // Check for circular references and return its corresponding clone.
+  stackA || (stackA = []);
+  stackB || (stackB = []);
+
+  var length = stackA.length;
+  while (length--) {
+    if (stackA[length] == value) {
+      return stackB[length];
+    }
+  }
+  // Add the source value to the stack of traversed objects and associate it with its clone.
+  stackA.push(value);
+  stackB.push(result);
+
+  // Recursively populate clone (susceptible to call stack limits).
+  (isArr ? arrayEach : baseForOwn)(value, function(subValue, key) {
+    result[key] = baseClone(subValue, isDeep, customizer, key, value, stackA, stackB);
+  });
+  return result;
+}
+
+module.exports = baseClone;
+
+},{"../lang/isArray":34,"../lang/isObject":37,"./arrayCopy":5,"./arrayEach":6,"./baseAssign":7,"./baseForOwn":12,"./initCloneArray":23,"./initCloneByTag":24,"./initCloneObject":25}],9:[function(require,module,exports){
+/**
+ * Copies properties of `source` to `object`.
+ *
+ * @private
+ * @param {Object} source The object to copy properties from.
+ * @param {Array} props The property names to copy.
+ * @param {Object} [object={}] The object to copy properties to.
+ * @returns {Object} Returns `object`.
+ */
+function baseCopy(source, props, object) {
+  object || (object = {});
+
+  var index = -1,
+      length = props.length;
+
+  while (++index < length) {
+    var key = props[index];
+    object[key] = source[key];
+  }
+  return object;
+}
+
+module.exports = baseCopy;
+
+},{}],10:[function(require,module,exports){
+var baseForOwn = require('./baseForOwn'),
+    createBaseEach = require('./createBaseEach');
+
+/**
+ * The base implementation of `_.forEach` without support for callback
+ * shorthands and `this` binding.
+ *
+ * @private
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array|Object|string} Returns `collection`.
+ */
+var baseEach = createBaseEach(baseForOwn);
+
+module.exports = baseEach;
+
+},{"./baseForOwn":12,"./createBaseEach":16}],11:[function(require,module,exports){
+var createBaseFor = require('./createBaseFor');
+
+/**
+ * The base implementation of `baseForIn` and `baseForOwn` which iterates
+ * over `object` properties returned by `keysFunc` invoking `iteratee` for
+ * each property. Iteratee functions may exit iteration early by explicitly
+ * returning `false`.
+ *
+ * @private
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @param {Function} keysFunc The function to get the keys of `object`.
+ * @returns {Object} Returns `object`.
+ */
+var baseFor = createBaseFor();
+
+module.exports = baseFor;
+
+},{"./createBaseFor":17}],12:[function(require,module,exports){
+var baseFor = require('./baseFor'),
+    keys = require('../object/keys');
+
+/**
+ * The base implementation of `_.forOwn` without support for callback
+ * shorthands and `this` binding.
+ *
+ * @private
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Object} Returns `object`.
+ */
+function baseForOwn(object, iteratee) {
+  return baseFor(object, iteratee, keys);
+}
+
+module.exports = baseForOwn;
+
+},{"../object/keys":41,"./baseFor":11}],13:[function(require,module,exports){
+/**
+ * The base implementation of `_.property` without support for deep paths.
+ *
+ * @private
+ * @param {string} key The key of the property to get.
+ * @returns {Function} Returns the new function.
+ */
+function baseProperty(key) {
+  return function(object) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+module.exports = baseProperty;
+
+},{}],14:[function(require,module,exports){
+var identity = require('../utility/identity');
+
+/**
+ * A specialized version of `baseCallback` which only supports `this` binding
+ * and specifying the number of arguments to provide to `func`.
+ *
+ * @private
+ * @param {Function} func The function to bind.
+ * @param {*} thisArg The `this` binding of `func`.
+ * @param {number} [argCount] The number of arguments to provide to `func`.
+ * @returns {Function} Returns the callback.
+ */
+function bindCallback(func, thisArg, argCount) {
+  if (typeof func != 'function') {
+    return identity;
+  }
+  if (thisArg === undefined) {
+    return func;
+  }
+  switch (argCount) {
+    case 1: return function(value) {
+      return func.call(thisArg, value);
+    };
+    case 3: return function(value, index, collection) {
+      return func.call(thisArg, value, index, collection);
+    };
+    case 4: return function(accumulator, value, index, collection) {
+      return func.call(thisArg, accumulator, value, index, collection);
+    };
+    case 5: return function(value, other, key, object, source) {
+      return func.call(thisArg, value, other, key, object, source);
+    };
+  }
+  return function() {
+    return func.apply(thisArg, arguments);
+  };
+}
+
+module.exports = bindCallback;
+
+},{"../utility/identity":43}],15:[function(require,module,exports){
+(function (global){
+/** Native method references. */
+var ArrayBuffer = global.ArrayBuffer,
+    Uint8Array = global.Uint8Array;
+
+/**
+ * Creates a clone of the given array buffer.
+ *
+ * @private
+ * @param {ArrayBuffer} buffer The array buffer to clone.
+ * @returns {ArrayBuffer} Returns the cloned array buffer.
+ */
+function bufferClone(buffer) {
+  var result = new ArrayBuffer(buffer.byteLength),
+      view = new Uint8Array(result);
+
+  view.set(new Uint8Array(buffer));
+  return result;
+}
+
+module.exports = bufferClone;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],16:[function(require,module,exports){
+var getLength = require('./getLength'),
+    isLength = require('./isLength'),
+    toObject = require('./toObject');
+
+/**
+ * Creates a `baseEach` or `baseEachRight` function.
+ *
+ * @private
+ * @param {Function} eachFunc The function to iterate over a collection.
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {Function} Returns the new base function.
+ */
+function createBaseEach(eachFunc, fromRight) {
+  return function(collection, iteratee) {
+    var length = collection ? getLength(collection) : 0;
+    if (!isLength(length)) {
+      return eachFunc(collection, iteratee);
+    }
+    var index = fromRight ? length : -1,
+        iterable = toObject(collection);
+
+    while ((fromRight ? index-- : ++index < length)) {
+      if (iteratee(iterable[index], index, iterable) === false) {
+        break;
+      }
+    }
+    return collection;
+  };
+}
+
+module.exports = createBaseEach;
+
+},{"./getLength":21,"./isLength":28,"./toObject":31}],17:[function(require,module,exports){
+var toObject = require('./toObject');
+
+/**
+ * Creates a base function for `_.forIn` or `_.forInRight`.
+ *
+ * @private
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {Function} Returns the new base function.
+ */
+function createBaseFor(fromRight) {
+  return function(object, iteratee, keysFunc) {
+    var iterable = toObject(object),
+        props = keysFunc(object),
+        length = props.length,
+        index = fromRight ? length : -1;
+
+    while ((fromRight ? index-- : ++index < length)) {
+      var key = props[index];
+      if (iteratee(iterable[key], key, iterable) === false) {
+        break;
+      }
+    }
+    return object;
+  };
+}
+
+module.exports = createBaseFor;
+
+},{"./toObject":31}],18:[function(require,module,exports){
+var bindCallback = require('./bindCallback'),
+    isArray = require('../lang/isArray');
+
+/**
+ * Creates a function for `_.forEach` or `_.forEachRight`.
+ *
+ * @private
+ * @param {Function} arrayFunc The function to iterate over an array.
+ * @param {Function} eachFunc The function to iterate over a collection.
+ * @returns {Function} Returns the new each function.
+ */
+function createForEach(arrayFunc, eachFunc) {
+  return function(collection, iteratee, thisArg) {
+    return (typeof iteratee == 'function' && thisArg === undefined && isArray(collection))
+      ? arrayFunc(collection, iteratee)
+      : eachFunc(collection, bindCallback(iteratee, thisArg, 3));
+  };
+}
+
+module.exports = createForEach;
+
+},{"../lang/isArray":34,"./bindCallback":14}],19:[function(require,module,exports){
+var bindCallback = require('./bindCallback'),
+    keysIn = require('../object/keysIn');
+
+/**
+ * Creates a function for `_.forIn` or `_.forInRight`.
+ *
+ * @private
+ * @param {Function} objectFunc The function to iterate over an object.
+ * @returns {Function} Returns the new each function.
+ */
+function createForIn(objectFunc) {
+  return function(object, iteratee, thisArg) {
+    if (typeof iteratee != 'function' || thisArg !== undefined) {
+      iteratee = bindCallback(iteratee, thisArg, 3);
+    }
+    return objectFunc(object, iteratee, keysIn);
+  };
+}
+
+module.exports = createForIn;
+
+},{"../object/keysIn":42,"./bindCallback":14}],20:[function(require,module,exports){
+var bindCallback = require('./bindCallback');
+
+/**
+ * Creates a function for `_.forOwn` or `_.forOwnRight`.
+ *
+ * @private
+ * @param {Function} objectFunc The function to iterate over an object.
+ * @returns {Function} Returns the new each function.
+ */
+function createForOwn(objectFunc) {
+  return function(object, iteratee, thisArg) {
+    if (typeof iteratee != 'function' || thisArg !== undefined) {
+      iteratee = bindCallback(iteratee, thisArg, 3);
+    }
+    return objectFunc(object, iteratee);
+  };
+}
+
+module.exports = createForOwn;
+
+},{"./bindCallback":14}],21:[function(require,module,exports){
+var baseProperty = require('./baseProperty');
+
+/**
+ * Gets the "length" property value of `object`.
+ *
+ * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
+ * that affects Safari on at least iOS 8.1-8.3 ARM64.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {*} Returns the "length" value.
+ */
+var getLength = baseProperty('length');
+
+module.exports = getLength;
+
+},{"./baseProperty":13}],22:[function(require,module,exports){
+var isNative = require('../lang/isNative');
+
+/**
+ * Gets the native function at `key` of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {string} key The key of the method to get.
+ * @returns {*} Returns the function if it's native, else `undefined`.
+ */
+function getNative(object, key) {
+  var value = object == null ? undefined : object[key];
+  return isNative(value) ? value : undefined;
+}
+
+module.exports = getNative;
+
+},{"../lang/isNative":36}],23:[function(require,module,exports){
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Initializes an array clone.
+ *
+ * @private
+ * @param {Array} array The array to clone.
+ * @returns {Array} Returns the initialized clone.
+ */
+function initCloneArray(array) {
+  var length = array.length,
+      result = new array.constructor(length);
+
+  // Add array properties assigned by `RegExp#exec`.
+  if (length && typeof array[0] == 'string' && hasOwnProperty.call(array, 'index')) {
+    result.index = array.index;
+    result.input = array.input;
+  }
+  return result;
+}
+
+module.exports = initCloneArray;
+
+},{}],24:[function(require,module,exports){
+var bufferClone = require('./bufferClone');
+
+/** `Object#toString` result references. */
+var boolTag = '[object Boolean]',
+    dateTag = '[object Date]',
+    numberTag = '[object Number]',
+    regexpTag = '[object RegExp]',
+    stringTag = '[object String]';
+
+var arrayBufferTag = '[object ArrayBuffer]',
+    float32Tag = '[object Float32Array]',
+    float64Tag = '[object Float64Array]',
+    int8Tag = '[object Int8Array]',
+    int16Tag = '[object Int16Array]',
+    int32Tag = '[object Int32Array]',
+    uint8Tag = '[object Uint8Array]',
+    uint8ClampedTag = '[object Uint8ClampedArray]',
+    uint16Tag = '[object Uint16Array]',
+    uint32Tag = '[object Uint32Array]';
+
+/** Used to match `RegExp` flags from their coerced string values. */
+var reFlags = /\w*$/;
+
+/**
+ * Initializes an object clone based on its `toStringTag`.
+ *
+ * **Note:** This function only supports cloning values with tags of
+ * `Boolean`, `Date`, `Error`, `Number`, `RegExp`, or `String`.
+ *
+ * @private
+ * @param {Object} object The object to clone.
+ * @param {string} tag The `toStringTag` of the object to clone.
+ * @param {boolean} [isDeep] Specify a deep clone.
+ * @returns {Object} Returns the initialized clone.
+ */
+function initCloneByTag(object, tag, isDeep) {
+  var Ctor = object.constructor;
+  switch (tag) {
+    case arrayBufferTag:
+      return bufferClone(object);
+
+    case boolTag:
+    case dateTag:
+      return new Ctor(+object);
+
+    case float32Tag: case float64Tag:
+    case int8Tag: case int16Tag: case int32Tag:
+    case uint8Tag: case uint8ClampedTag: case uint16Tag: case uint32Tag:
+      var buffer = object.buffer;
+      return new Ctor(isDeep ? bufferClone(buffer) : buffer, object.byteOffset, object.length);
+
+    case numberTag:
+    case stringTag:
+      return new Ctor(object);
+
+    case regexpTag:
+      var result = new Ctor(object.source, reFlags.exec(object));
+      result.lastIndex = object.lastIndex;
+  }
+  return result;
+}
+
+module.exports = initCloneByTag;
+
+},{"./bufferClone":15}],25:[function(require,module,exports){
+/**
+ * Initializes an object clone.
+ *
+ * @private
+ * @param {Object} object The object to clone.
+ * @returns {Object} Returns the initialized clone.
+ */
+function initCloneObject(object) {
+  var Ctor = object.constructor;
+  if (!(typeof Ctor == 'function' && Ctor instanceof Ctor)) {
+    Ctor = Object;
+  }
+  return new Ctor;
+}
+
+module.exports = initCloneObject;
+
+},{}],26:[function(require,module,exports){
+var getLength = require('./getLength'),
+    isLength = require('./isLength');
+
+/**
+ * Checks if `value` is array-like.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ */
+function isArrayLike(value) {
+  return value != null && isLength(getLength(value));
+}
+
+module.exports = isArrayLike;
+
+},{"./getLength":21,"./isLength":28}],27:[function(require,module,exports){
+/** Used to detect unsigned integer values. */
+var reIsUint = /^\d+$/;
+
+/**
+ * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
+ * of an array-like value.
+ */
+var MAX_SAFE_INTEGER = 9007199254740991;
+
+/**
+ * Checks if `value` is a valid array-like index.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+ * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+ */
+function isIndex(value, length) {
+  value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
+  length = length == null ? MAX_SAFE_INTEGER : length;
+  return value > -1 && value % 1 == 0 && value < length;
+}
+
+module.exports = isIndex;
+
+},{}],28:[function(require,module,exports){
+/**
+ * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
+ * of an array-like value.
+ */
+var MAX_SAFE_INTEGER = 9007199254740991;
+
+/**
+ * Checks if `value` is a valid array-like length.
+ *
+ * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+ */
+function isLength(value) {
+  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+}
+
+module.exports = isLength;
+
+},{}],29:[function(require,module,exports){
+/**
+ * Checks if `value` is object-like.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+module.exports = isObjectLike;
+
+},{}],30:[function(require,module,exports){
+var isArguments = require('../lang/isArguments'),
+    isArray = require('../lang/isArray'),
+    isIndex = require('./isIndex'),
+    isLength = require('./isLength'),
+    keysIn = require('../object/keysIn');
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * A fallback implementation of `Object.keys` which creates an array of the
+ * own enumerable property names of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ */
+function shimKeys(object) {
+  var props = keysIn(object),
+      propsLength = props.length,
+      length = propsLength && object.length;
+
+  var allowIndexes = !!length && isLength(length) &&
+    (isArray(object) || isArguments(object));
+
+  var index = -1,
+      result = [];
+
+  while (++index < propsLength) {
+    var key = props[index];
+    if ((allowIndexes && isIndex(key, length)) || hasOwnProperty.call(object, key)) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+module.exports = shimKeys;
+
+},{"../lang/isArguments":33,"../lang/isArray":34,"../object/keysIn":42,"./isIndex":27,"./isLength":28}],31:[function(require,module,exports){
+var isObject = require('../lang/isObject');
+
+/**
+ * Converts `value` to an object if it's not one.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {Object} Returns the object.
+ */
+function toObject(value) {
+  return isObject(value) ? value : Object(value);
+}
+
+module.exports = toObject;
+
+},{"../lang/isObject":37}],32:[function(require,module,exports){
+var baseClone = require('../internal/baseClone'),
+    bindCallback = require('../internal/bindCallback');
+
+/**
+ * Creates a deep clone of `value`. If `customizer` is provided it's invoked
+ * to produce the cloned values. If `customizer` returns `undefined` cloning
+ * is handled by the method instead. The `customizer` is bound to `thisArg`
+ * and invoked with up to three argument; (value [, index|key, object]).
+ *
+ * **Note:** This method is loosely based on the
+ * [structured clone algorithm](http://www.w3.org/TR/html5/infrastructure.html#internal-structured-cloning-algorithm).
+ * The enumerable properties of `arguments` objects and objects created by
+ * constructors other than `Object` are cloned to plain `Object` objects. An
+ * empty object is returned for uncloneable values such as functions, DOM nodes,
+ * Maps, Sets, and WeakMaps.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to deep clone.
+ * @param {Function} [customizer] The function to customize cloning values.
+ * @param {*} [thisArg] The `this` binding of `customizer`.
+ * @returns {*} Returns the deep cloned value.
+ * @example
+ *
+ * var users = [
+ *   { 'user': 'barney' },
+ *   { 'user': 'fred' }
+ * ];
+ *
+ * var deep = _.cloneDeep(users);
+ * deep[0] === users[0];
+ * // => false
+ *
+ * // using a customizer callback
+ * var el = _.cloneDeep(document.body, function(value) {
+ *   if (_.isElement(value)) {
+ *     return value.cloneNode(true);
+ *   }
+ * });
+ *
+ * el === document.body
+ * // => false
+ * el.nodeName
+ * // => BODY
+ * el.childNodes.length;
+ * // => 20
+ */
+function cloneDeep(value, customizer, thisArg) {
+  return typeof customizer == 'function'
+    ? baseClone(value, true, bindCallback(customizer, thisArg, 3))
+    : baseClone(value, true);
+}
+
+module.exports = cloneDeep;
+
+},{"../internal/baseClone":8,"../internal/bindCallback":14}],33:[function(require,module,exports){
+var isArrayLike = require('../internal/isArrayLike'),
+    isObjectLike = require('../internal/isObjectLike');
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Native method references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+/**
+ * Checks if `value` is classified as an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isArguments(function() { return arguments; }());
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+function isArguments(value) {
+  return isObjectLike(value) && isArrayLike(value) &&
+    hasOwnProperty.call(value, 'callee') && !propertyIsEnumerable.call(value, 'callee');
+}
+
+module.exports = isArguments;
+
+},{"../internal/isArrayLike":26,"../internal/isObjectLike":29}],34:[function(require,module,exports){
+var getNative = require('../internal/getNative'),
+    isLength = require('../internal/isLength'),
+    isObjectLike = require('../internal/isObjectLike');
+
+/** `Object#toString` result references. */
+var arrayTag = '[object Array]';
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objToString = objectProto.toString;
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeIsArray = getNative(Array, 'isArray');
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(function() { return arguments; }());
+ * // => false
+ */
+var isArray = nativeIsArray || function(value) {
+  return isObjectLike(value) && isLength(value.length) && objToString.call(value) == arrayTag;
+};
+
+module.exports = isArray;
+
+},{"../internal/getNative":22,"../internal/isLength":28,"../internal/isObjectLike":29}],35:[function(require,module,exports){
+var isObject = require('./isObject');
+
+/** `Object#toString` result references. */
+var funcTag = '[object Function]';
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objToString = objectProto.toString;
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in older versions of Chrome and Safari which return 'function' for regexes
+  // and Safari 8 which returns 'object' for typed array constructors.
+  return isObject(value) && objToString.call(value) == funcTag;
+}
+
+module.exports = isFunction;
+
+},{"./isObject":37}],36:[function(require,module,exports){
+var isFunction = require('./isFunction'),
+    isObjectLike = require('../internal/isObjectLike');
+
+/** Used to detect host constructors (Safari > 5). */
+var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var fnToString = Function.prototype.toString;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Used to detect if a method is native. */
+var reIsNative = RegExp('^' +
+  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
+  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+);
+
+/**
+ * Checks if `value` is a native function.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
+ * @example
+ *
+ * _.isNative(Array.prototype.push);
+ * // => true
+ *
+ * _.isNative(_);
+ * // => false
+ */
+function isNative(value) {
+  if (value == null) {
+    return false;
+  }
+  if (isFunction(value)) {
+    return reIsNative.test(fnToString.call(value));
+  }
+  return isObjectLike(value) && reIsHostCtor.test(value);
+}
+
+module.exports = isNative;
+
+},{"../internal/isObjectLike":29,"./isFunction":35}],37:[function(require,module,exports){
+/**
+ * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+ * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(1);
+ * // => false
+ */
+function isObject(value) {
+  // Avoid a V8 JIT bug in Chrome 19-20.
+  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+module.exports = isObject;
+
+},{}],38:[function(require,module,exports){
+/**
+ * Checks if `value` is `undefined`.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is `undefined`, else `false`.
+ * @example
+ *
+ * _.isUndefined(void 0);
+ * // => true
+ *
+ * _.isUndefined(null);
+ * // => false
+ */
+function isUndefined(value) {
+  return value === undefined;
+}
+
+module.exports = isUndefined;
+
+},{}],39:[function(require,module,exports){
+var baseFor = require('../internal/baseFor'),
+    createForIn = require('../internal/createForIn');
+
+/**
+ * Iterates over own and inherited enumerable properties of an object invoking
+ * `iteratee` for each property. The `iteratee` is bound to `thisArg` and invoked
+ * with three arguments: (value, key, object). Iteratee functions may exit
+ * iteration early by explicitly returning `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to iterate over.
+ * @param {Function} [iteratee=_.identity] The function invoked per iteration.
+ * @param {*} [thisArg] The `this` binding of `iteratee`.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.forIn(new Foo, function(value, key) {
+ *   console.log(key);
+ * });
+ * // => logs 'a', 'b', and 'c' (iteration order is not guaranteed)
+ */
+var forIn = createForIn(baseFor);
+
+module.exports = forIn;
+
+},{"../internal/baseFor":11,"../internal/createForIn":19}],40:[function(require,module,exports){
+var baseForOwn = require('../internal/baseForOwn'),
+    createForOwn = require('../internal/createForOwn');
+
+/**
+ * Iterates over own enumerable properties of an object invoking `iteratee`
+ * for each property. The `iteratee` is bound to `thisArg` and invoked with
+ * three arguments: (value, key, object). Iteratee functions may exit iteration
+ * early by explicitly returning `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to iterate over.
+ * @param {Function} [iteratee=_.identity] The function invoked per iteration.
+ * @param {*} [thisArg] The `this` binding of `iteratee`.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.forOwn(new Foo, function(value, key) {
+ *   console.log(key);
+ * });
+ * // => logs 'a' and 'b' (iteration order is not guaranteed)
+ */
+var forOwn = createForOwn(baseForOwn);
+
+module.exports = forOwn;
+
+},{"../internal/baseForOwn":12,"../internal/createForOwn":20}],41:[function(require,module,exports){
+var getNative = require('../internal/getNative'),
+    isArrayLike = require('../internal/isArrayLike'),
+    isObject = require('../lang/isObject'),
+    shimKeys = require('../internal/shimKeys');
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeKeys = getNative(Object, 'keys');
+
+/**
+ * Creates an array of the own enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects. See the
+ * [ES spec](http://ecma-international.org/ecma-262/6.0/#sec-object.keys)
+ * for more details.
+ *
+ * @static
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keys(new Foo);
+ * // => ['a', 'b'] (iteration order is not guaranteed)
+ *
+ * _.keys('hi');
+ * // => ['0', '1']
+ */
+var keys = !nativeKeys ? shimKeys : function(object) {
+  var Ctor = object == null ? undefined : object.constructor;
+  if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
+      (typeof object != 'function' && isArrayLike(object))) {
+    return shimKeys(object);
+  }
+  return isObject(object) ? nativeKeys(object) : [];
+};
+
+module.exports = keys;
+
+},{"../internal/getNative":22,"../internal/isArrayLike":26,"../internal/shimKeys":30,"../lang/isObject":37}],42:[function(require,module,exports){
+var isArguments = require('../lang/isArguments'),
+    isArray = require('../lang/isArray'),
+    isIndex = require('../internal/isIndex'),
+    isLength = require('../internal/isLength'),
+    isObject = require('../lang/isObject');
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Creates an array of the own and inherited enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects.
+ *
+ * @static
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keysIn(new Foo);
+ * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
+ */
+function keysIn(object) {
+  if (object == null) {
+    return [];
+  }
+  if (!isObject(object)) {
+    object = Object(object);
+  }
+  var length = object.length;
+  length = (length && isLength(length) &&
+    (isArray(object) || isArguments(object)) && length) || 0;
+
+  var Ctor = object.constructor,
+      index = -1,
+      isProto = typeof Ctor == 'function' && Ctor.prototype === object,
+      result = Array(length),
+      skipIndexes = length > 0;
+
+  while (++index < length) {
+    result[index] = (index + '');
+  }
+  for (var key in object) {
+    if (!(skipIndexes && isIndex(key, length)) &&
+        !(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+module.exports = keysIn;
+
+},{"../internal/isIndex":27,"../internal/isLength":28,"../lang/isArguments":33,"../lang/isArray":34,"../lang/isObject":37}],43:[function(require,module,exports){
+/**
+ * This method returns the first argument provided to it.
+ *
+ * @static
+ * @memberOf _
+ * @category Utility
+ * @param {*} value Any value.
+ * @returns {*} Returns `value`.
+ * @example
+ *
+ * var object = { 'user': 'fred' };
+ *
+ * _.identity(object) === object;
+ * // => true
+ */
+function identity(value) {
+  return value;
+}
+
+module.exports = identity;
+
+},{}],44:[function(require,module,exports){
 /**
  * Stampit
  **
@@ -9194,1298 +10485,7 @@ exports['default'] = (0, _supermixer.mixin)(stampit, {
   convertConstructor: convertConstructor
 });
 module.exports = exports['default'];
-},{"lodash/collection/forEach":5,"lodash/lang/isFunction":36,"lodash/lang/isObject":38,"supermixer":45}],5:[function(require,module,exports){
-var arrayEach = require('../internal/arrayEach'),
-    baseEach = require('../internal/baseEach'),
-    createForEach = require('../internal/createForEach');
-
-/**
- * Iterates over elements of `collection` invoking `iteratee` for each element.
- * The `iteratee` is bound to `thisArg` and invoked with three arguments:
- * (value, index|key, collection). Iteratee functions may exit iteration early
- * by explicitly returning `false`.
- *
- * **Note:** As with other "Collections" methods, objects with a "length" property
- * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
- * may be used for object iteration.
- *
- * @static
- * @memberOf _
- * @alias each
- * @category Collection
- * @param {Array|Object|string} collection The collection to iterate over.
- * @param {Function} [iteratee=_.identity] The function invoked per iteration.
- * @param {*} [thisArg] The `this` binding of `iteratee`.
- * @returns {Array|Object|string} Returns `collection`.
- * @example
- *
- * _([1, 2]).forEach(function(n) {
- *   console.log(n);
- * }).value();
- * // => logs each value from left to right and returns the array
- *
- * _.forEach({ 'a': 1, 'b': 2 }, function(n, key) {
- *   console.log(n, key);
- * });
- * // => logs each value-key pair and returns the object (iteration order is not guaranteed)
- */
-var forEach = createForEach(arrayEach, baseEach);
-
-module.exports = forEach;
-
-},{"../internal/arrayEach":7,"../internal/baseEach":11,"../internal/createForEach":19}],6:[function(require,module,exports){
-/**
- * Copies the values of `source` to `array`.
- *
- * @private
- * @param {Array} source The array to copy values from.
- * @param {Array} [array=[]] The array to copy values to.
- * @returns {Array} Returns `array`.
- */
-function arrayCopy(source, array) {
-  var index = -1,
-      length = source.length;
-
-  array || (array = Array(length));
-  while (++index < length) {
-    array[index] = source[index];
-  }
-  return array;
-}
-
-module.exports = arrayCopy;
-
-},{}],7:[function(require,module,exports){
-/**
- * A specialized version of `_.forEach` for arrays without support for callback
- * shorthands and `this` binding.
- *
- * @private
- * @param {Array} array The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns `array`.
- */
-function arrayEach(array, iteratee) {
-  var index = -1,
-      length = array.length;
-
-  while (++index < length) {
-    if (iteratee(array[index], index, array) === false) {
-      break;
-    }
-  }
-  return array;
-}
-
-module.exports = arrayEach;
-
-},{}],8:[function(require,module,exports){
-var baseCopy = require('./baseCopy'),
-    keys = require('../object/keys');
-
-/**
- * The base implementation of `_.assign` without support for argument juggling,
- * multiple sources, and `customizer` functions.
- *
- * @private
- * @param {Object} object The destination object.
- * @param {Object} source The source object.
- * @returns {Object} Returns `object`.
- */
-function baseAssign(object, source) {
-  return source == null
-    ? object
-    : baseCopy(source, keys(source), object);
-}
-
-module.exports = baseAssign;
-
-},{"../object/keys":42,"./baseCopy":10}],9:[function(require,module,exports){
-var arrayCopy = require('./arrayCopy'),
-    arrayEach = require('./arrayEach'),
-    baseAssign = require('./baseAssign'),
-    baseForOwn = require('./baseForOwn'),
-    initCloneArray = require('./initCloneArray'),
-    initCloneByTag = require('./initCloneByTag'),
-    initCloneObject = require('./initCloneObject'),
-    isArray = require('../lang/isArray'),
-    isObject = require('../lang/isObject');
-
-/** `Object#toString` result references. */
-var argsTag = '[object Arguments]',
-    arrayTag = '[object Array]',
-    boolTag = '[object Boolean]',
-    dateTag = '[object Date]',
-    errorTag = '[object Error]',
-    funcTag = '[object Function]',
-    mapTag = '[object Map]',
-    numberTag = '[object Number]',
-    objectTag = '[object Object]',
-    regexpTag = '[object RegExp]',
-    setTag = '[object Set]',
-    stringTag = '[object String]',
-    weakMapTag = '[object WeakMap]';
-
-var arrayBufferTag = '[object ArrayBuffer]',
-    float32Tag = '[object Float32Array]',
-    float64Tag = '[object Float64Array]',
-    int8Tag = '[object Int8Array]',
-    int16Tag = '[object Int16Array]',
-    int32Tag = '[object Int32Array]',
-    uint8Tag = '[object Uint8Array]',
-    uint8ClampedTag = '[object Uint8ClampedArray]',
-    uint16Tag = '[object Uint16Array]',
-    uint32Tag = '[object Uint32Array]';
-
-/** Used to identify `toStringTag` values supported by `_.clone`. */
-var cloneableTags = {};
-cloneableTags[argsTag] = cloneableTags[arrayTag] =
-cloneableTags[arrayBufferTag] = cloneableTags[boolTag] =
-cloneableTags[dateTag] = cloneableTags[float32Tag] =
-cloneableTags[float64Tag] = cloneableTags[int8Tag] =
-cloneableTags[int16Tag] = cloneableTags[int32Tag] =
-cloneableTags[numberTag] = cloneableTags[objectTag] =
-cloneableTags[regexpTag] = cloneableTags[stringTag] =
-cloneableTags[uint8Tag] = cloneableTags[uint8ClampedTag] =
-cloneableTags[uint16Tag] = cloneableTags[uint32Tag] = true;
-cloneableTags[errorTag] = cloneableTags[funcTag] =
-cloneableTags[mapTag] = cloneableTags[setTag] =
-cloneableTags[weakMapTag] = false;
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
-
-/**
- * The base implementation of `_.clone` without support for argument juggling
- * and `this` binding `customizer` functions.
- *
- * @private
- * @param {*} value The value to clone.
- * @param {boolean} [isDeep] Specify a deep clone.
- * @param {Function} [customizer] The function to customize cloning values.
- * @param {string} [key] The key of `value`.
- * @param {Object} [object] The object `value` belongs to.
- * @param {Array} [stackA=[]] Tracks traversed source objects.
- * @param {Array} [stackB=[]] Associates clones with source counterparts.
- * @returns {*} Returns the cloned value.
- */
-function baseClone(value, isDeep, customizer, key, object, stackA, stackB) {
-  var result;
-  if (customizer) {
-    result = object ? customizer(value, key, object) : customizer(value);
-  }
-  if (result !== undefined) {
-    return result;
-  }
-  if (!isObject(value)) {
-    return value;
-  }
-  var isArr = isArray(value);
-  if (isArr) {
-    result = initCloneArray(value);
-    if (!isDeep) {
-      return arrayCopy(value, result);
-    }
-  } else {
-    var tag = objToString.call(value),
-        isFunc = tag == funcTag;
-
-    if (tag == objectTag || tag == argsTag || (isFunc && !object)) {
-      result = initCloneObject(isFunc ? {} : value);
-      if (!isDeep) {
-        return baseAssign(result, value);
-      }
-    } else {
-      return cloneableTags[tag]
-        ? initCloneByTag(value, tag, isDeep)
-        : (object ? value : {});
-    }
-  }
-  // Check for circular references and return its corresponding clone.
-  stackA || (stackA = []);
-  stackB || (stackB = []);
-
-  var length = stackA.length;
-  while (length--) {
-    if (stackA[length] == value) {
-      return stackB[length];
-    }
-  }
-  // Add the source value to the stack of traversed objects and associate it with its clone.
-  stackA.push(value);
-  stackB.push(result);
-
-  // Recursively populate clone (susceptible to call stack limits).
-  (isArr ? arrayEach : baseForOwn)(value, function(subValue, key) {
-    result[key] = baseClone(subValue, isDeep, customizer, key, value, stackA, stackB);
-  });
-  return result;
-}
-
-module.exports = baseClone;
-
-},{"../lang/isArray":35,"../lang/isObject":38,"./arrayCopy":6,"./arrayEach":7,"./baseAssign":8,"./baseForOwn":13,"./initCloneArray":24,"./initCloneByTag":25,"./initCloneObject":26}],10:[function(require,module,exports){
-/**
- * Copies properties of `source` to `object`.
- *
- * @private
- * @param {Object} source The object to copy properties from.
- * @param {Array} props The property names to copy.
- * @param {Object} [object={}] The object to copy properties to.
- * @returns {Object} Returns `object`.
- */
-function baseCopy(source, props, object) {
-  object || (object = {});
-
-  var index = -1,
-      length = props.length;
-
-  while (++index < length) {
-    var key = props[index];
-    object[key] = source[key];
-  }
-  return object;
-}
-
-module.exports = baseCopy;
-
-},{}],11:[function(require,module,exports){
-var baseForOwn = require('./baseForOwn'),
-    createBaseEach = require('./createBaseEach');
-
-/**
- * The base implementation of `_.forEach` without support for callback
- * shorthands and `this` binding.
- *
- * @private
- * @param {Array|Object|string} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array|Object|string} Returns `collection`.
- */
-var baseEach = createBaseEach(baseForOwn);
-
-module.exports = baseEach;
-
-},{"./baseForOwn":13,"./createBaseEach":17}],12:[function(require,module,exports){
-var createBaseFor = require('./createBaseFor');
-
-/**
- * The base implementation of `baseForIn` and `baseForOwn` which iterates
- * over `object` properties returned by `keysFunc` invoking `iteratee` for
- * each property. Iteratee functions may exit iteration early by explicitly
- * returning `false`.
- *
- * @private
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @param {Function} keysFunc The function to get the keys of `object`.
- * @returns {Object} Returns `object`.
- */
-var baseFor = createBaseFor();
-
-module.exports = baseFor;
-
-},{"./createBaseFor":18}],13:[function(require,module,exports){
-var baseFor = require('./baseFor'),
-    keys = require('../object/keys');
-
-/**
- * The base implementation of `_.forOwn` without support for callback
- * shorthands and `this` binding.
- *
- * @private
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Object} Returns `object`.
- */
-function baseForOwn(object, iteratee) {
-  return baseFor(object, iteratee, keys);
-}
-
-module.exports = baseForOwn;
-
-},{"../object/keys":42,"./baseFor":12}],14:[function(require,module,exports){
-/**
- * The base implementation of `_.property` without support for deep paths.
- *
- * @private
- * @param {string} key The key of the property to get.
- * @returns {Function} Returns the new function.
- */
-function baseProperty(key) {
-  return function(object) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-module.exports = baseProperty;
-
-},{}],15:[function(require,module,exports){
-var identity = require('../utility/identity');
-
-/**
- * A specialized version of `baseCallback` which only supports `this` binding
- * and specifying the number of arguments to provide to `func`.
- *
- * @private
- * @param {Function} func The function to bind.
- * @param {*} thisArg The `this` binding of `func`.
- * @param {number} [argCount] The number of arguments to provide to `func`.
- * @returns {Function} Returns the callback.
- */
-function bindCallback(func, thisArg, argCount) {
-  if (typeof func != 'function') {
-    return identity;
-  }
-  if (thisArg === undefined) {
-    return func;
-  }
-  switch (argCount) {
-    case 1: return function(value) {
-      return func.call(thisArg, value);
-    };
-    case 3: return function(value, index, collection) {
-      return func.call(thisArg, value, index, collection);
-    };
-    case 4: return function(accumulator, value, index, collection) {
-      return func.call(thisArg, accumulator, value, index, collection);
-    };
-    case 5: return function(value, other, key, object, source) {
-      return func.call(thisArg, value, other, key, object, source);
-    };
-  }
-  return function() {
-    return func.apply(thisArg, arguments);
-  };
-}
-
-module.exports = bindCallback;
-
-},{"../utility/identity":44}],16:[function(require,module,exports){
-(function (global){
-/** Native method references. */
-var ArrayBuffer = global.ArrayBuffer,
-    Uint8Array = global.Uint8Array;
-
-/**
- * Creates a clone of the given array buffer.
- *
- * @private
- * @param {ArrayBuffer} buffer The array buffer to clone.
- * @returns {ArrayBuffer} Returns the cloned array buffer.
- */
-function bufferClone(buffer) {
-  var result = new ArrayBuffer(buffer.byteLength),
-      view = new Uint8Array(result);
-
-  view.set(new Uint8Array(buffer));
-  return result;
-}
-
-module.exports = bufferClone;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],17:[function(require,module,exports){
-var getLength = require('./getLength'),
-    isLength = require('./isLength'),
-    toObject = require('./toObject');
-
-/**
- * Creates a `baseEach` or `baseEachRight` function.
- *
- * @private
- * @param {Function} eachFunc The function to iterate over a collection.
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {Function} Returns the new base function.
- */
-function createBaseEach(eachFunc, fromRight) {
-  return function(collection, iteratee) {
-    var length = collection ? getLength(collection) : 0;
-    if (!isLength(length)) {
-      return eachFunc(collection, iteratee);
-    }
-    var index = fromRight ? length : -1,
-        iterable = toObject(collection);
-
-    while ((fromRight ? index-- : ++index < length)) {
-      if (iteratee(iterable[index], index, iterable) === false) {
-        break;
-      }
-    }
-    return collection;
-  };
-}
-
-module.exports = createBaseEach;
-
-},{"./getLength":22,"./isLength":29,"./toObject":32}],18:[function(require,module,exports){
-var toObject = require('./toObject');
-
-/**
- * Creates a base function for `_.forIn` or `_.forInRight`.
- *
- * @private
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {Function} Returns the new base function.
- */
-function createBaseFor(fromRight) {
-  return function(object, iteratee, keysFunc) {
-    var iterable = toObject(object),
-        props = keysFunc(object),
-        length = props.length,
-        index = fromRight ? length : -1;
-
-    while ((fromRight ? index-- : ++index < length)) {
-      var key = props[index];
-      if (iteratee(iterable[key], key, iterable) === false) {
-        break;
-      }
-    }
-    return object;
-  };
-}
-
-module.exports = createBaseFor;
-
-},{"./toObject":32}],19:[function(require,module,exports){
-var bindCallback = require('./bindCallback'),
-    isArray = require('../lang/isArray');
-
-/**
- * Creates a function for `_.forEach` or `_.forEachRight`.
- *
- * @private
- * @param {Function} arrayFunc The function to iterate over an array.
- * @param {Function} eachFunc The function to iterate over a collection.
- * @returns {Function} Returns the new each function.
- */
-function createForEach(arrayFunc, eachFunc) {
-  return function(collection, iteratee, thisArg) {
-    return (typeof iteratee == 'function' && thisArg === undefined && isArray(collection))
-      ? arrayFunc(collection, iteratee)
-      : eachFunc(collection, bindCallback(iteratee, thisArg, 3));
-  };
-}
-
-module.exports = createForEach;
-
-},{"../lang/isArray":35,"./bindCallback":15}],20:[function(require,module,exports){
-var bindCallback = require('./bindCallback'),
-    keysIn = require('../object/keysIn');
-
-/**
- * Creates a function for `_.forIn` or `_.forInRight`.
- *
- * @private
- * @param {Function} objectFunc The function to iterate over an object.
- * @returns {Function} Returns the new each function.
- */
-function createForIn(objectFunc) {
-  return function(object, iteratee, thisArg) {
-    if (typeof iteratee != 'function' || thisArg !== undefined) {
-      iteratee = bindCallback(iteratee, thisArg, 3);
-    }
-    return objectFunc(object, iteratee, keysIn);
-  };
-}
-
-module.exports = createForIn;
-
-},{"../object/keysIn":43,"./bindCallback":15}],21:[function(require,module,exports){
-var bindCallback = require('./bindCallback');
-
-/**
- * Creates a function for `_.forOwn` or `_.forOwnRight`.
- *
- * @private
- * @param {Function} objectFunc The function to iterate over an object.
- * @returns {Function} Returns the new each function.
- */
-function createForOwn(objectFunc) {
-  return function(object, iteratee, thisArg) {
-    if (typeof iteratee != 'function' || thisArg !== undefined) {
-      iteratee = bindCallback(iteratee, thisArg, 3);
-    }
-    return objectFunc(object, iteratee);
-  };
-}
-
-module.exports = createForOwn;
-
-},{"./bindCallback":15}],22:[function(require,module,exports){
-var baseProperty = require('./baseProperty');
-
-/**
- * Gets the "length" property value of `object`.
- *
- * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
- * that affects Safari on at least iOS 8.1-8.3 ARM64.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {*} Returns the "length" value.
- */
-var getLength = baseProperty('length');
-
-module.exports = getLength;
-
-},{"./baseProperty":14}],23:[function(require,module,exports){
-var isNative = require('../lang/isNative');
-
-/**
- * Gets the native function at `key` of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {string} key The key of the method to get.
- * @returns {*} Returns the function if it's native, else `undefined`.
- */
-function getNative(object, key) {
-  var value = object == null ? undefined : object[key];
-  return isNative(value) ? value : undefined;
-}
-
-module.exports = getNative;
-
-},{"../lang/isNative":37}],24:[function(require,module,exports){
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Initializes an array clone.
- *
- * @private
- * @param {Array} array The array to clone.
- * @returns {Array} Returns the initialized clone.
- */
-function initCloneArray(array) {
-  var length = array.length,
-      result = new array.constructor(length);
-
-  // Add array properties assigned by `RegExp#exec`.
-  if (length && typeof array[0] == 'string' && hasOwnProperty.call(array, 'index')) {
-    result.index = array.index;
-    result.input = array.input;
-  }
-  return result;
-}
-
-module.exports = initCloneArray;
-
-},{}],25:[function(require,module,exports){
-var bufferClone = require('./bufferClone');
-
-/** `Object#toString` result references. */
-var boolTag = '[object Boolean]',
-    dateTag = '[object Date]',
-    numberTag = '[object Number]',
-    regexpTag = '[object RegExp]',
-    stringTag = '[object String]';
-
-var arrayBufferTag = '[object ArrayBuffer]',
-    float32Tag = '[object Float32Array]',
-    float64Tag = '[object Float64Array]',
-    int8Tag = '[object Int8Array]',
-    int16Tag = '[object Int16Array]',
-    int32Tag = '[object Int32Array]',
-    uint8Tag = '[object Uint8Array]',
-    uint8ClampedTag = '[object Uint8ClampedArray]',
-    uint16Tag = '[object Uint16Array]',
-    uint32Tag = '[object Uint32Array]';
-
-/** Used to match `RegExp` flags from their coerced string values. */
-var reFlags = /\w*$/;
-
-/**
- * Initializes an object clone based on its `toStringTag`.
- *
- * **Note:** This function only supports cloning values with tags of
- * `Boolean`, `Date`, `Error`, `Number`, `RegExp`, or `String`.
- *
- * @private
- * @param {Object} object The object to clone.
- * @param {string} tag The `toStringTag` of the object to clone.
- * @param {boolean} [isDeep] Specify a deep clone.
- * @returns {Object} Returns the initialized clone.
- */
-function initCloneByTag(object, tag, isDeep) {
-  var Ctor = object.constructor;
-  switch (tag) {
-    case arrayBufferTag:
-      return bufferClone(object);
-
-    case boolTag:
-    case dateTag:
-      return new Ctor(+object);
-
-    case float32Tag: case float64Tag:
-    case int8Tag: case int16Tag: case int32Tag:
-    case uint8Tag: case uint8ClampedTag: case uint16Tag: case uint32Tag:
-      var buffer = object.buffer;
-      return new Ctor(isDeep ? bufferClone(buffer) : buffer, object.byteOffset, object.length);
-
-    case numberTag:
-    case stringTag:
-      return new Ctor(object);
-
-    case regexpTag:
-      var result = new Ctor(object.source, reFlags.exec(object));
-      result.lastIndex = object.lastIndex;
-  }
-  return result;
-}
-
-module.exports = initCloneByTag;
-
-},{"./bufferClone":16}],26:[function(require,module,exports){
-/**
- * Initializes an object clone.
- *
- * @private
- * @param {Object} object The object to clone.
- * @returns {Object} Returns the initialized clone.
- */
-function initCloneObject(object) {
-  var Ctor = object.constructor;
-  if (!(typeof Ctor == 'function' && Ctor instanceof Ctor)) {
-    Ctor = Object;
-  }
-  return new Ctor;
-}
-
-module.exports = initCloneObject;
-
-},{}],27:[function(require,module,exports){
-var getLength = require('./getLength'),
-    isLength = require('./isLength');
-
-/**
- * Checks if `value` is array-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- */
-function isArrayLike(value) {
-  return value != null && isLength(getLength(value));
-}
-
-module.exports = isArrayLike;
-
-},{"./getLength":22,"./isLength":29}],28:[function(require,module,exports){
-/** Used to detect unsigned integer values. */
-var reIsUint = /^\d+$/;
-
-/**
- * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * Checks if `value` is a valid array-like index.
- *
- * @private
- * @param {*} value The value to check.
- * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
- * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
- */
-function isIndex(value, length) {
-  value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
-  length = length == null ? MAX_SAFE_INTEGER : length;
-  return value > -1 && value % 1 == 0 && value < length;
-}
-
-module.exports = isIndex;
-
-},{}],29:[function(require,module,exports){
-/**
- * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- */
-function isLength(value) {
-  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-module.exports = isLength;
-
-},{}],30:[function(require,module,exports){
-/**
- * Checks if `value` is object-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-module.exports = isObjectLike;
-
-},{}],31:[function(require,module,exports){
-var isArguments = require('../lang/isArguments'),
-    isArray = require('../lang/isArray'),
-    isIndex = require('./isIndex'),
-    isLength = require('./isLength'),
-    keysIn = require('../object/keysIn');
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * A fallback implementation of `Object.keys` which creates an array of the
- * own enumerable property names of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- */
-function shimKeys(object) {
-  var props = keysIn(object),
-      propsLength = props.length,
-      length = propsLength && object.length;
-
-  var allowIndexes = !!length && isLength(length) &&
-    (isArray(object) || isArguments(object));
-
-  var index = -1,
-      result = [];
-
-  while (++index < propsLength) {
-    var key = props[index];
-    if ((allowIndexes && isIndex(key, length)) || hasOwnProperty.call(object, key)) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-module.exports = shimKeys;
-
-},{"../lang/isArguments":34,"../lang/isArray":35,"../object/keysIn":43,"./isIndex":28,"./isLength":29}],32:[function(require,module,exports){
-var isObject = require('../lang/isObject');
-
-/**
- * Converts `value` to an object if it's not one.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {Object} Returns the object.
- */
-function toObject(value) {
-  return isObject(value) ? value : Object(value);
-}
-
-module.exports = toObject;
-
-},{"../lang/isObject":38}],33:[function(require,module,exports){
-var baseClone = require('../internal/baseClone'),
-    bindCallback = require('../internal/bindCallback');
-
-/**
- * Creates a deep clone of `value`. If `customizer` is provided it's invoked
- * to produce the cloned values. If `customizer` returns `undefined` cloning
- * is handled by the method instead. The `customizer` is bound to `thisArg`
- * and invoked with up to three argument; (value [, index|key, object]).
- *
- * **Note:** This method is loosely based on the
- * [structured clone algorithm](http://www.w3.org/TR/html5/infrastructure.html#internal-structured-cloning-algorithm).
- * The enumerable properties of `arguments` objects and objects created by
- * constructors other than `Object` are cloned to plain `Object` objects. An
- * empty object is returned for uncloneable values such as functions, DOM nodes,
- * Maps, Sets, and WeakMaps.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to deep clone.
- * @param {Function} [customizer] The function to customize cloning values.
- * @param {*} [thisArg] The `this` binding of `customizer`.
- * @returns {*} Returns the deep cloned value.
- * @example
- *
- * var users = [
- *   { 'user': 'barney' },
- *   { 'user': 'fred' }
- * ];
- *
- * var deep = _.cloneDeep(users);
- * deep[0] === users[0];
- * // => false
- *
- * // using a customizer callback
- * var el = _.cloneDeep(document.body, function(value) {
- *   if (_.isElement(value)) {
- *     return value.cloneNode(true);
- *   }
- * });
- *
- * el === document.body
- * // => false
- * el.nodeName
- * // => BODY
- * el.childNodes.length;
- * // => 20
- */
-function cloneDeep(value, customizer, thisArg) {
-  return typeof customizer == 'function'
-    ? baseClone(value, true, bindCallback(customizer, thisArg, 3))
-    : baseClone(value, true);
-}
-
-module.exports = cloneDeep;
-
-},{"../internal/baseClone":9,"../internal/bindCallback":15}],34:[function(require,module,exports){
-var isArrayLike = require('../internal/isArrayLike'),
-    isObjectLike = require('../internal/isObjectLike');
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/** Native method references. */
-var propertyIsEnumerable = objectProto.propertyIsEnumerable;
-
-/**
- * Checks if `value` is classified as an `arguments` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isArguments(function() { return arguments; }());
- * // => true
- *
- * _.isArguments([1, 2, 3]);
- * // => false
- */
-function isArguments(value) {
-  return isObjectLike(value) && isArrayLike(value) &&
-    hasOwnProperty.call(value, 'callee') && !propertyIsEnumerable.call(value, 'callee');
-}
-
-module.exports = isArguments;
-
-},{"../internal/isArrayLike":27,"../internal/isObjectLike":30}],35:[function(require,module,exports){
-var getNative = require('../internal/getNative'),
-    isLength = require('../internal/isLength'),
-    isObjectLike = require('../internal/isObjectLike');
-
-/** `Object#toString` result references. */
-var arrayTag = '[object Array]';
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
-
-/* Native method references for those with the same name as other `lodash` methods. */
-var nativeIsArray = getNative(Array, 'isArray');
-
-/**
- * Checks if `value` is classified as an `Array` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isArray([1, 2, 3]);
- * // => true
- *
- * _.isArray(function() { return arguments; }());
- * // => false
- */
-var isArray = nativeIsArray || function(value) {
-  return isObjectLike(value) && isLength(value.length) && objToString.call(value) == arrayTag;
-};
-
-module.exports = isArray;
-
-},{"../internal/getNative":23,"../internal/isLength":29,"../internal/isObjectLike":30}],36:[function(require,module,exports){
-var isObject = require('./isObject');
-
-/** `Object#toString` result references. */
-var funcTag = '[object Function]';
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in older versions of Chrome and Safari which return 'function' for regexes
-  // and Safari 8 which returns 'object' for typed array constructors.
-  return isObject(value) && objToString.call(value) == funcTag;
-}
-
-module.exports = isFunction;
-
-},{"./isObject":38}],37:[function(require,module,exports){
-var isFunction = require('./isFunction'),
-    isObjectLike = require('../internal/isObjectLike');
-
-/** Used to detect host constructors (Safari > 5). */
-var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to resolve the decompiled source of functions. */
-var fnToString = Function.prototype.toString;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/** Used to detect if a method is native. */
-var reIsNative = RegExp('^' +
-  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
-  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-);
-
-/**
- * Checks if `value` is a native function.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
- * @example
- *
- * _.isNative(Array.prototype.push);
- * // => true
- *
- * _.isNative(_);
- * // => false
- */
-function isNative(value) {
-  if (value == null) {
-    return false;
-  }
-  if (isFunction(value)) {
-    return reIsNative.test(fnToString.call(value));
-  }
-  return isObjectLike(value) && reIsHostCtor.test(value);
-}
-
-module.exports = isNative;
-
-},{"../internal/isObjectLike":30,"./isFunction":36}],38:[function(require,module,exports){
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-module.exports = isObject;
-
-},{}],39:[function(require,module,exports){
-/**
- * Checks if `value` is `undefined`.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is `undefined`, else `false`.
- * @example
- *
- * _.isUndefined(void 0);
- * // => true
- *
- * _.isUndefined(null);
- * // => false
- */
-function isUndefined(value) {
-  return value === undefined;
-}
-
-module.exports = isUndefined;
-
-},{}],40:[function(require,module,exports){
-var baseFor = require('../internal/baseFor'),
-    createForIn = require('../internal/createForIn');
-
-/**
- * Iterates over own and inherited enumerable properties of an object invoking
- * `iteratee` for each property. The `iteratee` is bound to `thisArg` and invoked
- * with three arguments: (value, key, object). Iteratee functions may exit
- * iteration early by explicitly returning `false`.
- *
- * @static
- * @memberOf _
- * @category Object
- * @param {Object} object The object to iterate over.
- * @param {Function} [iteratee=_.identity] The function invoked per iteration.
- * @param {*} [thisArg] The `this` binding of `iteratee`.
- * @returns {Object} Returns `object`.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.forIn(new Foo, function(value, key) {
- *   console.log(key);
- * });
- * // => logs 'a', 'b', and 'c' (iteration order is not guaranteed)
- */
-var forIn = createForIn(baseFor);
-
-module.exports = forIn;
-
-},{"../internal/baseFor":12,"../internal/createForIn":20}],41:[function(require,module,exports){
-var baseForOwn = require('../internal/baseForOwn'),
-    createForOwn = require('../internal/createForOwn');
-
-/**
- * Iterates over own enumerable properties of an object invoking `iteratee`
- * for each property. The `iteratee` is bound to `thisArg` and invoked with
- * three arguments: (value, key, object). Iteratee functions may exit iteration
- * early by explicitly returning `false`.
- *
- * @static
- * @memberOf _
- * @category Object
- * @param {Object} object The object to iterate over.
- * @param {Function} [iteratee=_.identity] The function invoked per iteration.
- * @param {*} [thisArg] The `this` binding of `iteratee`.
- * @returns {Object} Returns `object`.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.forOwn(new Foo, function(value, key) {
- *   console.log(key);
- * });
- * // => logs 'a' and 'b' (iteration order is not guaranteed)
- */
-var forOwn = createForOwn(baseForOwn);
-
-module.exports = forOwn;
-
-},{"../internal/baseForOwn":13,"../internal/createForOwn":21}],42:[function(require,module,exports){
-var getNative = require('../internal/getNative'),
-    isArrayLike = require('../internal/isArrayLike'),
-    isObject = require('../lang/isObject'),
-    shimKeys = require('../internal/shimKeys');
-
-/* Native method references for those with the same name as other `lodash` methods. */
-var nativeKeys = getNative(Object, 'keys');
-
-/**
- * Creates an array of the own enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects. See the
- * [ES spec](http://ecma-international.org/ecma-262/6.0/#sec-object.keys)
- * for more details.
- *
- * @static
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keys(new Foo);
- * // => ['a', 'b'] (iteration order is not guaranteed)
- *
- * _.keys('hi');
- * // => ['0', '1']
- */
-var keys = !nativeKeys ? shimKeys : function(object) {
-  var Ctor = object == null ? undefined : object.constructor;
-  if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
-      (typeof object != 'function' && isArrayLike(object))) {
-    return shimKeys(object);
-  }
-  return isObject(object) ? nativeKeys(object) : [];
-};
-
-module.exports = keys;
-
-},{"../internal/getNative":23,"../internal/isArrayLike":27,"../internal/shimKeys":31,"../lang/isObject":38}],43:[function(require,module,exports){
-var isArguments = require('../lang/isArguments'),
-    isArray = require('../lang/isArray'),
-    isIndex = require('../internal/isIndex'),
-    isLength = require('../internal/isLength'),
-    isObject = require('../lang/isObject');
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Creates an array of the own and inherited enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects.
- *
- * @static
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keysIn(new Foo);
- * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
- */
-function keysIn(object) {
-  if (object == null) {
-    return [];
-  }
-  if (!isObject(object)) {
-    object = Object(object);
-  }
-  var length = object.length;
-  length = (length && isLength(length) &&
-    (isArray(object) || isArguments(object)) && length) || 0;
-
-  var Ctor = object.constructor,
-      index = -1,
-      isProto = typeof Ctor == 'function' && Ctor.prototype === object,
-      result = Array(length),
-      skipIndexes = length > 0;
-
-  while (++index < length) {
-    result[index] = (index + '');
-  }
-  for (var key in object) {
-    if (!(skipIndexes && isIndex(key, length)) &&
-        !(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-module.exports = keysIn;
-
-},{"../internal/isIndex":28,"../internal/isLength":29,"../lang/isArguments":34,"../lang/isArray":35,"../lang/isObject":38}],44:[function(require,module,exports){
-/**
- * This method returns the first argument provided to it.
- *
- * @static
- * @memberOf _
- * @category Utility
- * @param {*} value Any value.
- * @returns {*} Returns `value`.
- * @example
- *
- * var object = { 'user': 'fred' };
- *
- * _.identity(object) === object;
- * // => true
- */
-function identity(value) {
-  return value;
-}
-
-module.exports = identity;
-
-},{}],45:[function(require,module,exports){
+},{"lodash/collection/forEach":4,"lodash/lang/isFunction":35,"lodash/lang/isObject":37,"supermixer":45}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -10557,7 +10557,7 @@ exports.mixinChainFunctions = mixinChainFunctions;
 exports.merge = merge;
 exports.mergeUnique = mergeUnique;
 exports.mergeChainNonFunctions = mergeChainNonFunctions;
-},{"./mixer":46,"lodash/lang/isFunction":36}],46:[function(require,module,exports){
+},{"./mixer":46,"lodash/lang/isFunction":35}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -10656,7 +10656,7 @@ function mixer() {
 }
 
 module.exports = exports['default'];
-},{"lodash/lang/cloneDeep":33,"lodash/lang/isObject":38,"lodash/lang/isUndefined":39,"lodash/object/forIn":40,"lodash/object/forOwn":41}],47:[function(require,module,exports){
+},{"lodash/lang/cloneDeep":32,"lodash/lang/isObject":37,"lodash/lang/isUndefined":38,"lodash/object/forIn":39,"lodash/object/forOwn":40}],47:[function(require,module,exports){
 var self = self || {};// File:src/Three.js
 
 /**
@@ -51345,27 +51345,34 @@ let THREE = require('three');
 let Sprite = require('./sprite.js');
 let Debug = require('./debug.js');
 let Updatable = require('./updatable.js');
+let CustomShader = require('./custom_shader.js');
 
-let AnimatedSprite = stampit.compose(Updatable, Sprite)
+let AnimatedSprite = stampit.compose(Updatable, CustomShader)
   .methods({
     duration: function(){
       return this.animations[this.animationState][this.frame].duration;
+    },
+    gridPosition: function(){
+      return [Math.round(this.position.x), Math.round(this.position.y)];
     }
   })
   .refs({
+    spritePosition: [0, 0],
+    direction: 'right',
+    spriteLayout: [1, 1],
     frames: [{id:0, duration: 1}],
     animationState: false,
-    animations: {}
+    animations: {},
+    fixed: false,
+    size: new THREE.Vector2(1,1),
+    shaders: {
+      vertexShader: 'animated.vert',
+      fragmentShader: 'animated.frag'
+    }
   })
-  .init(function(){
-
-    this.animated = true;
-
-    this.frame = 0;
-    this.timeElapsed = 0;
-
-    this.registerUpdateCallback(function(dt) {
-      if (!this.animations[this.animationState]) return;
+  .methods({
+    animatedSpriteUpdateCallback: function(dt){
+      if (!this.animated || !this.animations[this.animationState]) return;
       this.timeElapsed += dt;
       this.frame = this.frame % this.animations[this.animationState].length; // in case animation state changes
 
@@ -51375,23 +51382,194 @@ let AnimatedSprite = stampit.compose(Updatable, Sprite)
       }
 
       this.material.uniforms['spritePosition']['value'].x = this.animations[this.animationState][this.frame].id;
-      if (this.direction){
-        this.material.uniforms['spriteFlipped'] = {type: 'i', value: this.direction == "left" };
-      }
+      this.material.uniforms['spriteFlipped'] = {type: 'i', value: this.direction == "left" };
       this.material.needsUpdate = true;
-    });
+    }
+  })
+  .init(function(){
+    this.animated = true;
+    this.spriteLayout = new THREE.Vector2(0, 0).fromArray(this.spriteLayout);
+    this.spritePosition = new THREE.Vector2(0, 0).fromArray(this.spritePosition);
+    this.size = new THREE.Vector2(1, 1);
+    this.spriteSize = new THREE.Vector2(1, 1);
+
+    this.frame = 0;
+    this.timeElapsed = 0;
+
+    this.uniforms = {
+      opacity: { type: "f", value: 1 },
+      tileLocation: { type: "v2", value: this.position },
+      screenSize: {type: "v2", value: this.game.renderer.screenSize},
+      size: {type: "v2", value: this.size },
+      spriteSize: {type: "v2", value: this.spriteSize },
+      spriteLayout: {type: "v2", value: this.spriteLayout },
+      spritePosition: {type: "v2", value: this.spritePosition },
+      fixedPosition: {type: "i", value: this.fixed}
+    };
+
+    this.setupCustomShader();
+    this.game.renderer.addToScene(this.mesh);
+
+    this.registerUpdateCallback(this.animatedSpriteUpdateCallback);
   });
 
 
 module.exports = AnimatedSprite;
 
-},{"./debug.js":51,"./sprite.js":75,"./updatable.js":78,"stampit":4,"three":47}],49:[function(require,module,exports){
+},{"./custom_shader.js":53,"./debug.js":54,"./sprite.js":81,"./updatable.js":84,"stampit":44,"three":47}],49:[function(require,module,exports){
+let stampit = require('stampit');
+
+let Animation = stampit()
+  .refs({
+    duration: 1,
+    speed: 1
+
+  })
+  .methods({
+    handleAnimation: function() {},
+    handleStart: function() {},
+    handleStop: function() {},
+    start: function(dt){
+      this.time = 0;
+      this.handleStart();
+      this.game.renderer.toAnimate.add(this);
+    },
+    stop: function(){
+      this.handleStop();
+      this.game.renderer.toAnimate.delete(this);
+    },
+    updateAnimation: function(dt){
+      this.time += dt;
+      if (this.time * this.speed > this.duration){
+        this.stop();
+      } else {
+        this.handleAnimation(dt);
+      }
+    }
+  })
+  .init(function(){
+    this.start();
+  });
+
+
+module.exports = Animation;
+
+},{"stampit":44}],50:[function(require,module,exports){
+let stampit = require('stampit');
+let THREE = require('three');
+let Animation = require('./animation.js');
+let Sprite = require('./sprite.js');
+let PhysicsEngine = require('./physics_engine.js');
+
+let BumpAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 5,
+    amplitude: 0.5,
+  })
+  .methods({
+    
+    handleStop: function() {
+      this.subject.position.copy(this.startPosition);
+    },
+    handleAnimation: function(dt) {
+      this.subject.position.y = this.startPosition.y + Math.sin(this.time * Math.PI * this.speed) * this.amplitude;
+    },
+    handleStart: function() {
+      this.startPosition = this.subject.position.clone();
+    }
+  });
+
+let BrickAnimation = stampit.compose(BumpAnimation);
+
+let NewMushroomAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 2.5,
+    amplitude: 1,
+  })
+  .methods({
+    handleStop: function() {
+      this.subject.position.copy(this.startPosition);
+      this.subject.velocity.copy(this.objVelocity);
+    },
+    handleAnimation: function(dt) {
+      this.subject.position.y = this.startPosition.y - 1 + this.time * this.speed * this.amplitude;
+    },
+    handleStart: function() {
+      this.startPosition = this.subject.position.clone();
+      this.objVelocity = this.subject.velocity.clone();
+      this.subject.velocity.set(0, 0);
+    }
+  });
+
+let Gravel = stampit.compose(Sprite)
+  .refs({
+    texture: "brick_piece.png"
+  })
+  .init(function(){
+    this.velocity     = new THREE.Vector2(0, 0).fromArray(this.velocity);
+    this.acceleration = new THREE.Vector2(0, -60);
+  });
+
+let BreakBrickAnimation = stampit.compose(Animation)
+  .methods({
+    handleStop: function() {
+      for (let piece of this.gravel){
+        this.game.renderer.deleteFromScene(piece.mesh);
+      }
+    },
+    handleAnimation: function(dt) {
+      for (let piece of this.gravel){
+        PhysicsEngine.newtonianResponse(piece, dt);
+      }
+    },
+    handleStart: function() {
+      this.gravel = [
+        Gravel.create({velocity: [6, 20], game: this.game, position: this.subject.position.clone() }),
+        Gravel.create({velocity: [-6, 20], game: this.game, position: this.subject.position.clone() }),
+        Gravel.create({velocity: [ 6, 10], game: this.game, position: this.subject.position.clone() }),
+        Gravel.create({velocity: [-6, 10], game: this.game, position: this.subject.position.clone() })
+      ];
+    }
+  });
+
+
+module.exports = {
+  BumpAnimation: BumpAnimation,
+  BrickAnimation: BrickAnimation,
+  NewMushroomAnimation: NewMushroomAnimation,
+  BreakBrickAnimation: BreakBrickAnimation
+}
+
+},{"./animation.js":49,"./physics_engine.js":73,"./sprite.js":81,"stampit":44,"three":47}],51:[function(require,module,exports){
 let stampit = require('stampit');
 let Sprite = require('./sprite.js');
 let AnimatedSprite = require('./animated_sprite.js');
 let THREE = require('three');
 let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
+let Animation = require('./animation.js');
+let {BumpAnimation, BrickAnimation, NewMushroomAnimation, BreakBrickAnimation} = require('./animations.js')
+let {Goomba, Mushroom} = require('./enemies.js')
+let PointsAnimation = require('./points_animation.js');
+let PhysicsEngine = require('./physics_engine.js');
+
+let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
+let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
+let PipeTopLeft     = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
+let PipeTopRight    = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
+let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
+let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
+
+let MushroomBlockAnimation = stampit.compose(BumpAnimation)
+  .methods({
+    handleStop: function(){
+      let shroomPosition = this.subject.position.clone();
+      shroomPosition.y += 1;
+      Mushroom.create({game: this.game, position: shroomPosition })
+      Block.create({game: this.game, position: this.subject.position.clone() })
+    }
+  });
+
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -51406,15 +51584,83 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
         {id: 0, duration: 0.05}
       ]
     },
-    spritePosition: new THREE.Vector2( 2, 0),
-    spriteLayout: new THREE.Vector2( 3, 1)
+    spritePosition: [2, 0],
+    spriteLayout: [3, 1]
   })
+  .methods({
+    transformToBlock: function(){
+      this.game.renderer.deleteFromScene(this.mesh);
+      return block = Block.create({game: this.game, position: this.position.clone() });
+    }
+  });
+
+let RotatingCoin = stampit.compose(AnimatedSprite)
+  .refs({
+    texture: 'coins_2.png',
+    animationState: "blinking",
+    animations: {
+      blinking: [
+        {id: 0, duration: 0.05},
+        {id: 1, duration: 0.05},
+        {id: 2, duration: 0.05},
+        {id: 3, duration: 0.05},
+      ]
+    },
+    spritePosition: [2, 0],
+    spriteLayout: [4, 1]
+  })
+  .init(function(){
+    this.velocity = new THREE.Vector2(0, 0),
+    this.acceleration =  new THREE.Vector2(0, 0)
+  });
+
+let CoinAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 0.5
+  })
+  .methods({
+    handleAnimation: function(dt){
+      PhysicsEngine.newtonianResponse(this.coin, dt);
+    },
+    handleStart: function(){
+      this.coin = RotatingCoin.create({game: this.game, position: this.subject.position.clone()});
+      this.coin.velocity.y = 20;
+      this.coin.acceleration.y = -60;
+    },
+    handleStop: function(){
+      this.game.renderer.deleteFromScene(this.coin.mesh);
+      PointsAnimation.create({game: this.game, subject: this.coin, points: this.points});
+    }
+  });
+
+
+let CoinBlock = stampit.compose(ItemBlock)
   .methods({
     collided: function(entity, direction) {
       if(direction == "below") {
-        console.log("I should produce an item! ^.^");
         sounds.coin.currentTime = 0;
         sounds.coin.play();
+        entity.coins += 1;
+        entity.score += 200;
+        entity.statsChanged();
+
+        let block = this.transformToBlock();
+        CoinAnimation.create({game: this.game, subject: block, points: 200});
+        //MushroomBlockAnimation.create({game: this.game, subject: block});
+      }
+    }
+  });
+
+let MushroomBlock = stampit.compose(ItemBlock)
+  .methods({
+    collided: function(entity, direction) {
+      if(direction == "below") {
+        sounds.powerUpAppears.currentTime = 0;
+        sounds.powerUpAppears.play();
+
+        
+        let block = this.transformToBlock();
+        MushroomBlockAnimation.create({game: this.game, subject: block});
       }
     }
   });
@@ -51432,30 +51678,41 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
         {id: 0, duration: 0.05}
       ]
     },
-    spritePosition: new THREE.Vector2( 2, 0),
-    spriteLayout: new THREE.Vector2( 3, 1)
+    spritePosition: [2, 0],
+    spriteLayout: [3, 1]
   });
 
-let Brick = stampit.compose(Sprite, Collidable)
-            .refs({ texture: 'brick.png' })
-            .methods({
-              collided: function(entity, direction) {
-                if(direction == "below") {
-                  sounds.breakBlock.currentTime = 0;
-                  sounds.breakBlock.play();
-                }
-              }
-            });
 
-let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
-let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
-let PipeTopLeft     = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
-let PipeTopRight    = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
-let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
-let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
+let Brick = stampit.compose(Sprite, Collidable)
+    .refs({
+      bumptime: 0,
+      texture: 'brick.png'
+    })
+    .methods({
+      bump: function(){
+        if (this.bumptime < 0.4){
+          this.position.y += Math.sin(bumptime);
+          this.bumptime = 0;
+        }
+      },
+      collided: function(entity, direction) {
+        if(direction == "below") {
+          sounds.breakBlock.currentTime = 0;
+          sounds.breakBlock.play();
+          if (entity.superMario){
+            BreakBrickAnimation.create({game: this.game, subject: this});
+            this.game.renderer.deleteFromScene(this.mesh);
+            PhysicsEngine.deleteObject(this);
+          } else {
+            BrickAnimation.create({game: this.game, subject: this});
+          }
+        }
+      }
+    });
 
 module.exports = {
-  ItemBlock: ItemBlock,
+  CoinBlock: CoinBlock,
+  MushroomBlock: MushroomBlock,
   Ground: Ground,
   Block: Block,
   Brick: Brick,
@@ -51466,7 +51723,7 @@ module.exports = {
   Coin: Coin
 }
 
-},{"./animated_sprite.js":48,"./collidable.js":50,"./sounds.js":74,"./sprite.js":75,"stampit":4,"three":47}],50:[function(require,module,exports){
+},{"./animated_sprite.js":48,"./animation.js":49,"./animations.js":50,"./collidable.js":52,"./enemies.js":55,"./physics_engine.js":73,"./points_animation.js":76,"./sounds.js":80,"./sprite.js":81,"stampit":44,"three":47}],52:[function(require,module,exports){
 let stampit = require('stampit');
 let PhysicsEngine = require('./physics_engine.js');
 
@@ -51482,7 +51739,75 @@ let Collidable = stampit()
   });
 
 module.exports = Collidable;
-},{"./physics_engine.js":70,"stampit":4}],51:[function(require,module,exports){
+},{"./physics_engine.js":73,"stampit":44}],53:[function(require,module,exports){
+let stampit = require('stampit');
+let THREE = require('three');
+let SpriteGeometry = require('./sprite_geometry.js');
+let ShaderLoader = require('./shader_loader.js');
+let TextureLoader = require('./texture_loader.js');
+
+let CustomShader = stampit()
+  .refs({
+  })
+  .methods({
+    shadersReceived: function(result){
+      this.material.vertexShader = result[0];
+      this.material.fragmentShader = result[1];
+      this.material.needsUpdate = true;
+    },
+    updateMaterial: function(texture){
+      texture.magFilter = THREE.NearestFilter;
+      texture.minFilter = THREE.NearestFilter;
+      this.material.uniforms.texture1 = { type: "t", value: texture };
+      this.material.needsUpdate = true;
+    },
+    updateUniforms: function(){
+      this.material.uniforms = this.uniforms;
+      for (let uniform in this.uniforms){
+        let propertyName = "set" + uniform.charAt(0).toUpperCase() + uniform.slice(1);
+        this.registerUniform(uniform, propertyName);
+        if (this.uniforms[uniform].type == "v2"){ //vector
+          propertyName = "set" + uniform.charAt(0).toUpperCase() + uniform.slice(1) + "X";
+          this.registerUniform(uniform, propertyName, "x");
+          propertyName = "set" + uniform.charAt(0).toUpperCase() + uniform.slice(1) + "Y";
+          this.registerUniform(uniform, propertyName, "y");
+        }
+      }
+      this.material.needsUpdate = true;
+    },
+    registerUniform: function(variable, register, property){
+      this[register] = (function(value){
+        if (property){
+          this[variable][property] = value;
+          this.material.uniforms[variable].value[property] = value;
+        } else {
+          this[variable] = value;
+          this.material.uniforms[variable].value = value;
+        }
+      }.bind(this));
+    },
+    setupCustomShader: function(){
+      this.material = new THREE.ShaderMaterial();
+      this.material.uniforms = this.uniforms;
+
+      this.geometry = SpriteGeometry.create({size: this.size});
+      this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
+
+      let shaders = [
+        ShaderLoader.load(this.shaders.vertexShader),
+        ShaderLoader.load(this.shaders.fragmentShader)
+      ];
+      TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
+      Promise.all(shaders).then(this.shadersReceived.bind(this));
+    }
+  })
+  .init(function(){
+
+  });
+
+module.exports = CustomShader;
+
+},{"./shader_loader.js":78,"./sprite_geometry.js":82,"./texture_loader.js":83,"stampit":44,"three":47}],54:[function(require,module,exports){
 let stampit = require('stampit');
 
 let debugParent = document.getElementById('debugParent');
@@ -51499,7 +51824,7 @@ let Debug = function(what, value){
 
 module.exports = Debug;
 
-},{"stampit":4}],52:[function(require,module,exports){
+},{"stampit":44}],55:[function(require,module,exports){
 let stampit = require('stampit');
 let Sprite = require('./sprite.js');
 let AnimatedSprite = require('./animated_sprite.js');
@@ -51508,38 +51833,24 @@ let Updateable = require('./updatable.js');
 let Entity = require('./entity.js');
 let Collidable = require('./collidable.js');
 let Debug = require('./debug.js');
+let SimpleAI = require('./simple_ai.js');
+let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
 
-let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
+let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
   .refs({
+    name: "Goomba",
+    deadly: true,
     texture: 'goomba.png',
     animationState: "walking",
     animations: {
       walking: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
       dead: [{id:2, duration: 1}]
     },
-    walkSpeed: 3.0,
-    onGround: false,
-    dead: false
-
+    spritePosition: [0, 0],
+    spriteLayout: [3, 1],
+    walkSpeed: 3
   })
   .methods({
-    collided: function(block, direction){
-      switch(direction){
-        case 'left':
-          this.position.x = block.position.x + block.size.x;
-          this.velocity.x = -this.velocity.x;
-          break;
-        case 'right':
-          this.position.x = block.position.x - block.size.x;
-          this.velocity.x = -this.velocity.x;
-          break;
-        case 'below':
-          this.position.y = block.position.y + block.size.y;
-          this.velocity.y = 0;
-          this.onGround = true;
-          break;
-      }
-    },
     die: function(){
       this.dead = true;
       this.velocity.set(0, 0);
@@ -51548,29 +51859,24 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity)
         this.delete();
       }.bind(this)),1000);
     }
+  });
+
+let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
+  .refs({
+    name: "Mushroom",
+    texture: 'mushroom.png',
+    walkSpeed: -2
   })
   .init(function(){
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 0, 0) };
-    this.velocity.x = -this.walkSpeed;
-
-    this.registerUpdateCallback(function(dt) {
-      this.acceleration.y = -60;
-      this.oldPosition = this.position.clone();
-      this.position.addScaledVector(this.velocity, dt)
-      if (this.onGround == false){
-        this.position.y += this.acceleration.y * dt * dt * .5;
-        this.velocity.y += this.acceleration.y * dt;
-      }
-      this.updateCollisions(dt);
-    });
+    NewMushroomAnimation.create({game: this.game, subject: this});
   });
 
 module.exports = {
-  Goomba: Goomba
+  Goomba: Goomba,
+  Mushroom: Mushroom
 }
 
-},{"./animated_sprite.js":48,"./collidable.js":50,"./debug.js":51,"./entity.js":53,"./sprite.js":75,"./updatable.js":78,"stampit":4,"three":47}],53:[function(require,module,exports){
+},{"./animated_sprite.js":48,"./animations.js":50,"./collidable.js":52,"./debug.js":54,"./entity.js":56,"./simple_ai.js":79,"./sprite.js":81,"./updatable.js":84,"stampit":44,"three":47}],56:[function(require,module,exports){
 let PhysicsEngine = require('./physics_engine.js');
 let stampit = require('stampit');
 let THREE = require('three');
@@ -51579,6 +51885,12 @@ let Debug = require('./debug.js');
 let Entity = stampit()
   .methods({
     collided: function(block, direction){ },
+    remove: function(){
+      this.game.renderer.deleteFromScene(this.mesh);
+      this.mesh.geometry.dispose();
+      this.mesh.material.dispose();
+      this.game.entities.delete(this);
+    },
     updateCollisions: function(dt){
       if (this.velocity == undefined) return;
       let position = [Math.round(this.oldPosition.x), Math.round(this.oldPosition.y)];
@@ -51625,11 +51937,12 @@ let Entity = stampit()
   init(function(){
     this.velocity = new THREE.Vector2(0, 0),
     this.acceleration =  new THREE.Vector2(0, 0)
+    this.game.entities.add(this);
   });
 
 module.exports = Entity;
 
-},{"./debug.js":51,"./physics_engine.js":70,"stampit":4,"three":47}],54:[function(require,module,exports){
+},{"./debug.js":54,"./physics_engine.js":73,"stampit":44,"three":47}],57:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let SpriteGeometry = require('./sprite_geometry.js');
@@ -51680,13 +51993,11 @@ var FlagPole = stampit
 
 module.exports = FlagPole;
 
-},{"./collidable.js":50,"./entity.js":53,"./shader_loader.js":73,"./sprite.js":75,"./sprite_geometry.js":76,"./texture_loader.js":77,"./updatable.js":78,"stampit":4,"three":47}],55:[function(require,module,exports){
+},{"./collidable.js":52,"./entity.js":56,"./shader_loader.js":78,"./sprite.js":81,"./sprite_geometry.js":82,"./texture_loader.js":83,"./updatable.js":84,"stampit":44,"three":47}],58:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
-let SpriteGeometry = require('./sprite_geometry.js');
-let ShaderLoader = require('./shader_loader.js');
-let TextureLoader = require('./texture_loader.js');
-let Sprite = require('./sprite.js');
+
+let CustomShader = require('./custom_shader.js');
 
 let charMap = [
         ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', 'x', '!'],
@@ -51694,17 +52005,16 @@ let charMap = [
         ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
       ];
 
-var Font = stampit.compose(Sprite)
+var Font = stampit.compose(CustomShader)
   .refs({
-    spriteLayout: new THREE.Vector2(16, 3),
-    spritePosition: new THREE.Vector2(0, 0),
-    position: new THREE.Vector2(5, 5),
+    spriteLayout: [16, 3],
+    spritePosition: [0, 0],
     text: "NO TEXT",
     texture: "font_white.png",
-    shaders: [
-      ShaderLoader.load('font.vert'),
-      ShaderLoader.load('font.frag')
-    ],
+    shaders: {
+      vertexShader: 'font.vert',
+      fragmentShader: 'font.frag'
+    },
     fixed: true,
     fontSize: 2,
     size: new THREE.Vector2(1,1)
@@ -51742,16 +52052,32 @@ var Font = stampit.compose(Sprite)
       this.material.uniforms.textData = { type: "t", value: dataTexture };
       this.material.uniforms.textLength = { type: "f", value: length };
       this.material.needsUpdate = true;
+    },
+    gridPosition: function(){
+      return [Math.round(this.position.x), Math.round(this.position.y)];
     }
   })
   .init(function(){
-    this.material.uniforms.fontSize = {type: "f", value: this.fontSize};
+    this.spriteLayout = new THREE.Vector2(0, 0).fromArray(this.spriteLayout);
+    this.spritePosition = new THREE.Vector2(0, 0).fromArray(this.spritePosition);
+    this.uniforms = {
+      fontSize: {type: "f", value: this.fontSize},
+      tileLocation: { type: "v2", value: this.position },
+      screenSize: {type: "v2", value: this.game.renderer.screenSize},
+      tileSize: {type: "v2", value: this.size },
+      spriteLayout: {type: "v2", value: this.spriteLayout },
+      spritePosition: {type: "v2", value: this.spritePosition },
+      fixedPosition: {type: "i", value: this.fixed}
+    };
+
+    this.setupCustomShader();
+    this.game.renderer.addToScene(this.mesh);
     this.setText(this.text);
   });
 
 module.exports = Font;
 
-},{"./shader_loader.js":73,"./sprite.js":75,"./sprite_geometry.js":76,"./texture_loader.js":77,"stampit":4,"three":47}],56:[function(require,module,exports){
+},{"./custom_shader.js":53,"stampit":44,"three":47}],59:[function(require,module,exports){
 let stampit             = require('stampit');
 let THREE               = require('three');
 let gameState           = require('./game_state.js');
@@ -51759,12 +52085,13 @@ let GameRules           = require('./game_rules.js');
 
 var Game = stampit()
   .refs({
-    entities: [],
+    entities: new Set(),
     gameRules: GameRules.create()
   })
   .methods({
     start: function(){
       this.gameloop();
+      gameState.togglePause();
     },
     loadLevel: function(level){
       this.level = level;
@@ -51782,11 +52109,13 @@ var Game = stampit()
           this.renderer.camera.position.x = (4 - this.player.position.x);
         }
 
-        this.player.update(dt);
+        if (this.renderer.updating){
+          this.player.update(dt);
+          this.gui.updateTime();
+          this.gameRules.update(this.player, this.entities, gameState);
+        }
         this.renderer.render(dt);
-        this.gui.updateTime();
 
-        this.gameRules.update(this.player, this.entities, gameState);
       }
 
       requestAnimationFrame(this.gameloop.bind(this));
@@ -51797,42 +52126,55 @@ var Game = stampit()
 
 module.exports = Game;
 
-},{"./game_rules.js":57,"./game_state.js":58,"stampit":4,"three":47}],57:[function(require,module,exports){
+},{"./game_rules.js":60,"./game_state.js":61,"stampit":44,"three":47}],60:[function(require,module,exports){
 let stampit = require('stampit');
 let sounds = require('./sounds.js');
 let PhysicsEngine = require('./physics_engine.js');
+let PointsAnimation = require('./points_animation.js');
 
 let GameRules = stampit.compose()
   .refs({
     time: 400, 
   })
   .init().methods({
+  resetTime: function(){
+   this.time = 400;
+  },
   update: function(player, entities, game) {
     this.time -= 1/60 / 0.65;
-    if (player.position.y < -2) {
+    if (this.time < 0 || player.position.y < -2) {
       player.die();
     }
 
     for(let entity of entities) {
       if (entity.dead) continue;
       if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
-        //difference in current position and top of goomba
-        let dy = (player.position.y - entity.position.y - entity.size.y);
+        switch(entity.name){
+          case 'Goomba':
+            if (PhysicsEngine.hitFromAbove(player, entity)){
+              player.killed(entity);
+              entity.die();
+              player.velocity.y = 17;
+              sounds.stomp.play();
+            } else {
+              if (player.invulnerable){
+                break;
+              }
 
-        //time since it had that y position, assuming no acceleration
-        let time = (dy / -player.velocity.y);
-
-        //x position at that time
-        let x = player.position.x + player.velocity.x * time;
-
-        //that time point should be in the past. The position should be (player + size < x < entity + size)
-        if (time < 0 && entity.position.x - player.size.x < x && x < entity.position.x + entity.size.x){
-          player.killed(entity);
-          entity.die();
-          player.velocity.y = 17;
-          sounds.stomp.play();
-        } else {
-          player.die();
+              if (player.superMario){
+                player.shrink();
+              } else {
+                player.die();
+              }
+            }
+            break;
+          case 'Mushroom':
+            player.grow();
+            PointsAnimation.create({game: player.game, points: 1000, subject: entity});
+            entity.remove();
+            player.score += 1000;
+            player.statsChanged();
+            break;
         }
       }
     }
@@ -51841,7 +52183,7 @@ let GameRules = stampit.compose()
 
 module.exports = GameRules;
 
-},{"./physics_engine.js":70,"./sounds.js":74,"stampit":4}],58:[function(require,module,exports){
+},{"./physics_engine.js":73,"./points_animation.js":76,"./sounds.js":80,"stampit":44}],61:[function(require,module,exports){
 let sounds = require('./sounds.js');
 
 let gameState = {
@@ -51869,7 +52211,7 @@ let gameState = {
 };
 
 module.exports = gameState;
-},{"./sounds.js":74}],59:[function(require,module,exports){
+},{"./sounds.js":80}],62:[function(require,module,exports){
 let {menuStream} = require("./input_stream.js");
 let gameState = require('./game_state.js');
 
@@ -51886,7 +52228,7 @@ document.getElementById('stop-music').onclick = function() {
 };
 
 
-},{"./game_state.js":58,"./input_stream.js":62}],60:[function(require,module,exports){
+},{"./game_state.js":61,"./input_stream.js":65}],63:[function(require,module,exports){
 GamepadState  = function() {
   this.controllers = {};
   this.debug = true; // Set to true for some debug out in console
@@ -51949,7 +52291,7 @@ GamepadState.prototype._buttonPressed = function(b) {
 }
 
 module.exports = new GamepadState;
-},{}],61:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 var keyboard = require('./keyboard_state.js');
 var gamepad = require('./gamepad_state.js');
 
@@ -51989,7 +52331,7 @@ InputState.prototype.pressed = function(button_id) {
 // Triangle => 3
 //
 module.exports = new InputState;
-},{"./gamepad_state.js":60,"./keyboard_state.js":64}],62:[function(require,module,exports){
+},{"./gamepad_state.js":63,"./keyboard_state.js":67}],65:[function(require,module,exports){
 let inputState = require("./input_state.js");
 let Kefir = require('kefir');
 
@@ -52017,7 +52359,7 @@ module.exports = {
   jumpStream: jumpStream,
   inputState: inputState,
 };
-},{"./input_state.js":61,"kefir":3}],63:[function(require,module,exports){
+},{"./input_state.js":64,"kefir":3}],66:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Font = require('./font.js');
@@ -52035,6 +52377,7 @@ let Interface = stampit()
   .methods({
     updateScore: function(){
       this.score.setText(padZero(this.player.score, 6));
+      this.coins.setText("x" + padZero(this.player.coins, 2));
     },
     updateTime: function(){
       this.time.setText(padZero(Math.round(this.game.gameRules.time),3));
@@ -52044,10 +52387,10 @@ let Interface = stampit()
 
     Font.create({position: new THREE.Vector2(5,15), text: this.player.name, game: this.game});
     this.score = Font.create({text: padZero(this.player.score, 6), position: new THREE.Vector2(5,14.5), game: this.game});
-    this.player.stateChanged = this.updateScore.bind(this);
+    this.player.statsChanged = this.updateScore.bind(this);
 
 
-    Font.create({position: new THREE.Vector2(10,14.5), text: ("x" + padZero(this.player.coins, 2)),    game: this.game});
+    this.coins = Font.create({position: new THREE.Vector2(10,14.5), text: ("x" + padZero(this.player.coins, 2)),    game: this.game});
     Coin.create({position: new THREE.Vector2(9,14.5), game: this.game, fixed: true});
 
 
@@ -52063,7 +52406,7 @@ let Interface = stampit()
 
 module.exports = Interface;
 
-},{"./blocks.js":49,"./font.js":55,"stampit":4,"three":47}],64:[function(require,module,exports){
+},{"./blocks.js":51,"./font.js":58,"stampit":44,"three":47}],67:[function(require,module,exports){
 KeyboardState  = function(){
   // to store the current state
   this.keyCodes = {};
@@ -52144,12 +52487,12 @@ KeyboardState.prototype.pressed  = function(keyDesc){
 }
 
 module.exports = new KeyboardState;
-},{}],65:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 let stampit             = require('stampit');
 let THREE               = require('three');
-let {ItemBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight} = require('./blocks.js');
+let {CoinBlock, MushroomBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight} = require('./blocks.js');
 let FlagPole = require('./flag_pole.js');
-let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, ItemBlock, FlagPole];
+let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, CoinBlock, FlagPole, MushroomBlock];
 
 let Level = stampit()
   .refs({
@@ -52174,7 +52517,7 @@ let Level = stampit()
 module.exports = Level;
 
 
-},{"./blocks.js":49,"./flag_pole.js":54,"stampit":4,"three":47}],66:[function(require,module,exports){
+},{"./blocks.js":51,"./flag_pole.js":57,"stampit":44,"three":47}],69:[function(require,module,exports){
 let stampit = require('stampit');
 let Level = require('../level.js');
 let {Goomba} = require('../enemies.js')
@@ -52191,7 +52534,7 @@ let levelData = [
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 3, 8, 3, 8, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 3, 10, 3, 8, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 9, 0, 0, 1],
@@ -52206,8 +52549,7 @@ let Level1_1 = stampit.compose(Level)
   .methods({
     loadEntities: function(game){
       for(var i=-2; i<3; i++) {
-        let goom = Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 7)})
-        game.entities.push(goom);
+        Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 7)})
       }
     }
   });
@@ -52215,15 +52557,22 @@ let Level1_1 = stampit.compose(Level)
 
 module.exports = Level1_1;
 
-},{"../enemies.js":52,"../level.js":65,"stampit":4,"three":47}],67:[function(require,module,exports){
+},{"../enemies.js":55,"../level.js":68,"stampit":44,"three":47}],70:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let AnimatedSprite = require('./animated_sprite.js');
 let Debug = require('./debug.js');
+let SpriteGeometry = require('./sprite_geometry.js');
+let ShaderLoader = require('./shader_loader.js');
+let {InvulnerableAnimation, GrowAnimation, ShrinkAnimation, DeathAnimation} = require('./player_animations.js');
+let sounds = require('./sounds.js');
 
 let Mario = stampit.compose(AnimatedSprite)
   .refs({
-    texture: 'mario_big.png',
+    spriteLayout: [21, 3],
+    spritePosition: [2, 0],
+    texture: 'mario.png',
+    superMario: false,
     animationState: 'standing',
     animations: {
       standing: [
@@ -52244,7 +52593,7 @@ let Mario = stampit.compose(AnimatedSprite)
         {id: 6, duration: 0.0}
       ]
     },
-    size: new THREE.Vector2(1, 2)
+    size: new THREE.Vector2(1, 1)
   })
   .methods({
     duration: function(){
@@ -52253,29 +52602,40 @@ let Mario = stampit.compose(AnimatedSprite)
       }
       return this.animations[this.animationState][this.frame].duration;
     },
-    selectAnimation: function(name, facingLeft){
-      if (this.animationState == name)
-        return;
-
-      this.frame = 0;
-      this.timeElapsed = 0;
-      this.animationState = name;
-      if (facingLeft !== undefined){
-        this.material.uniforms['spriteFlipped'] = {type: 'i', value: facingLeft };
+    grow: function(){
+      if (!this.superMario){
+        this.superMario = true;
+        sounds.powerUp.currentTime = 0;
+        sounds.powerUp.playbackRate = 1;
+        sounds.powerUp.play();
+        GrowAnimation.create({game: this.game, subject: this});
       }
-      this.material.needsUpdate = true;
+    },
+    die: function() {
+      if (!this.dead){
+        sounds.die.play();
+        DeathAnimation.create({game: this.game, subject: this});
+      }
+
+      this.dead = true;
+    },
+    shrink: function(){
+      InvulnerableAnimation.create({game: this.game, subject: this});
+      ShrinkAnimation.create({game: this.game, subject: this});
+      sounds.pipe.currentTime = 0;
+      sounds.pipe.playbackRate = 1;
+      sounds.pipe.play();
+      this.superMario = false;
     }
   })
   .init(function(){
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 21, 1) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
-    this.selectAnimation('standing', false);
+    this.updateUniforms();
   });
 
 
 module.exports = Mario;
 
-},{"./animated_sprite.js":48,"./debug.js":51,"stampit":4,"three":47}],68:[function(require,module,exports){
+},{"./animated_sprite.js":48,"./debug.js":54,"./player_animations.js":75,"./shader_loader.js":78,"./sounds.js":80,"./sprite_geometry.js":82,"stampit":44,"three":47}],71:[function(require,module,exports){
 let debug = require('./debug.js');
 let stampit = require('stampit');
 
@@ -52310,7 +52670,7 @@ let MouseState = stampit()
 
 module.exports = MouseState;
 
-},{"./debug.js":51,"stampit":4}],69:[function(require,module,exports){
+},{"./debug.js":54,"stampit":44}],72:[function(require,module,exports){
 let MouseState = require("./mouse_state.js");
 let Kefir = require('kefir');
 let sounds = require('./sounds')
@@ -52350,7 +52710,7 @@ shakeStream.onValue(() => {
 });
 
 module.exports = mouseStream;
-},{"./mouse_state.js":68,"./sounds":74,"kefir":3}],70:[function(require,module,exports){
+},{"./mouse_state.js":71,"./sounds":80,"kefir":3}],73:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 
@@ -52374,11 +52734,32 @@ let PhysicsEngine = stampit()
     addObject: function(obj){
       this.objects[this.key(obj)] = obj;
     },
+    deleteObject: function(obj){
+      delete this.objects[this.key(obj)];
+    },
     checkPosition: function(x, y){
       let key = x + "x" + y;
       if (key in this.objects)
         return this.objects[key];
       return false;
+    },
+    newtonianResponse: function(obj, dt){
+      obj.position.addScaledVector(obj.velocity, dt);
+      obj.position.addScaledVector(obj.acceleration, dt * dt);
+      obj.velocity.addScaledVector(obj.acceleration, dt);
+    },
+    hitFromAbove: function(entity_a, entity_b){
+        //difference in current position and top of goomba
+        let dy = (entity_a.position.y - entity_b.position.y - entity_b.size.y);
+
+        //time since it had that y position, assuming no acceleration
+        let time = (dy / -entity_a.velocity.y);
+
+        //x position at that time
+        let x = entity_a.position.x + entity_a.velocity.x * time;
+
+        //that time point should be in the past. The position should be (player + size < x < entity + size)
+        return (time < 0 && entity_b.position.x - entity_a.size.x < x && x < entity_b.position.x + entity_b.size.x);
     }
 
 
@@ -52386,7 +52767,7 @@ let PhysicsEngine = stampit()
 
 module.exports = PhysicsEngine.create();
 
-},{"stampit":4,"three":47}],71:[function(require,module,exports){
+},{"stampit":44,"three":47}],74:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Mario = require('./mario.js');
@@ -52394,6 +52775,7 @@ let {jumpStream, inputState} = require("./input_stream.js");
 let sounds = require('./sounds.js');
 let Entity = require('./entity.js');
 let Debug = require('./debug.js');
+let PointsAnimation = require('./points_animation.js');
 
 let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario, Entity)
@@ -52413,7 +52795,8 @@ let Player1 = stampit.compose(Mario, Entity)
     dead: false,
     score: 0,
     coins: 0,
-    streak: 0
+    streak: 0,
+    invulnerable: false
 
   })
   .init(function(){
@@ -52451,28 +52834,23 @@ let Player1 = stampit.compose(Mario, Entity)
   })
   .methods({
     killed: function(entity){
-      this.score += 100 * Math.pow(2, this.streak);
+      let addedScore = 100 * Math.pow(2, this.streak);
+      this.score += addedScore;
+      PointsAnimation.create({game: this.game, subject: entity, points: addedScore});
       this.streak += 1;
-      if (this.stateChanged){
-        this.stateChanged();
+      if (this.statsChanged){
+        this.statsChanged();
       }
     },
-    die: function() {
-      if (!this.dead){
-        sounds.die.play();
-
-        window.setTimeout(function() { // Respawn the player after 3 seconds
-          this.position.x = 6;
-          this.position.y = 5;
-          this.acceleration.y = 0;
-          this.velocity.y = 18;
-          this.velocity.x = 2;
-          sounds.kick.play();
-          this.dead = false;
-        }.bind(this), 3250)
-      }
-
-      this.dead = true;
+    reset: function(){
+      this.position.x = 6;
+      this.position.y = 5;
+      this.acceleration.y = 0;
+      this.velocity.y = 18;
+      this.velocity.x = 2;
+      this.game.gameRules.resetTime();
+      sounds.kick.play();
+      this.dead = false;
     },
 
     collided: function(block, direction){
@@ -52480,6 +52858,7 @@ let Player1 = stampit.compose(Mario, Entity)
         case 'above':
           this.position.y = block.position.y - this.size.y;
           this.velocity.y = 0;
+          this.timeSinceJump = this.jumpLength;
           break;
         case 'below':
           this.position.y = block.position.y + block.size.y;
@@ -52500,12 +52879,6 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     },
     update: function(dt){
-      if (this.dead) {
-        this.animationState = "dead";
-        this.position.y -= 0.02;
-        return;
-      }
-
       this.oldPosition = this.position.clone();
 
       this.acceleration.x = 0;
@@ -52562,7 +52935,190 @@ let Player1 = stampit.compose(Mario, Entity)
 
 module.exports = Player1;
 
-},{"./debug.js":51,"./entity.js":53,"./input_stream.js":62,"./mario.js":67,"./sounds.js":74,"stampit":4,"three":47}],72:[function(require,module,exports){
+},{"./debug.js":54,"./entity.js":56,"./input_stream.js":65,"./mario.js":70,"./points_animation.js":76,"./sounds.js":80,"stampit":44,"three":47}],75:[function(require,module,exports){
+let stampit = require('stampit');
+let THREE = require('three');
+let Animation = require('./animation.js');
+
+let InvulnerableAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 2
+  })
+  .methods({
+    handleStop: function() {
+      this.subject.invulnerable = false;
+      this.subject.setOpacity(1);
+    },
+    handleAnimation: function(dt) {
+      this.timeSinceAnimation += dt;
+      if (this.timeSinceAnimation < this.animationSpeed) return;
+      this.timeSinceAnimation = 0;
+
+      if (this.opaque){
+        this.subject.setOpacity(1);
+      } else {
+        this.subject.setOpacity(0.5);
+      }
+      this.opaque = !this.opaque;
+    },
+    handleStart: function() {
+      this.opaque = false;
+      this.subject.invulnerable = true;
+      this.timeSinceAnimation = 0;
+      this.animationSpeed = 0.1;
+    }
+
+  });
+
+let GrowAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 1,
+  })
+  .methods({
+    handleStop: function() {
+      this.subject.animated = true;
+      this.game.renderer.updating = true;
+      this.subject.setSizeY(2);
+      this.subject.setSpriteSizeY(2);
+      this.subject.setSpritePosition(new THREE.Vector2( 2, 1));
+    },
+    handleAnimation: function(dt) {
+      this.timeSinceAnimation += dt;
+      if (this.timeSinceAnimation < this.animationSpeed) return;
+      this.timeSinceAnimation = 0;
+
+      if (this.big){
+        this.subject.setSizeY(this.subjectSize + this.time);
+        this.subject.setSpriteSizeY(1.5);
+        this.subject.setSpritePosition(new THREE.Vector2( 15, 1));
+      } else {
+        this.subject.setSizeY(this.subjectSize);
+        this.subject.setSpriteSizeY(this.subjectSize);
+        this.subject.setSpritePosition(new THREE.Vector2( 2, 0));
+      }
+      this.big = !this.big;
+    },
+    handleStart: function() {
+      this.subject.animated = false;
+      this.game.renderer.updating = false;
+      this.subjectSize = this.subject.size.y;
+      this.big = true;
+      this.timeSinceAnimation = 0;
+      this.animationSpeed = 0.1;
+    }
+  });
+
+let ShrinkAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 1,
+  })
+  .methods({
+    handleStop: function() {
+      this.subject.animated = true;
+      this.game.renderer.updating = true;
+      this.subject.setSizeY(1);
+      this.subject.setSpriteSizeY(1);
+      this.subject.setSpritePosition(new THREE.Vector2( 2, 0));
+    },
+    handleAnimation: function(dt) {
+      this.timeSinceAnimation += dt;
+      if (this.timeSinceAnimation < this.animationSpeed) return;
+      this.timeSinceAnimation = 0;
+
+      if (this.big){
+        this.subject.setSizeY(2 - this.time);
+        this.subject.setSpriteSizeY(1.5);
+        this.subject.setSpritePosition(new THREE.Vector2( 15, 1));
+      } else {
+        this.subject.setSizeY(1);
+        this.subject.setSpriteSizeY(1);
+        this.subject.setSpritePosition(new THREE.Vector2( 11, 0));
+      }
+      this.big = !this.big;
+    },
+    handleStart: function() {
+      this.subject.animated = false;
+      this.game.renderer.updating = false;
+      this.subjectSize = this.subject.size.y;
+      this.big = false;
+      this.timeSinceAnimation = 0;
+      this.animationSpeed = 0.1;
+    }
+  });
+
+let DeathAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 3.25,
+  })
+  .methods({
+    handleStop: function() {
+      this.subject.animated = true;
+      this.game.renderer.updating = true;
+      this.subject.reset();
+    },
+    handleAnimation: function(dt) {
+      this.subject.animatedSpriteUpdateCallback(dt);
+      if (this.time > this.deathDelay){
+        if (this.kick == false){
+          this.subject.velocity.set(0,25);
+          this.subject.acceleration.x = 0;
+          this.kick = true;
+        }
+        this.subject.position.addScaledVector(this.subject.velocity, dt)
+        this.subject.position.addScaledVector(this.subject.acceleration, dt * dt)
+        this.subject.velocity.addScaledVector(this.subject.acceleration, dt)
+      }
+    },
+    handleStart: function() {
+      this.subject.setSpritePosition(new THREE.Vector2( 6, 0));
+      this.deathDelay = 0.5;
+      this.subject.animated = false;
+      this.kick = false;
+      this.game.renderer.updating = false;
+    }
+  });
+
+module.exports = {
+  InvulnerableAnimation: InvulnerableAnimation,
+  GrowAnimation: GrowAnimation,
+  ShrinkAnimation: ShrinkAnimation,
+  DeathAnimation: DeathAnimation
+}
+
+},{"./animation.js":49,"stampit":44,"three":47}],76:[function(require,module,exports){
+let stampit = require('stampit');
+let Sprite = require('./sprite.js');
+let THREE = require('three');
+let Animation = require('./animation.js');
+
+let PointsAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 0.5,
+    points: 100
+  })
+  .methods({
+    pointToTexture: function(points){
+      if (points > 1000){
+        return "one_up.png";
+      } else {
+        return "points_" + points + ".png";
+      }
+    },
+    handleStart: function(){
+      this.point = Sprite.create({game: this.game, texture: this.pointToTexture(this.points), position: this.subject.position.clone()});
+    },
+    handleAnimation: function(dt){
+      this.point.position.y += 2 * dt;
+    },
+    handleStop: function(){
+      this.game.renderer.deleteFromScene(this.point.mesh);
+    }
+  });
+
+
+module.exports = PointsAnimation;
+
+},{"./animation.js":49,"./sprite.js":81,"stampit":44,"three":47}],77:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Sprite = require('./sprite.js');
@@ -52585,11 +53141,12 @@ let Selector = stampit.compose(Sprite)
 
 module.exports = Selector;
 
-},{"./sprite.js":75,"stampit":4,"three":47}],73:[function(require,module,exports){
+},{"./sprite.js":81,"stampit":44,"three":47}],78:[function(require,module,exports){
 var Promise = require("bluebird");
 
 function ShaderLoader(){
   this.shaders = {};
+  this.shaderPromises = {};
   // this.import = function(shadersList, listener) {
   //   this.shadersList = shadersList;
   //   this.n = 0;
@@ -52603,6 +53160,9 @@ function ShaderLoader(){
 
   this.load = function(filename){
     var me = this;
+    if (this.shaderPromises[filename]){
+      return this.shaderPromises[filename];
+    }
 
     var promise = new Promise(function(resolve, reject) {
       var xhttp = new XMLHttpRequest();
@@ -52615,6 +53175,8 @@ function ShaderLoader(){
       xhttp.open("GET", "shaders/" + filename, true);
       xhttp.send();
     });
+
+    this.shaderPromises[filename] = promise;
 
     return promise;
   }
@@ -52631,7 +53193,54 @@ function ShaderLoader(){
 
 module.exports = new ShaderLoader;
 
-},{"bluebird":2}],74:[function(require,module,exports){
+},{"bluebird":2}],79:[function(require,module,exports){
+let stampit = require('stampit');
+let THREE = require('three');
+
+let SimpleAI = stampit()
+  .refs({
+    walkSpeed: 1,
+    onGround: false,
+    dead: false
+  })
+  .methods({
+    collided: function(block, direction){
+      switch(direction){
+        case 'left':
+          this.position.x = block.position.x + block.size.x;
+          this.velocity.x = -this.velocity.x;
+          break;
+        case 'right':
+          this.position.x = block.position.x - block.size.x;
+          this.velocity.x = -this.velocity.x;
+          break;
+        case 'below':
+          this.position.y = block.position.y + block.size.y;
+          this.velocity.y = 0;
+          this.onGround = true;
+          break;
+      }
+    },
+  })
+  .init(function(){
+    this.velocity.x = -this.walkSpeed;
+
+    this.registerUpdateCallback(function(dt) {
+      this.acceleration.y = -60;
+      this.oldPosition = this.position.clone();
+      this.position.addScaledVector(this.velocity, dt)
+      if (this.onGround == false){
+        this.position.y += this.acceleration.y * dt * dt * .5;
+        this.velocity.y += this.acceleration.y * dt;
+      }
+      this.updateCollisions(dt);
+    });
+  });
+
+
+module.exports = SimpleAI;
+
+},{"stampit":44,"three":47}],80:[function(require,module,exports){
 var pauseSound = new Audio('sounds/smb_pause.wav');
 var jumpSmall = new Audio('sounds/smb_jump-small.wav');
 var coin = new Audio('sounds/smb_coin.wav');
@@ -52641,6 +53250,9 @@ var stomp = new Audio('sounds/smb_stomp.wav');
 var die = new Audio('sounds/smb_mariodie.wav');
 var stageClear = new Audio('sounds/smb_stage_clear.wav');
 var breakBlock = new Audio('sounds/smb_breakblock.wav');
+var powerUp = new Audio('sounds/smb_powerup.wav');
+var powerUpAppears = new Audio('sounds/smb_powerup_appears.wav');
+var pipe = new Audio('sounds/smb_pipe.wav');
 
 module.exports = {
   pauseSound: pauseSound,
@@ -52651,64 +53263,39 @@ module.exports = {
   die: die,
   stomp: stomp,
   stageClear: stageClear,
-  breakBlock: breakBlock
+  breakBlock: breakBlock,
+  powerUp: powerUp,
+  powerUpAppears: powerUpAppears,
+  pipe: pipe
 }
-},{}],75:[function(require,module,exports){
+
+},{}],81:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
-let SpriteGeometry = require('./sprite_geometry.js');
-let ShaderLoader = require('./shader_loader.js');
-let TextureLoader = require('./texture_loader.js');
+let CustomShader = require('./custom_shader.js');
 
 let loader = new THREE.TextureLoader();
-let Sprite = stampit()
+let Sprite = stampit.compose(CustomShader)
   .refs({
-    spriteLayout: new THREE.Vector2(1, 1),
-    spritePosition: new THREE.Vector2(0, 0),
-    position: new THREE.Vector2(0, 0),
     fixed: false,
-    shaders: [
-      ShaderLoader.load('tile.vert'),
-      ShaderLoader.load('tile.frag')
-    ],
-    size: new THREE.Vector2(1,1)
-
+    size: new THREE.Vector2(1, 1),
+    shaders: {
+      vertexShader: 'tile.vert',
+      fragmentShader: 'tile.frag'
+    }
   })
   .methods({
-    shadersReceived: function(result){
-      this.material.vertexShader = result[0];
-      this.material.fragmentShader = result[1];
-      this.material.needsUpdate = true;
-    },
-    updateMaterial: function(texture){
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      this.material.uniforms.texture1 = { type: "t", value: texture };
-      this.material.needsUpdate = true;
-    },
     gridPosition: function(){
-      return [Math.round(this.position.x / this.size.x), Math.round(this.position.y / this.size.y)];
+      return [Math.round(this.position.x), Math.round(this.position.y)];
     }
   })
   .init(function(){
-    this.material = new THREE.ShaderMaterial();
-    if (!this.game){
-      console.log(this);
-    }
-    this.material.uniforms = {
+    this.uniforms = {
       tileLocation: { type: "v2", value: this.position },
-      screenSize: {type: "v2", value: new THREE.Vector2(this.game.renderer.width, this.game.renderer.height) },
-      tileSize: {type: "v2", value: this.size },
-      spriteLayout: {type: "v2", value: this.spriteLayout },
-      spritePosition: {type: "v2", value: this.spritePosition },
-      spriteFlipped: {type: 'i', value: false },
+      screenSize: {type: "v2", value: this.game.renderer.screenSize},
       fixedPosition: {type: "i", value: this.fixed}
     };
-    this.geometry = SpriteGeometry.create({size: this.size});
-    this.mesh = new THREE.Mesh(this.geometry.geometry, this.material);
-
-    TextureLoader.get(this.texture).then(this.updateMaterial.bind(this));
-    Promise.all(this.shaders).then(this.shadersReceived.bind(this));
+    this.setupCustomShader();
     this.game.renderer.addToScene(this.mesh);
   });
 
@@ -52717,7 +53304,7 @@ let Sprite = stampit()
 module.exports = Sprite;
 
 
-},{"./shader_loader.js":73,"./sprite_geometry.js":76,"./texture_loader.js":77,"stampit":4,"three":47}],76:[function(require,module,exports){
+},{"./custom_shader.js":53,"stampit":44,"three":47}],82:[function(require,module,exports){
 var stampit = require('stampit');
 var THREE = require('three');
 
@@ -52733,6 +53320,7 @@ let rectShape = function(size){
   
 
 var SpriteGeometry = stampit().refs({
+  size: new THREE.Vector2(1, 1)
 }).init(function(){
   this.geometry = new THREE.ShapeGeometry(rectShape(this.size));
 });
@@ -52740,7 +53328,7 @@ var SpriteGeometry = stampit().refs({
 module.exports = SpriteGeometry;
 
 
-},{"stampit":4,"three":47}],77:[function(require,module,exports){
+},{"stampit":44,"three":47}],83:[function(require,module,exports){
 var THREE = require('three');
 
 let loader = new THREE.TextureLoader();
@@ -52763,7 +53351,7 @@ let TextureLoader = {
 }
 module.exports = TextureLoader;
 
-},{"three":47}],78:[function(require,module,exports){
+},{"three":47}],84:[function(require,module,exports){
 let stampit = require('stampit');
 
 let Updatable = stampit
@@ -52789,7 +53377,7 @@ let Updatable = stampit
 
 module.exports = Updatable;
 
-},{"stampit":4}],79:[function(require,module,exports){
+},{"stampit":44}],85:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Sprite = require('./sprite.js');
@@ -52801,11 +53389,18 @@ let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBo
 let WebGLRenderer = stampit()
   .methods({
     render: function(dt){
-      this.renderer.render(this.scene, this.camera);
 
-      for (let item of this.toUpdate) {
-        item.updateSprite(dt);
+      if (this.updating){
+        for (let item of this.toUpdate) {
+          item.updateSprite(dt);
+        };
+      }
+
+      for (let item of this.toAnimate) {
+        item.updateAnimation(dt);
       };
+
+      this.renderer.render(this.scene, this.camera);
     },
     addToScene: function(obj){
       this.scene.add(obj);
@@ -52815,11 +53410,14 @@ let WebGLRenderer = stampit()
     }
   })
   .init(function(){
+    this.updating = true;
     this.scene = new THREE.Scene();
     this.toUpdate = new Set();
+    this.toAnimate = new Set();
     this.renderer = new THREE.WebGLRenderer({canvas: this.canvas, alpha: true});
     this.width = this.renderer.domElement.offsetWidth;
     this.height = this.renderer.domElement.offsetHeight;
+    this.screenSize = new THREE.Vector2(this.width, this.height);
     this.renderer.setSize(this.width, this.height);
     this.width /= 2;
     this.height /= 2;
@@ -52830,7 +53428,7 @@ let WebGLRenderer = stampit()
 
 module.exports = WebGLRenderer;
 
-},{"./blocks.js":49,"./flag_pole.js":54,"./physics_engine.js":70,"./sprite.js":75,"stampit":4,"three":47}],80:[function(require,module,exports){
+},{"./blocks.js":51,"./flag_pole.js":57,"./physics_engine.js":73,"./sprite.js":81,"stampit":44,"three":47}],86:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
