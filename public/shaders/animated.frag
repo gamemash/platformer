@@ -5,6 +5,7 @@ uniform vec2 spriteLayout;
 uniform vec2 spritePosition;
 uniform vec2 spriteSize;
 uniform int spriteFlipped;
+uniform float opacity;
 
 void main(){
   //gl_FragColor = vec4(textureCoord / 50.0, 0, 1);
@@ -18,6 +19,7 @@ void main(){
   if (result.w < 0.01){
     discard;
   } else {
+    result.a = opacity;
     gl_FragColor = result;
   }
 }

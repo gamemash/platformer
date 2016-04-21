@@ -39,6 +39,7 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
     this.timeElapsed = 0;
 
     this.uniforms = {
+      opacity: { type: "f", value: 1 },
       tileLocation: { type: "v2", value: this.position },
       screenSize: {type: "v2", value: this.game.renderer.screenSize},
       tileSize: {type: "v2", value: this.size },
