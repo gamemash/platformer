@@ -28,6 +28,22 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
       fragmentShader: 'animated.frag'
     }
   })
+  .methods({
+    animatedSpriteUpdateCallback: function(dt){
+      if (!this.animated || !this.animations[this.animationState]) return;
+      this.timeElapsed += dt;
+      this.frame = this.frame % this.animations[this.animationState].length; // in case animation state changes
+
+      if (this.timeElapsed > this.duration()) {
+        this.frame = (this.frame + 1) % this.animations[this.animationState].length;;
+        this.timeElapsed = 0;
+      }
+
+      this.material.uniforms['spritePosition']['value'].x = this.animations[this.animationState][this.frame].id;
+      this.material.uniforms['spriteFlipped'] = {type: 'i', value: this.direction == "left" };
+      this.material.needsUpdate = true;
+    }
+  })
   .init(function(){
     this.animated = true;
     this.spriteLayout = new THREE.Vector2(0, 0).fromArray(this.spriteLayout);
@@ -52,20 +68,7 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
     this.setupCustomShader();
     this.game.renderer.addToScene(this.mesh);
 
-    this.registerUpdateCallback(function(dt) {
-      if (!this.animated || !this.animations[this.animationState]) return;
-      this.timeElapsed += dt;
-      this.frame = this.frame % this.animations[this.animationState].length; // in case animation state changes
-
-      if (this.timeElapsed > this.duration()) {
-        this.frame = (this.frame + 1) % this.animations[this.animationState].length;;
-        this.timeElapsed = 0;
-      }
-
-      this.material.uniforms['spritePosition']['value'].x = this.animations[this.animationState][this.frame].id;
-      this.material.uniforms['spriteFlipped'] = {type: 'i', value: this.direction == "left" };
-      this.material.needsUpdate = true;
-    });
+    this.registerUpdateCallback(this.animatedSpriteUpdateCallback);
   });
 
 

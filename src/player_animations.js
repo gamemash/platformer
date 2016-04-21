@@ -108,8 +108,41 @@ let ShrinkAnimation = stampit.compose(Animation)
     }
   });
 
+let DeathAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 3.25,
+  })
+  .methods({
+    handleStop: function() {
+      this.subject.animated = true;
+      this.game.renderer.updating = true;
+      this.subject.reset();
+    },
+    handleAnimation: function(dt) {
+      this.subject.animatedSpriteUpdateCallback(dt);
+      if (this.time > this.deathDelay){
+        if (this.kick == false){
+          this.subject.velocity.set(0,25);
+          this.subject.acceleration.x = 0;
+          this.kick = true;
+        }
+        this.subject.position.addScaledVector(this.subject.velocity, dt)
+        this.subject.position.addScaledVector(this.subject.acceleration, dt * dt)
+        this.subject.velocity.addScaledVector(this.subject.acceleration, dt)
+      }
+    },
+    handleStart: function() {
+      this.subject.setSpritePosition(new THREE.Vector2( 6, 0));
+      this.deathDelay = 0.5;
+      this.subject.animated = false;
+      this.kick = false;
+      this.game.renderer.updating = false;
+    }
+  });
+
 module.exports = {
   InvulnerableAnimation: InvulnerableAnimation,
   GrowAnimation: GrowAnimation,
-  ShrinkAnimation: ShrinkAnimation
+  ShrinkAnimation: ShrinkAnimation,
+  DeathAnimation: DeathAnimation
 }

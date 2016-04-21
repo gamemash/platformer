@@ -69,22 +69,14 @@ let Player1 = stampit.compose(Mario, Entity)
         this.stateChanged();
       }
     },
-    die: function() {
-      if (!this.dead){
-        sounds.die.play();
-
-        window.setTimeout(function() { // Respawn the player after 3 seconds
-          this.position.x = 6;
-          this.position.y = 5;
-          this.acceleration.y = 0;
-          this.velocity.y = 18;
-          this.velocity.x = 2;
-          sounds.kick.play();
-          this.dead = false;
-        }.bind(this), 3250)
-      }
-
-      this.dead = true;
+    reset: function(){
+      this.position.x = 6;
+      this.position.y = 5;
+      this.acceleration.y = 0;
+      this.velocity.y = 18;
+      this.velocity.x = 2;
+      sounds.kick.play();
+      this.dead = false;
     },
 
     collided: function(block, direction){
@@ -113,12 +105,6 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     },
     update: function(dt){
-      if (this.dead) {
-        this.animationState = "dead";
-        this.position.y -= 0.02;
-        return;
-      }
-
       this.oldPosition = this.position.clone();
 
       this.acceleration.x = 0;
