@@ -2,6 +2,7 @@ var Promise = require("bluebird");
 
 function ShaderLoader(){
   this.shaders = {};
+  this.shaderPromises = {};
   // this.import = function(shadersList, listener) {
   //   this.shadersList = shadersList;
   //   this.n = 0;
@@ -15,6 +16,9 @@ function ShaderLoader(){
 
   this.load = function(filename){
     var me = this;
+    if (this.shaderPromises[filename]){
+      return this.shaderPromises[filename];
+    }
 
     var promise = new Promise(function(resolve, reject) {
       var xhttp = new XMLHttpRequest();
@@ -27,6 +31,8 @@ function ShaderLoader(){
       xhttp.open("GET", "shaders/" + filename, true);
       xhttp.send();
     });
+
+    this.shaderPromises[filename] = promise;
 
     return promise;
   }
