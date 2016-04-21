@@ -1,6 +1,6 @@
 let stampit = require('stampit');
 let Level = require('../level.js');
-let {Goomba} = require('../enemies.js')
+let {Goomba, Mushroom, Koopa} = require('../enemies.js')
 let THREE               = require('three');
 
 let levelData = [
@@ -29,8 +29,9 @@ let Level1_1 = stampit.compose(Level)
   .methods({
     loadEntities: function(game){
       for(var i=-2; i<3; i++) {
-        Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 7)})
+        //Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 7)})
       }
+      Koopa.create({game: game, position: new THREE.Vector2(10, 3)});
     }
   });
 

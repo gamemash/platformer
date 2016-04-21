@@ -22,9 +22,10 @@ let GameRules = stampit.compose()
       if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
         switch(entity.name){
           case 'Goomba':
+          case 'Koopa':
             if (PhysicsEngine.hitFromAbove(player, entity)){
               player.killed(entity);
-              entity.die();
+              entity.hitBy(player);
               player.velocity.y = 17;
               sounds.stomp.play();
             } else {

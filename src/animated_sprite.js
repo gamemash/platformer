@@ -21,8 +21,8 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
     frames: [{id:0, duration: 1}],
     animationState: false,
     animations: {},
+    spriteFlipped: false,
     fixed: false,
-    size: new THREE.Vector2(1,1),
     shaders: {
       vertexShader: 'animated.vert',
       fragmentShader: 'animated.frag'
@@ -62,7 +62,8 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
       spriteSize: {type: "v2", value: this.spriteSize },
       spriteLayout: {type: "v2", value: this.spriteLayout },
       spritePosition: {type: "v2", value: this.spritePosition },
-      fixedPosition: {type: "i", value: this.fixed}
+      fixedPosition: {type: "i", value: this.fixed},
+      spriteFlipped: {type: "i", value: this.spriteFlipped}
     };
 
     this.setupCustomShader();
