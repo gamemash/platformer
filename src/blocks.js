@@ -42,15 +42,35 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
     spriteLayout: [3, 1]
   })
   .methods({
+    transformToBlock: function(){
+      this.game.renderer.deleteFromScene(this.mesh);
+      return block = Block.create({game: this.game, position: this.position.clone() });
+    }
+  });
+
+let CoinBlock = stampit.compose(ItemBlock)
+  .methods({
     collided: function(entity, direction) {
       if(direction == "below") {
         console.log("I should produce an item! ^.^");
         sounds.coin.currentTime = 0;
         sounds.coin.play();
 
+        this.transformToBlock();
+        //MushroomBlockAnimation.create({game: this.game, subject: block});
+      }
+    }
+  });
+
+let MushroomBlock = stampit.compose(ItemBlock)
+  .methods({
+    collided: function(entity, direction) {
+      if(direction == "below") {
+        sounds.powerUpAppears.currentTime = 0;
+        sounds.powerUpAppears.play();
+
         
-        this.game.renderer.deleteFromScene(this.mesh);
-        let block = Block.create({game: this.game, position: this.position.clone() });
+        let block = this.transformToBlock();
         MushroomBlockAnimation.create({game: this.game, subject: block});
       }
     }
@@ -96,7 +116,8 @@ let Brick = stampit.compose(Sprite, Collidable)
     });
 
 module.exports = {
-  ItemBlock: ItemBlock,
+  CoinBlock: CoinBlock,
+  MushroomBlock: MushroomBlock,
   Ground: Ground,
   Block: Block,
   Brick: Brick,

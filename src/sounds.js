@@ -8,6 +8,7 @@ var die = new Audio('sounds/smb_mariodie.wav');
 var stageClear = new Audio('sounds/smb_stage_clear.wav');
 var breakBlock = new Audio('sounds/smb_breakblock.wav');
 var powerUp = new Audio('sounds/smb_powerup.wav');
+var powerUpAppears = new Audio('sounds/smb_powerup_appears.wav');
 var pipe = new Audio('sounds/smb_pipe.wav');
 
 module.exports = {
@@ -21,5 +22,6 @@ module.exports = {
   stageClear: stageClear,
   breakBlock: breakBlock,
   powerUp: powerUp,
+  powerUpAppears: powerUpAppears,
   pipe: pipe
 }
