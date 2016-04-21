@@ -3,7 +3,8 @@ let THREE                               = require('three');
 let {mouseMoveStream, mouseClickStream} = require('./mouse_stream.js');
 let Selector                            = require('./selector.js');
 let _                                   = require('underscore');
-let Blocks = require('./blocks.js');
+let PhysicsEngine                       = require('./physics_engine.js');
+let Blocks                              = require('./blocks.js');
 
 function convertToGridCoordinatesForRenderer(renderer, pixelCoordinates) {
   let newCoordinates = new THREE.Vector2()
@@ -39,13 +40,15 @@ let Level = stampit
     delete: function(coordinates) {
       console.log(coordinates);
       delete this.data[coordinates.x + ":" + coordinates.y];
-      this.game.renderer.deleteFromScene(this.loadedSprites[coordinates.x + ":" + coordinates.y].mesh)
+      PhysicsEngine.removeObject(this.loadedSprites[coordinates.x + ":" + coordinates.y]);
+      this.game.renderer.deleteFromScene(this.loadedSprites[coordinates.x + ":" + coordinates.y].mesh);
+      delete this.loadedSprites[coordinates.x + ":" + coordinates.y];
     },
     export: function() {
       console.log(JSON.stringify(this.data));
     },
     clear: function() {
-      let scene = this.game.renderer.scene
+      let scene = this.game.renderer.scene;
       for(var i = scene.children.length - 1; i >= 0 ; i--){
         let obj = scene.children[i];
         console.log(obj)
@@ -91,12 +94,13 @@ let LevelEditor = stampit
     mouseMoveGridStream.onValue(this.selector.moveToCoordinates.bind(this.selector));
 
     let clickPositionStream = mouseMoveGridStream.sampledBy(mouseClickStream.filter((x) => {return x}));
+    mouseClickStream.log();
     let dragPositionStream = mouseMoveStream.map(convertToGridCoordinates).filterBy(mouseClickStream);
 
     let level = Level.create({game: this.game});
     window.level = level;
 
-    clickPositionStream
+    clickPositionStream.log()
       .merge(dragPositionStream)
       .skipDuplicates(_.isEqual)
       .onValue((coordinates) => {
@@ -111,7 +115,13 @@ let LevelEditor = stampit
       }
     }
 
+    this.addSpacerToToolbox();
     this.addBlockToToolbox('Eraser');
+    this.addBlockToToolbox('Clear');
+    this.addSpacerToToolbox();
+    this.addBlockToToolbox('Save');
+    this.addBlockToToolbox('Load');
+
 
   })
   .methods({
@@ -123,6 +133,12 @@ let LevelEditor = stampit
       }
     },
 
+    addSpacerToToolbox: function() {
+      element = document.createElement("div");
+      element.className = "spacer";
+      this.toolbox.appendChild(element);
+    },
+
     addBlockToToolbox: function(key) {
       element = document.createElement("div");
       element.className = "block";
@@ -132,7 +148,6 @@ let LevelEditor = stampit
       }
 
       element.id = key;
-      // element.innerHTML = key;
       this.toolbox.appendChild(element);
       element.addEventListener("click", (evt) => {
         this.selectTool(evt.target.id);
