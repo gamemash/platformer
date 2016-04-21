@@ -42,7 +42,7 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
       opacity: { type: "f", value: 1 },
       tileLocation: { type: "v2", value: this.position },
       screenSize: {type: "v2", value: this.game.renderer.screenSize},
-      tileSize: {type: "v2", value: this.size },
+      size: {type: "v2", value: this.size },
       spriteSize: {type: "v2", value: this.spriteSize },
       spriteLayout: {type: "v2", value: this.spriteLayout },
       spritePosition: {type: "v2", value: this.spritePosition },

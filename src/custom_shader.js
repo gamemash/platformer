@@ -35,10 +35,11 @@ let CustomShader = stampit()
     },
     registerUniform: function(variable, register, property){
       this[register] = (function(value){
-        this[variable] = value;
         if (property){
+          this[variable][property] = value;
           this.material.uniforms[variable].value[property] = value;
         } else {
+          this[variable] = value;
           this.material.uniforms[variable].value = value;
         }
       }.bind(this));

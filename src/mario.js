@@ -44,7 +44,7 @@ let GrowAnimation = stampit.compose(Animation)
     handleStop: function() {
       this.subject.animated = true;
       this.game.renderer.updating = true;
-      this.subject.uniforms.tileSize.value = this.subject.size = new THREE.Vector2(1, 2);
+      this.subject.setSizeY(2);
       this.subject.setSpriteSizeY(2);
       this.subject.setSpritePosition(new THREE.Vector2( 2, 1));
     },
@@ -54,11 +54,11 @@ let GrowAnimation = stampit.compose(Animation)
       this.timeSinceAnimation = 0;
 
       if (this.big){
-        this.subject.uniforms.tileSize.value.y = this.subject.size.y = this.subjectSize + this.time;
+        this.subject.setSizeY(this.subjectSize + this.time);
         this.subject.setSpriteSizeY(1.5);
         this.subject.setSpritePosition(new THREE.Vector2( 15, 1));
       } else {
-        this.subject.uniforms.tileSize.value.y = this.subject.size.y = this.subjectSize;
+        this.subject.setSizeY(this.subjectSize);
         this.subject.setSpriteSizeY(this.subjectSize);
         this.subject.setSpritePosition(new THREE.Vector2( 2, 0));
       }
@@ -82,7 +82,7 @@ let ShrinkAnimation = stampit.compose(Animation)
     handleStop: function() {
       this.subject.animated = true;
       this.game.renderer.updating = true;
-      this.subject.uniforms.tileSize.value = this.subject.size = new THREE.Vector2(1, 1);
+      this.subject.setSizeY(1);
       this.subject.setSpriteSizeY(1);
       this.subject.setSpritePosition(new THREE.Vector2( 2, 0));
     },
@@ -92,11 +92,11 @@ let ShrinkAnimation = stampit.compose(Animation)
       this.timeSinceAnimation = 0;
 
       if (this.big){
-        this.subject.uniforms.tileSize.value.y = this.subject.size.y = 2 - this.time;
+        this.subject.setSizeY(2 - this.time);
         this.subject.setSpriteSizeY(1.5);
         this.subject.setSpritePosition(new THREE.Vector2( 15, 1));
       } else {
-        this.subject.uniforms.tileSize.value.y = this.subject.size.y = 1;
+        this.subject.setSizeY(1);
         this.subject.setSpriteSizeY(1);
         this.subject.setSpritePosition(new THREE.Vector2( 11, 0));
       }
