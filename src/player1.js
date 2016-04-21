@@ -5,6 +5,7 @@ let {jumpStream, inputState} = require("./input_stream.js");
 let sounds = require('./sounds.js');
 let Entity = require('./entity.js');
 let Debug = require('./debug.js');
+let PointsAnimation = require('./points_animation.js');
 
 let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario, Entity)
@@ -24,7 +25,8 @@ let Player1 = stampit.compose(Mario, Entity)
     dead: false,
     score: 0,
     coins: 0,
-    streak: 0
+    streak: 0,
+    invulnerable: false
 
   })
   .init(function(){
@@ -62,28 +64,22 @@ let Player1 = stampit.compose(Mario, Entity)
   })
   .methods({
     killed: function(entity){
-      this.score += 100 * Math.pow(2, this.streak);
+      let addedScore = 100 * Math.pow(2, this.streak);
+      this.score += addedScore;
+      PointsAnimation.create({game: this.game, subject: entity, points: addedScore});
       this.streak += 1;
-      if (this.stateChanged){
-        this.stateChanged();
+      if (this.statsChanged){
+        this.statsChanged();
       }
     },
-    die: function() {
-      if (!this.dead){
-        sounds.die.play();
-
-        window.setTimeout(function() { // Respawn the player after 3 seconds
-          this.position.x = 6;
-          this.position.y = 5;
-          this.acceleration.y = 0;
-          this.velocity.y = 18;
-          this.velocity.x = 2;
-          sounds.kick.play();
-          this.dead = false;
-        }.bind(this), 3250)
-      }
-
-      this.dead = true;
+    reset: function(){
+      this.position.x = 6;
+      this.position.y = 5;
+      this.acceleration.y = 0;
+      this.velocity.y = 18;
+      this.velocity.x = 2;
+      sounds.kick.play();
+      this.dead = false;
     },
 
     collided: function(block, direction){
@@ -112,12 +108,6 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     },
     update: function(dt){
-      if (this.dead) {
-        this.animationState = "dead";
-        this.position.y -= 0.02;
-        return;
-      }
-
       this.oldPosition = this.position.clone();
 
       this.acceleration.x = 0;

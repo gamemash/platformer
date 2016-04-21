@@ -1,9 +1,7 @@
 let stampit = require('stampit');
 let THREE = require('three');
-let SpriteGeometry = require('./sprite_geometry.js');
-let ShaderLoader = require('./shader_loader.js');
-let TextureLoader = require('./texture_loader.js');
-let Sprite = require('./sprite.js');
+
+let CustomShader = require('./custom_shader.js');
 
 let charMap = [
         ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', 'x', '!'],
@@ -11,17 +9,16 @@ let charMap = [
         ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
       ];
 
-var Font = stampit.compose(Sprite)
+var Font = stampit.compose(CustomShader)
   .refs({
-    spriteLayout: new THREE.Vector2(16, 3),
-    spritePosition: new THREE.Vector2(0, 0),
-    position: new THREE.Vector2(5, 5),
+    spriteLayout: [16, 3],
+    spritePosition: [0, 0],
     text: "NO TEXT",
     texture: "font_white.png",
-    shaders: [
-      ShaderLoader.load('font.vert'),
-      ShaderLoader.load('font.frag')
-    ],
+    shaders: {
+      vertexShader: 'font.vert',
+      fragmentShader: 'font.frag'
+    },
     fixed: true,
     fontSize: 2,
     size: new THREE.Vector2(1,1)
@@ -59,10 +56,26 @@ var Font = stampit.compose(Sprite)
       this.material.uniforms.textData = { type: "t", value: dataTexture };
       this.material.uniforms.textLength = { type: "f", value: length };
       this.material.needsUpdate = true;
+    },
+    gridPosition: function(){
+      return [Math.round(this.position.x), Math.round(this.position.y)];
     }
   })
   .init(function(){
-    this.material.uniforms.fontSize = {type: "f", value: this.fontSize};
+    this.spriteLayout = new THREE.Vector2(0, 0).fromArray(this.spriteLayout);
+    this.spritePosition = new THREE.Vector2(0, 0).fromArray(this.spritePosition);
+    this.uniforms = {
+      fontSize: {type: "f", value: this.fontSize},
+      tileLocation: { type: "v2", value: this.position },
+      screenSize: {type: "v2", value: this.game.renderer.screenSize},
+      tileSize: {type: "v2", value: this.size },
+      spriteLayout: {type: "v2", value: this.spriteLayout },
+      spritePosition: {type: "v2", value: this.spritePosition },
+      fixedPosition: {type: "i", value: this.fixed}
+    };
+
+    this.setupCustomShader();
+    this.game.renderer.addToScene(this.mesh);
     this.setText(this.text);
   });
 

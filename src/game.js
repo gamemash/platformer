@@ -5,12 +5,13 @@ let GameRules           = require('./game_rules.js');
 
 var Game = stampit()
   .refs({
-    entities: [],
+    entities: new Set(),
     gameRules: GameRules.create()
   })
   .methods({
     start: function(){
       this.gameloop();
+      gameState.togglePause();
     },
     loadLevel: function(level){
       this.level = level;
@@ -28,7 +29,9 @@ var Game = stampit()
           this.renderer.camera.position.x = (4 - this.player.position.x);
         }
 
-        this.player.update(dt);
+        if (this.renderer.updating){
+          this.player.update(dt);
+        }
         this.renderer.render(dt);
         this.gui.updateTime();
 

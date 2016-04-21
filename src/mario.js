@@ -2,10 +2,17 @@ let stampit = require('stampit');
 let THREE = require('three');
 let AnimatedSprite = require('./animated_sprite.js');
 let Debug = require('./debug.js');
+let SpriteGeometry = require('./sprite_geometry.js');
+let ShaderLoader = require('./shader_loader.js');
+let {InvulnerableAnimation, GrowAnimation, ShrinkAnimation, DeathAnimation} = require('./player_animations.js');
+let sounds = require('./sounds.js');
 
 let Mario = stampit.compose(AnimatedSprite)
   .refs({
-    texture: 'mario_big.png',
+    spriteLayout: [21, 3],
+    spritePosition: [2, 0],
+    texture: 'mario.png',
+    superMario: false,
     animationState: 'standing',
     animations: {
       standing: [
@@ -26,7 +33,7 @@ let Mario = stampit.compose(AnimatedSprite)
         {id: 6, duration: 0.0}
       ]
     },
-    size: new THREE.Vector2(1, 2)
+    size: new THREE.Vector2(1, 1)
   })
   .methods({
     duration: function(){
@@ -35,23 +42,34 @@ let Mario = stampit.compose(AnimatedSprite)
       }
       return this.animations[this.animationState][this.frame].duration;
     },
-    selectAnimation: function(name, facingLeft){
-      if (this.animationState == name)
-        return;
-
-      this.frame = 0;
-      this.timeElapsed = 0;
-      this.animationState = name;
-      if (facingLeft !== undefined){
-        this.material.uniforms['spriteFlipped'] = {type: 'i', value: facingLeft };
+    grow: function(){
+      if (!this.superMario){
+        this.superMario = true;
+        sounds.powerUp.currentTime = 0;
+        sounds.powerUp.playbackRate = 1;
+        sounds.powerUp.play();
+        GrowAnimation.create({game: this.game, subject: this});
       }
-      this.material.needsUpdate = true;
+    },
+    die: function() {
+      if (!this.dead){
+        sounds.die.play();
+        DeathAnimation.create({game: this.game, subject: this});
+      }
+
+      this.dead = true;
+    },
+    shrink: function(){
+      InvulnerableAnimation.create({game: this.game, subject: this});
+      ShrinkAnimation.create({game: this.game, subject: this});
+      sounds.pipe.currentTime = 0;
+      sounds.pipe.playbackRate = 1;
+      sounds.pipe.play();
+      this.superMario = false;
     }
   })
   .init(function(){
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 21, 1) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
-    this.selectAnimation('standing', false);
+    this.updateUniforms();
   });
 
 

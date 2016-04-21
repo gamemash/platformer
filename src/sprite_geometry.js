@@ -13,6 +13,7 @@ let rectShape = function(size){
   
 
 var SpriteGeometry = stampit().refs({
+  size: new THREE.Vector2(1, 1)
 }).init(function(){
   this.geometry = new THREE.ShapeGeometry(rectShape(this.size));
 });
