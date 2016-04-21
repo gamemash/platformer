@@ -4,6 +4,7 @@ let AnimatedSprite = require('./animated_sprite.js');
 let THREE = require('three');
 let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
+let Animation = require('./animation.js');
 let {BumpAnimation, BrickAnimation} = require('./animations.js')
 let {Goomba, Mushroom} = require('./enemies.js')
 
@@ -48,15 +49,62 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
     }
   });
 
+
+let RotatingCoin = stampit.compose(AnimatedSprite)
+  .refs({
+    texture: 'coins_2.png',
+    animationState: "blinking",
+    animations: {
+      blinking: [
+        {id: 0, duration: 0.05},
+        {id: 1, duration: 0.05},
+        {id: 2, duration: 0.05},
+        {id: 3, duration: 0.05},
+      ]
+    },
+    spritePosition: [2, 0],
+    spriteLayout: [4, 1]
+  })
+  .init(function(){
+    this.velocity = new THREE.Vector2(0, 0),
+    this.acceleration =  new THREE.Vector2(0, 0)
+  });
+
+let CoinAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 0.5
+  })
+  .methods({
+    handleAnimation: function(dt){
+      this.coin.position.addScaledVector(this.coin.velocity, dt);
+      this.coin.position.addScaledVector(this.coin.acceleration, dt * dt);
+      this.coin.velocity.addScaledVector(this.coin.acceleration, dt);
+    },
+    handleStart: function(){
+      this.coin = RotatingCoin.create({game: this.game, position: this.subject.position.clone()});
+      this.coin.velocity.y = 20;
+      this.coin.acceleration.y = -60;
+    },
+    handleStop: function(){
+      this.game.renderer.deleteFromScene(this.coin.mesh);
+    }
+  });
+
+
 let CoinBlock = stampit.compose(ItemBlock)
   .methods({
     collided: function(entity, direction) {
       if(direction == "below") {
-        console.log("I should produce an item! ^.^");
+        console.log(entity);
         sounds.coin.currentTime = 0;
         sounds.coin.play();
+        entity.coins += 1;
+        entity.statsChanged();
 
-        this.transformToBlock();
+
+
+        let block = this.transformToBlock();
+        CoinAnimation.create({game: this.game, subject: block});
         //MushroomBlockAnimation.create({game: this.game, subject: block});
       }
     }

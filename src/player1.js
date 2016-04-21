@@ -65,8 +65,8 @@ let Player1 = stampit.compose(Mario, Entity)
     killed: function(entity){
       this.score += 100 * Math.pow(2, this.streak);
       this.streak += 1;
-      if (this.stateChanged){
-        this.stateChanged();
+      if (this.statsChanged){
+        this.statsChanged();
       }
     },
     reset: function(){
