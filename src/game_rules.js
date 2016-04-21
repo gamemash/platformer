@@ -19,7 +19,6 @@ let GameRules = stampit.compose()
       if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
         switch(entity.name){
           case 'Goomba':
-            Debug('Invulnerable', player.invulnerable);
             if (PhysicsEngine.hitFromAbove(player, entity)){
               player.killed(entity);
               entity.die();

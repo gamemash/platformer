@@ -24,7 +24,8 @@ let Player1 = stampit.compose(Mario, Entity)
     dead: false,
     score: 0,
     coins: 0,
-    streak: 0
+    streak: 0,
+    invulnerable: false
 
   })
   .init(function(){
