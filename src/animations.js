@@ -1,6 +1,8 @@
 let stampit = require('stampit');
 let THREE = require('three');
 let Animation = require('./animation.js');
+let Sprite = require('./sprite.js');
+let PhysicsEngine = require('./physics_engine.js');
 
 let BumpAnimation = stampit.compose(Animation)
   .refs({
@@ -42,10 +44,41 @@ let NewMushroomAnimation = stampit.compose(Animation)
     }
   });
 
+let Gravel = stampit.compose(Sprite)
+  .refs({
+    texture: "brick_piece.png"
+  })
+  .init(function(){
+    this.velocity     = new THREE.Vector2(0, 0).fromArray(this.velocity);
+    this.acceleration = new THREE.Vector2(0, -60);
+  });
+
+let BreakBrickAnimation = stampit.compose(Animation)
+  .methods({
+    handleStop: function() {
+      for (let piece of this.gravel){
+        this.game.renderer.deleteFromScene(piece.mesh);
+      }
+    },
+    handleAnimation: function(dt) {
+      for (let piece of this.gravel){
+        PhysicsEngine.newtonianResponse(piece, dt);
+      }
+    },
+    handleStart: function() {
+      this.gravel = [
+        Gravel.create({velocity: [6, 20], game: this.game, position: this.subject.position.clone() }),
+        Gravel.create({velocity: [-6, 20], game: this.game, position: this.subject.position.clone() }),
+        Gravel.create({velocity: [ 6, 10], game: this.game, position: this.subject.position.clone() }),
+        Gravel.create({velocity: [-6, 10], game: this.game, position: this.subject.position.clone() })
+      ];
+    }
+  });
 
 
 module.exports = {
   BumpAnimation: BumpAnimation,
   BrickAnimation: BrickAnimation,
-  NewMushroomAnimation: NewMushroomAnimation
+  NewMushroomAnimation: NewMushroomAnimation,
+  BreakBrickAnimation: BreakBrickAnimation
 }

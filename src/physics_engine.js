@@ -21,11 +21,19 @@ let PhysicsEngine = stampit()
     addObject: function(obj){
       this.objects[this.key(obj)] = obj;
     },
+    deleteObject: function(obj){
+      delete this.objects[this.key(obj)];
+    },
     checkPosition: function(x, y){
       let key = x + "x" + y;
       if (key in this.objects)
         return this.objects[key];
       return false;
+    },
+    newtonianResponse: function(obj, dt){
+      obj.position.addScaledVector(obj.velocity, dt);
+      obj.position.addScaledVector(obj.acceleration, dt * dt);
+      obj.velocity.addScaledVector(obj.acceleration, dt);
     },
     hitFromAbove: function(entity_a, entity_b){
         //difference in current position and top of goomba

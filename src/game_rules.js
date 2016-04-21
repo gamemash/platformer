@@ -5,7 +5,7 @@ let PointsAnimation = require('./points_animation.js');
 
 let GameRules = stampit.compose()
   .refs({
-    time: 4, 
+    time: 400, 
   })
   .init().methods({
   resetTime: function(){

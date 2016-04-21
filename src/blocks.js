@@ -5,9 +5,10 @@ let THREE = require('three');
 let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
 let Animation = require('./animation.js');
-let {BumpAnimation, BrickAnimation} = require('./animations.js')
+let {BumpAnimation, BrickAnimation, NewMushroomAnimation, BreakBrickAnimation} = require('./animations.js')
 let {Goomba, Mushroom} = require('./enemies.js')
 let PointsAnimation = require('./points_animation.js');
+let PhysicsEngine = require('./physics_engine.js');
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
@@ -76,9 +77,7 @@ let CoinAnimation = stampit.compose(Animation)
   })
   .methods({
     handleAnimation: function(dt){
-      this.coin.position.addScaledVector(this.coin.velocity, dt);
-      this.coin.position.addScaledVector(this.coin.acceleration, dt * dt);
-      this.coin.velocity.addScaledVector(this.coin.acceleration, dt);
+      PhysicsEngine.newtonianResponse(this.coin, dt);
     },
     handleStart: function(){
       this.coin = RotatingCoin.create({game: this.game, position: this.subject.position.clone()});
@@ -157,7 +156,13 @@ let Brick = stampit.compose(Sprite, Collidable)
         if(direction == "below") {
           sounds.breakBlock.currentTime = 0;
           sounds.breakBlock.play();
-          BrickAnimation.create({game: this.game, subject: this});
+          if (entity.superMario){
+            BreakBrickAnimation.create({game: this.game, subject: this});
+            this.game.renderer.deleteFromScene(this.mesh);
+            PhysicsEngine.deleteObject(this);
+          } else {
+            BrickAnimation.create({game: this.game, subject: this});
+          }
         }
       }
     });
