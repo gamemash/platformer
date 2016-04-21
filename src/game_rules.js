@@ -5,12 +5,15 @@ let PointsAnimation = require('./points_animation.js');
 
 let GameRules = stampit.compose()
   .refs({
-    time: 400, 
+    time: 4, 
   })
   .init().methods({
+  resetTime: function(){
+   this.time = 400;
+  },
   update: function(player, entities, game) {
     this.time -= 1/60 / 0.65;
-    if (player.position.y < -2) {
+    if (this.time < 0 || player.position.y < -2) {
       player.die();
     }
 

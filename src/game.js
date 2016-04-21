@@ -31,11 +31,11 @@ var Game = stampit()
 
         if (this.renderer.updating){
           this.player.update(dt);
+          this.gui.updateTime();
+          this.gameRules.update(this.player, this.entities, gameState);
         }
         this.renderer.render(dt);
-        this.gui.updateTime();
 
-        this.gameRules.update(this.player, this.entities, gameState);
       }
 
       requestAnimationFrame(this.gameloop.bind(this));

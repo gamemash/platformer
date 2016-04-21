@@ -78,6 +78,7 @@ let Player1 = stampit.compose(Mario, Entity)
       this.acceleration.y = 0;
       this.velocity.y = 18;
       this.velocity.x = 2;
+      this.game.gameRules.resetTime();
       sounds.kick.play();
       this.dead = false;
     },
