@@ -29,7 +29,9 @@ var Game = stampit()
           this.renderer.camera.position.x = (4 - this.player.position.x);
         }
 
-        this.player.update(dt);
+        if (this.renderer.updating){
+          this.player.update(dt);
+        }
         this.renderer.render(dt);
         this.gui.updateTime();
 

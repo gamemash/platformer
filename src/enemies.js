@@ -19,6 +19,8 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
       walking: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
       dead: [{id:2, duration: 1}]
     },
+    spritePosition: [0, 0],
+    spriteLayout: [3, 1],
     walkSpeed: 3
   })
   .methods({
@@ -30,10 +32,6 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
         this.delete();
       }.bind(this)),1000);
     }
-  })
-  .init(function(){
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
-    this.material.uniforms['spritePosition'] = {type: 'v2', value: new THREE.Vector2( 0, 0) };
   });
 
 let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)

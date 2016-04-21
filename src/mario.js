@@ -3,9 +3,13 @@ let THREE = require('three');
 let AnimatedSprite = require('./animated_sprite.js');
 let Debug = require('./debug.js');
 let SpriteGeometry = require('./sprite_geometry.js');
+let ShaderLoader = require('./shader_loader.js');
+let {InvulnerableAnimation, GrowAnimation, ShrinkAnimation} = require('./player_animations.js');
 
 let Mario = stampit.compose(AnimatedSprite)
   .refs({
+    spriteLayout: [21, 3],
+    spritePosition: [2, 0],
     texture: 'mario.png',
     superMario: false,
     animationState: 'standing',
@@ -39,22 +43,18 @@ let Mario = stampit.compose(AnimatedSprite)
     },
     grow: function(){
       if (!this.superMario){
-        console.log("Grow?");
         this.superMario = true;
-        this.size = new THREE.Vector2(1, 2);
-        this.material.uniforms['tileSize'] = {type: "v2", value: this.size };
-        this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 1) };
-        this.material.needsUpdate = true;
+        GrowAnimation.create({game: this.game, subject: this});
       }
+    },
+    shrink: function(){
+      InvulnerableAnimation.create({game: this.game, subject: this});
+      ShrinkAnimation.create({game: this.game, subject: this});
+      this.superMario = false;
     }
-
   })
   .init(function(){
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 21, 3) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
-    this.material.uniforms['tileSize'] =  {type: "v2", value: this.size };
-
-    //this.selectAnimation('standing', false);
+    this.updateUniforms();
   });
 
 

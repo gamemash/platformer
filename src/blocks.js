@@ -38,8 +38,8 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
         {id: 0, duration: 0.05}
       ]
     },
-    spritePosition: new THREE.Vector2( 2, 0),
-    spriteLayout: new THREE.Vector2( 3, 1)
+    spritePosition: [2, 0],
+    spriteLayout: [3, 1]
   })
   .methods({
     collided: function(entity, direction) {
@@ -69,8 +69,8 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
         {id: 0, duration: 0.05}
       ]
     },
-    spritePosition: new THREE.Vector2( 2, 0),
-    spriteLayout: new THREE.Vector2( 3, 1)
+    spritePosition: [2, 0],
+    spriteLayout: [3, 1]
   });
 
 

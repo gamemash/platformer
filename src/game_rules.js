@@ -1,6 +1,7 @@
 let stampit = require('stampit');
 let sounds = require('./sounds.js');
 let PhysicsEngine = require('./physics_engine.js');
+let Debug = require('./debug.js');
 
 let GameRules = stampit.compose()
   .refs({
@@ -24,7 +25,15 @@ let GameRules = stampit.compose()
               player.velocity.y = 17;
               sounds.stomp.play();
             } else {
-              player.die();
+              if (player.invulnerable){
+                break;
+              }
+
+              if (player.superMario){
+                player.shrink();
+              } else {
+                player.die();
+              }
             }
             break;
           case 'Mushroom':
