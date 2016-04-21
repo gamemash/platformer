@@ -1,7 +1,7 @@
 let stampit = require('stampit');
 let sounds = require('./sounds.js');
 let PhysicsEngine = require('./physics_engine.js');
-let Debug = require('./debug.js');
+let PointsAnimation = require('./points_animation.js');
 
 let GameRules = stampit.compose()
   .refs({
@@ -38,7 +38,10 @@ let GameRules = stampit.compose()
             break;
           case 'Mushroom':
             player.grow();
+            PointsAnimation.create({game: player.game, points: 1000, subject: entity});
             entity.remove();
+            player.score += 1000;
+            player.statsChanged();
             break;
         }
       }

@@ -5,6 +5,7 @@ let {jumpStream, inputState} = require("./input_stream.js");
 let sounds = require('./sounds.js');
 let Entity = require('./entity.js');
 let Debug = require('./debug.js');
+let PointsAnimation = require('./points_animation.js');
 
 let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario, Entity)
@@ -63,7 +64,9 @@ let Player1 = stampit.compose(Mario, Entity)
   })
   .methods({
     killed: function(entity){
-      this.score += 100 * Math.pow(2, this.streak);
+      let addedScore = 100 * Math.pow(2, this.streak);
+      this.score += addedScore;
+      PointsAnimation.create({game: this.game, subject: entity, points: addedScore});
       this.streak += 1;
       if (this.statsChanged){
         this.statsChanged();

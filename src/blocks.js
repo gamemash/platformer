@@ -7,6 +7,7 @@ let sounds = require('./sounds.js');
 let Animation = require('./animation.js');
 let {BumpAnimation, BrickAnimation} = require('./animations.js')
 let {Goomba, Mushroom} = require('./enemies.js')
+let PointsAnimation = require('./points_animation.js');
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
@@ -49,7 +50,6 @@ let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
     }
   });
 
-
 let RotatingCoin = stampit.compose(AnimatedSprite)
   .refs({
     texture: 'coins_2.png',
@@ -87,6 +87,7 @@ let CoinAnimation = stampit.compose(Animation)
     },
     handleStop: function(){
       this.game.renderer.deleteFromScene(this.coin.mesh);
+      PointsAnimation.create({game: this.game, subject: this.coin, points: this.points});
     }
   });
 
@@ -95,16 +96,14 @@ let CoinBlock = stampit.compose(ItemBlock)
   .methods({
     collided: function(entity, direction) {
       if(direction == "below") {
-        console.log(entity);
         sounds.coin.currentTime = 0;
         sounds.coin.play();
         entity.coins += 1;
+        entity.score += 200;
         entity.statsChanged();
 
-
-
         let block = this.transformToBlock();
-        CoinAnimation.create({game: this.game, subject: block});
+        CoinAnimation.create({game: this.game, subject: block, points: 200});
         //MushroomBlockAnimation.create({game: this.game, subject: block});
       }
     }
