@@ -10,15 +10,22 @@ let Animation = stampit()
     handleAnimation: function() {},
     handleStart: function() {},
     handleStop: function() {},
+    handleReactivation: function() {},
 
     start: function(dt){
+      if (this.subject.animation){
+        this.handleReactivation(dt);
+        return;
+      }
       this.time = 0;
       this.handleStart();
       this.game.renderer.toAnimate.add(this);
+      this.subject.animation = this;
     },
     stop: function(){
       this.handleStop();
       this.game.renderer.toAnimate.delete(this);
+      delete this.subject.animation;
     },
     updateAnimation: function(dt){
       this.time += dt;
