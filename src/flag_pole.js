@@ -15,17 +15,18 @@ var Flag = stampit
   });
 
 var Top = stampit
-  .compose(Collidable, Entity, Sprite)
+  .compose(Entity, Sprite)
   .refs({
     texture: 'flagpole.png',
   });
 
 var Rod = stampit
-  .compose(Collidable, Entity, Sprite)
+  .compose(Entity, Sprite)
   .init(function(){
   })
   .refs({
-    texture: 'flagpole_rod.png',
+    name: 'Flagpole',
+    texture: 'flagpole_rod.png'
   })
 
 var FlagPole = stampit
@@ -38,12 +39,13 @@ var FlagPole = stampit
     let y_pos = this.position.y;
 
     this.top = Top.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + this.height)})
-
-    for (let i = 0; i < this.height; i++) {
-      Rod.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + i)})
-    };
-
     this.flag = Flag.create({game: this.game, position: new THREE.Vector2(x_pos-0.5, y_pos + this.height - 0.8)})
+
+    Rod.create({game: this.game, flag: this.flag, size: new THREE.Vector2(1, this.height), position: new THREE.Vector2(x_pos, y_pos)})
+    //for (let i = 0; i < this.height; i++) {
+    //  Rod.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + i)})
+    //};
+
   });
 
 module.exports = FlagPole;

@@ -1,6 +1,7 @@
 let stampit = require('stampit');
 let THREE = require('three');
 let Animation = require('./animation.js');
+let PhysicsEngine = require('./physics_engine.js');
 
 let InvulnerableAnimation = stampit.compose(Animation)
   .refs({
@@ -140,9 +141,48 @@ let DeathAnimation = stampit.compose(Animation)
     }
   });
 
+let VictoryAnimation = stampit.compose(Animation)
+  .refs({
+    flagpoleSpeed: -5
+  })
+  .methods({
+
+    handleStop: function() {
+      this.subject.animated = true;
+    },
+    handleAnimation: function(dt) {
+      if (this.flag.position.y > this.flagpole.position.y){
+        PhysicsEngine.newtonianResponse(this.flag, dt);
+      } else {
+        this.subject.position.x = this.flagpole.position.x + 0.5;
+        this.subject.setSpriteFlipped(1);
+      }
+      if (this.subject.position.y > this.flagpole.position.y){
+        PhysicsEngine.newtonianResponse(this.subject, dt);
+      }
+    },
+    handleStart: function() {
+      this.duration = Math.abs(this.flagpole.size.y / this.flagpoleSpeed);
+      console.log(this.duration);
+      this.flag = this.flagpole.flag;
+
+      this.subject.animated = false;
+      this.subject.velocity.set(0, this.flagpoleSpeed);
+      this.flag.velocity = new THREE.Vector2(0, this.flagpoleSpeed);
+
+      this.subject.acceleration.set(0, 0);
+      this.subject.setSpritePositionX(7);
+      this.subject.position.x = this.flagpole.position.x - 0.5;
+      this.game.renderer.updating = false;
+    }
+  })
+  .init(function(){
+  });
+
 module.exports = {
   InvulnerableAnimation: InvulnerableAnimation,
   GrowAnimation: GrowAnimation,
   ShrinkAnimation: ShrinkAnimation,
-  DeathAnimation: DeathAnimation
+  DeathAnimation: DeathAnimation,
+  VictoryAnimation: VictoryAnimation
 }

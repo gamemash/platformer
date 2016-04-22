@@ -31,6 +31,9 @@ let Mario = stampit.compose(AnimatedSprite)
       ],
       dead: [
         {id: 6, duration: 0.0}
+      ],
+      victory: [
+        {id : 8, duration: 1 }
       ]
     },
     size: new THREE.Vector2(1, 1)

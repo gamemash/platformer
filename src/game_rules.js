@@ -2,6 +2,7 @@ let stampit = require('stampit');
 let sounds = require('./sounds.js');
 let PhysicsEngine = require('./physics_engine.js');
 let PointsAnimation = require('./points_animation.js');
+let PlayerAnimations = require('./player_animations.js');
 
 let GameRules = stampit.compose()
   .refs({
@@ -46,6 +47,12 @@ let GameRules = stampit.compose()
             entity.remove();
             player.score += 1000;
             player.statsChanged();
+            break;
+          case 'Flagpole':
+            //shitty equation, need more number pictures...
+            let points = Math.pow(2,Math.round(Math.sqrt(player.position.y - entity.position.y))) * 100;
+            PointsAnimation.create({game: player.game, points: points, subject: player, duration: 2});
+            PlayerAnimations.VictoryAnimation.create({game: player.game, subject: player, flagpole: entity});
             break;
         }
       }
