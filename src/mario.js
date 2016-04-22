@@ -55,6 +55,7 @@ let Mario = stampit.compose(AnimatedSprite)
       }
     },
     die: function() {
+      this.disregardCollisions = true;
       if (!this.dead){
         sounds.die.play();
         DeathAnimation.create({game: this.game, subject: this});

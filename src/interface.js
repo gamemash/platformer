@@ -23,7 +23,7 @@ let Interface = stampit()
   })
   .init(function(){
 
-    Font.create({position: new THREE.Vector2(5,15), text: this.player.name, game: this.game});
+    Font.create({position: new THREE.Vector2(5,15), text: this.player.name.toUpperCase(), game: this.game});
     this.score = Font.create({text: padZero(this.player.score, 6), position: new THREE.Vector2(5,14.5), game: this.game});
     this.player.statsChanged = this.updateScore.bind(this);
 

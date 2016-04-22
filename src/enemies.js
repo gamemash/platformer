@@ -25,13 +25,37 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
     walkSpeed: 3
   })
   .methods({
-    hitBy: function(){
-      this.dead = true;
-      this.velocity.set(0, 0);
-      this.animationState = 'dead';
-      setTimeout((function(){
-        this.delete();
-      }.bind(this)),1000);
+    hitBy: function(entity, cameFromAbove){
+      if (this.dead) return;
+      switch (entity.name){
+
+        case 'Koopa':
+          if (entity.shell){
+            this.disregardCollisions = true;
+            this.dead = true;
+            this.velocity.set(entity.velocity.x, 8);
+            setTimeout((function(){
+              console.log("remove goomba");
+              this.remove();
+            }.bind(this)),1000);
+            return;
+          }
+
+          break;
+        case 'Mario':
+          if (cameFromAbove){
+            this.dead = true;
+            this.velocity.set(0, 0);
+            this.animationState = 'dead';
+            setTimeout((function(){
+              console.log("remove goomba");
+              this.remove();
+            }.bind(this)),1000);
+            return;
+          }
+          break;
+      }
+      this.velocity.multiplyScalar(-1);
     }
   });
 
@@ -61,30 +85,47 @@ let Koopa = stampit.compose(Updateable, AnimatedSprite, Entity)
     walkSpeed: 3
   })
   .methods({
-    hitBy: function(player){
-      if (this.shell){
-        this.pushed = true;
-        let direction = (player.position.x < this.position.x ? 1 : -1 );
-        this.velocity.set(direction * 10, 0);
-        setTimeout((function(){
-          this.remove();
-        }.bind(this)),8000);
+    hitBy: function(entity, cameFromAbove){
+      //console.log("In kooopa", entity);
+      switch (entity.name){
 
-      } else {
-        this.shell = true;
-        this.velocity.set(0, 0);
-        this.animationState = 'shell';
-        this.setSize(new THREE.Vector2(1, 1));
-        this.setSpriteSize(new THREE.Vector2(1, 1));
-        setTimeout((function(){
-          if (!this.pushed){
-            this.reset();
+        case 'Mario':
+          if (cameFromAbove){
+            if (this.shell){
+              this.pushed = true;
+              let direction = (entity.position.x < this.position.x ? 1 : -1 );
+              this.velocity.set(direction * 10, 0);
+              setTimeout((function(){
+                this.remove();
+              }.bind(this)),8000);
+
+            } else {
+              this.shell = true;
+              this.velocity.set(0, 0);
+              this.animationState = 'shell';
+              this.setSize(new THREE.Vector2(1, 1));
+              this.setSpriteSize(new THREE.Vector2(1, 1));
+              setTimeout((function(){
+                if (!this.pushed){
+                  this.reset();
+                }
+              }.bind(this)),3000);
+            }
           }
-        }.bind(this)),3000);
+          return;
+
+        case 'Koopa':
+        case 'Goomba':
+          if (this.shell){
+            return;
+          }
+          break;
       }
+      this.velocity.multiplyScalar(-1);
 
     },
     reset: function(){
+      this.shell = false;
       this.animationState = "walking";
       this.velocity = new THREE.Vector2(-this.walkSpeed, 0);
       this.acceleration = new THREE.Vector2(0, -60);
@@ -92,6 +133,8 @@ let Koopa = stampit.compose(Updateable, AnimatedSprite, Entity)
       this.setSpriteSize(new THREE.Vector2(1, 1.5));
     },
     collided: function(block, direction){
+      if (this.disregardCollisions) return;
+
       switch(direction){
         case 'left':
           this.position.x = block.position.x + block.size.x;

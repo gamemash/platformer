@@ -2,10 +2,11 @@ let stampit             = require('stampit');
 let THREE               = require('three');
 let gameState           = require('./game_state.js');
 let GameRules           = require('./game_rules.js');
+let List                = require('./list.js');
 
 var Game = stampit()
   .refs({
-    entities: new Set(),
+    entities: new List(),
     gameRules: GameRules.create()
   })
   .methods({
@@ -29,13 +30,14 @@ var Game = stampit()
           this.renderer.camera.position.x = (4 - this.player.position.x);
         }
 
-        if (this.renderer.updating){
-          this.player.update(dt);
+        //if (this.renderer.updating){
+          //this.player.update(dt);
           this.gui.updateTime();
           this.gameRules.update(this.player, this.entities, gameState);
-        }
+        //}
         this.renderer.render(dt);
 
+        this.entities.clean();
       }
 
       requestAnimationFrame(this.gameloop.bind(this));

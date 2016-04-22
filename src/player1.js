@@ -6,11 +6,12 @@ let sounds = require('./sounds.js');
 let Entity = require('./entity.js');
 let Debug = require('./debug.js');
 let PointsAnimation = require('./points_animation.js');
+let PhysicsEngine = require('./physics_engine.js');
 
 let scale = 300; //pixel to reality ratio
 let Player1 = stampit.compose(Mario, Entity)
   .refs({
-    name: "MARIO",
+    name: "Mario",
     groundResistance: 3.6,
     accelerationConstant: 0.14 * scale,
     gravity: 20 * scale,
@@ -61,8 +62,24 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     }.bind(this));
 
+    this.registerUpdateCallback(this.update);
+
   })
   .methods({
+    hitBy: function(entity, cameFromAbove, iCameFromAbove){
+      if (this.dead) return;
+      if (this.invulnerable) return;
+      if (iCameFromAbove){
+        this.velocity.y = 17;
+      } else {
+        if (entity.dead) return;
+        if (this.superMario){
+          this.shrink();
+        } else {
+          this.die();
+        }
+      }
+    },
     killed: function(entity){
       let addedScore = 100 * Math.pow(2, this.streak);
       this.score += addedScore;
@@ -73,6 +90,7 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     },
     reset: function(){
+      this.disregardCollisions = false;
       this.position.x = 6;
       this.position.y = 5;
       this.acceleration.y = 0;
@@ -84,6 +102,7 @@ let Player1 = stampit.compose(Mario, Entity)
     },
 
     collided: function(block, direction){
+      if (this.disregardCollisions) return;
       switch(direction){
         case 'above':
           this.position.y = block.position.y - this.size.y;
@@ -159,7 +178,6 @@ let Player1 = stampit.compose(Mario, Entity)
       }
 
       this.updateCollisions(dt);
-      this.updateSprite(dt);
     }
   });
 
