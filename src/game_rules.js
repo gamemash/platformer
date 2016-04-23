@@ -3,6 +3,7 @@ let sounds = require('./sounds.js');
 let PhysicsEngine = require('./physics_engine.js');
 let PointsAnimation = require('./points_animation.js');
 let PlayerAnimations = require('./player_animations.js');
+let CollisionResponses = require('./collision_responses.js');
 
 let GameRules = stampit.compose()
   .refs({
@@ -24,14 +25,7 @@ let GameRules = stampit.compose()
         let entity_b = entities.get(b);
         
         if (PhysicsEngine.boundingBox(entity_a, entity_b)){
-          let aHitBFromAbove = PhysicsEngine.hitFromAbove(entity_a, entity_b);
-          let bHitAFromAbove = PhysicsEngine.hitFromAbove(entity_b, entity_a);
-          if (entity_a.hitBy){
-            entity_a.hitBy(entity_b, bHitAFromAbove, aHitBFromAbove);
-          }
-          if (entity_b.hitBy){
-            entity_b.hitBy(entity_a, aHitBFromAbove, bHitAFromAbove);
-          }
+          CollisionResponses.resolve(entity_a, entity_b);
         }
       }
     }

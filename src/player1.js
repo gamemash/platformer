@@ -66,18 +66,13 @@ let Player1 = stampit.compose(Mario, Entity)
 
   })
   .methods({
-    hitBy: function(entity, cameFromAbove, iCameFromAbove){
-      if (this.dead) return;
+    getsHit: function(){
       if (this.invulnerable) return;
-      if (iCameFromAbove){
-        this.velocity.y = 17;
+
+      if (this.superMario){
+        this.shrink();
       } else {
-        if (entity.dead) return;
-        if (this.superMario){
-          this.shrink();
-        } else {
-          this.die();
-        }
+        this.die();
       }
     },
     killed: function(entity){
