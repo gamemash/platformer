@@ -16,6 +16,7 @@ function List (){
   this.clean = function(){
     for (let obj of this.toBeDeleted){
       let i = this.data.indexOf(obj);
+      if (i < 0) continue;
       this.data[i] = this.data[this.data.length - 1];
       this.data.pop();
     }
