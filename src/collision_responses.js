@@ -1,6 +1,7 @@
 let stampit = require('stampit');
 let PhysicsEngine = require('./physics_engine.js');
 let PointsAnimation = require('./points_animation.js');
+let PlayerAnimations = require('./player_animations.js');
 let THREE = require('three');
 
 let CollisionResponses = function(){
@@ -74,7 +75,6 @@ let CollisionResponses = function(){
     }
   },
   this.shellHitsEnemy = function(shell, enemy){
-    //enemy.die();
     enemy.disregardCollisions = true;
     enemy.dead = true;
     enemy.velocity.set(shell.velocity.x, 8);
@@ -86,7 +86,16 @@ let CollisionResponses = function(){
     entity_a.velocity.multiplyScalar(-1);
     entity_b.velocity.multiplyScalar(-1);
   },
+  this.marioHitsFlagpole = function(mario, flagpole){
+    flagpole.disregardCollisions = true;
+
+    //shitty equation, need more number pictures...
+    let points = Math.pow(2,Math.round(Math.sqrt(mario.position.y - flagpole.position.y))) * 100;
+    PointsAnimation.create({game: mario.game, points: points, subject: mario, duration: 2});
+    PlayerAnimations.VictoryAnimation.create({game: mario.game, subject: mario, flagpole: flagpole});
+  },
   this.responses = {
+    'MarioFlagpole': this.marioHitsFlagpole,
     'ShellMario': this.shellHitsMario,
     'ShellGoomba': this.shellHitsEnemy,
     'MarioKoopa': this.marioHitsKoopa,

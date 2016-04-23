@@ -141,6 +141,29 @@ let DeathAnimation = stampit.compose(Animation)
     }
   });
 
+let WalkToCastleAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 2
+  })
+  .methods({
+    handleAnimation: function(dt){
+      this.subject.animationState = "moving";
+      this.subject.direction = "right";
+      this.subject.velocity.x = 3.15;
+      this.subject.acceleration.set(0, -this.subject.gravity / this.subject.mass);
+      this.subject.animatedSpriteUpdateCallback(dt);
+      this.subject.oldPosition = this.subject.position.clone();
+      PhysicsEngine.newtonianResponse(this.subject, dt);
+      this.subject.updateCollisions(dt);
+    },
+    handleStop: function(){
+      this.subject.remove();
+    },
+    handleStart: function(){
+      this.subject.disregardCollisions = false;
+    }
+  })
+
 let VictoryAnimation = stampit.compose(Animation)
   .refs({
     flagpoleSpeed: -5
@@ -149,6 +172,7 @@ let VictoryAnimation = stampit.compose(Animation)
 
     handleStop: function() {
       this.subject.animated = true;
+      WalkToCastleAnimation.create({game: this.game, subject: this.subject});
     },
     handleAnimation: function(dt) {
       if (this.flag.position.y > this.flagpole.position.y){
@@ -175,8 +199,6 @@ let VictoryAnimation = stampit.compose(Animation)
       this.subject.position.x = this.flagpole.position.x - 0.5;
       this.game.renderer.updating = false;
     }
-  })
-  .init(function(){
   });
 
 module.exports = {

@@ -123,10 +123,7 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     },
     update: function(dt){
-      this.oldPosition = this.position.clone();
-
       this.acceleration.x = 0;
-      this.acceleration.y = -this.gravity / this.mass;
 
       if (inputState.pressed("jump")) {
         if (this.timeSinceJump < this.jumpLength){ // Jump further while jump button is held down
@@ -136,7 +133,6 @@ let Player1 = stampit.compose(Mario, Entity)
 
       this.timeSinceJump += dt;
 
-      let slidingSpeed = this.velocity.x / (this.direction == "left" ? -1 : 1);
       this.animationState = "moving";
 
       if (inputState.pressed("right")) {
@@ -149,6 +145,10 @@ let Player1 = stampit.compose(Mario, Entity)
         this.animationState = "standing";
       }
 
+      this.oldPosition = this.position.clone();
+
+      let slidingSpeed = this.velocity.x / (this.direction == "left" ? -1 : 1);
+      this.acceleration.y = -this.gravity / this.mass;
       if (slidingSpeed < -1){
         this.animationState = "sliding";
       }
@@ -164,9 +164,7 @@ let Player1 = stampit.compose(Mario, Entity)
         this.velocity.x = 0;
       }
 
-      this.position.addScaledVector(this.velocity, dt)
-      this.position.addScaledVector(this.acceleration, dt * dt)
-      this.velocity.addScaledVector(this.acceleration, dt)
+      PhysicsEngine.newtonianResponse(this, dt);
 
       if (Math.abs(this.velocity.x) > this.maxVelocity){
         this.velocity.x = this.maxVelocity * this.velocity.x / Math.abs(this.velocity.x);
