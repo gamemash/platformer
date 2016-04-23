@@ -3,31 +3,17 @@ let THREE = require('three');
 let Mario = require('./mario.js');
 let {jumpStream, inputState} = require("./input_stream.js");
 let sounds = require('./sounds.js');
-let Entity = require('./entity.js');
 let Debug = require('./debug.js');
 let PointsAnimation = require('./points_animation.js');
-let PhysicsEngine = require('./physics_engine.js');
 
-let scale = 300; //pixel to reality ratio
-let Player1 = stampit.compose(Mario, Entity)
+let Player1 = stampit.compose(Mario)
   .refs({
     name: "Mario",
-    groundResistance: 3.6,
-    accelerationConstant: 0.14 * scale,
-    gravity: 20 * scale,
-    mass: 80,
-    jumpForce: 0.5 * 7.8 * scale,
-    onGround: false,
-    timeSinceJump: 10,
-    jumpLength: 0.3,
-    maxVelocity: 15,
-    airJumpCount: 0,
-    maxAirJumps: 2,
-    dead: false,
     score: 0,
     coins: 0,
     streak: 0,
-    invulnerable: false
+    invulnerable: false,
+    input: inputState
 
   })
   .init(function(){
@@ -40,29 +26,10 @@ let Player1 = stampit.compose(Mario, Entity)
     });
 
     jumpStream.onValue(function(x) {
-      if(this.onGround) {
-        this.airJumpCount = 0;
-      }
-
-      if(this.onGround || (this.airJumpCount < this.maxAirJumps)){
-        this.timeSinceJump = 0;
-        this.airJumpCount += 1;
-        this.velocity.y = this.jumpForce / this.mass;
-
-        if (this.airJumpCount == 1) {
-          sounds.jumpSmall.currentTime = 0;
-          sounds.jumpSmall.volume = 0.4;
-          sounds.jumpSmall.play();
-        } else {
-          sounds.kick.currentTime = 0;
-          sounds.kick.playbackRate = 1;
-          sounds.kick.play();
-        }
-
-      }
+      this.jump();
     }.bind(this));
 
-    this.registerUpdateCallback(this.update);
+    this.registerUpdateCallback(this.handleInput);
 
   })
   .methods({
@@ -85,12 +52,16 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     },
     reset: function(){
+      this.superMario = false;
       this.disregardCollisions = false;
       this.position.x = 6;
       this.position.y = 5;
       this.acceleration.y = 0;
       this.velocity.y = 18;
       this.velocity.x = 2;
+      this.setSizeY(1);
+      this.setSpriteSizeY(1);
+      this.setSpritePosition(new THREE.Vector2( 2, 0));
       this.game.gameRules.resetTime();
       sounds.kick.play();
       this.dead = false;
@@ -122,55 +93,16 @@ let Player1 = stampit.compose(Mario, Entity)
         this.streak = 0;
       }
     },
-    update: function(dt){
-      this.acceleration.x = 0;
-
-      if (inputState.pressed("jump")) {
-        if (this.timeSinceJump < this.jumpLength){ // Jump further while jump button is held down
-          this.velocity.y = this.jumpForce / this.mass;
-        }
-      }
-
-      this.timeSinceJump += dt;
-
-      this.animationState = "moving";
-
-      if (inputState.pressed("right")) {
-        this.direction = "right";
-        this.acceleration.x = this.accelerationConstant;
-      } else if(inputState.pressed("left")) {
-        this.direction = "left";
-        this.acceleration.x = -this.accelerationConstant;
+    handleInput: function(dt){
+      if (this.input.pressed("right")){
+        this.walking = "right";
+      } else if (this.input.pressed("left")){
+        this.walking = "left";
       } else {
-        this.animationState = "standing";
+        this.walking = "not";
       }
 
-      this.oldPosition = this.position.clone();
-
-      let slidingSpeed = this.velocity.x / (this.direction == "left" ? -1 : 1);
-      this.acceleration.y = -this.gravity / this.mass;
-      if (slidingSpeed < -1){
-        this.animationState = "sliding";
-      }
-
-      if (this.onGround){
-        this.acceleration.x -=  this.velocity.x * this.groundResistance;
-      } else {
-        this.acceleration.x -=  this.velocity.x * this.groundResistance / 2;
-        this.animationState = "jumping";
-      }
-
-      if (Math.abs(this.velocity.x) < 0.5) {
-        this.velocity.x = 0;
-      }
-
-      PhysicsEngine.newtonianResponse(this, dt);
-
-      if (Math.abs(this.velocity.x) > this.maxVelocity){
-        this.velocity.x = this.maxVelocity * this.velocity.x / Math.abs(this.velocity.x);
-      }
-
-      this.updateCollisions(dt);
+      this.jumping = this.input.pressed("jump");
     }
   });
 

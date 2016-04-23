@@ -143,24 +143,18 @@ let DeathAnimation = stampit.compose(Animation)
 
 let WalkToCastleAnimation = stampit.compose(Animation)
   .refs({
-    duration: 2
+    duration: 1
   })
   .methods({
     handleAnimation: function(dt){
-      this.subject.animationState = "moving";
-      this.subject.direction = "right";
-      this.subject.velocity.x = 3.15;
-      this.subject.acceleration.set(0, -this.subject.gravity / this.subject.mass);
+      this.subject.walking = "right";
+      this.subject.updateCallback(dt);
       this.subject.animatedSpriteUpdateCallback(dt);
-      this.subject.oldPosition = this.subject.position.clone();
-      PhysicsEngine.newtonianResponse(this.subject, dt);
-      this.subject.updateCollisions(dt);
     },
     handleStop: function(){
       this.subject.remove();
     },
     handleStart: function(){
-      this.subject.disregardCollisions = false;
     }
   })
 
