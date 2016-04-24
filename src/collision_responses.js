@@ -2,6 +2,7 @@ let stampit = require('stampit');
 let PhysicsEngine = require('./physics_engine.js');
 let PointsAnimation = require('./points_animation.js');
 let PlayerAnimations = require('./player_animations.js');
+let DelayedAction = require('./delayed_action.js');
 let THREE = require('three');
 
 let CollisionResponses = function(){
@@ -27,20 +28,26 @@ let CollisionResponses = function(){
         koopa.name = 'Shell';
         let direction = (mario.position.x < koopa.position.x ? 1 : -1 );
         koopa.velocity.set(direction * 10, 0);
-        setTimeout((function(){
-          koopa.remove();
-        }.bind(koopa)),8000);
+        DelayedAction.create({
+          game: mario.game,
+          action: (function(){
+            koopa.remove();
+          }),
+          duration: 8
+        });
       } else {
         koopa.shell = true;
         koopa.velocity.set(0, 0);
         koopa.animationState = 'shell';
         koopa.setSize(new THREE.Vector2(1, 1));
         koopa.setSpriteSize(new THREE.Vector2(1, 1));
-        setTimeout((function(){
-          if (!koopa.pushed){
+        DelayedAction.create({
+          game: mario.game,
+          action: (function(){
             koopa.reset();
-          }
-        }.bind(koopa)),3000);
+          }),
+          duration: 3
+        });
       }
       mario.velocity.y = 17;
     } else {
@@ -78,9 +85,13 @@ let CollisionResponses = function(){
     enemy.disregardCollisions = true;
     enemy.dead = true;
     enemy.velocity.set(shell.velocity.x, 8);
-    setTimeout((function(){
-      enemy.remove();
-    }.bind(enemy)),1000);
+    DelayedAction.create({
+      game: mario.game,
+      action: (function(){
+        enemy.remove();
+      }),
+      duration: 1
+    });
   },
   this.resolveBump =  function(entity_a, entity_b){
     entity_a.velocity.multiplyScalar(-1);
@@ -90,10 +101,13 @@ let CollisionResponses = function(){
     if (mario.position.x > castle.position.x - 1 + castle.size.x / 2){
       mario.remove();
       mario.delete();
-      setTimeout(function(){
-        PlayerAnimations.CalculateScoreAnimation.create({game: castle.game, subject: mario, flag: castle.flag});
-      }, 1000);
-      
+      DelayedAction.create({
+        game: mario.game,
+        action: (function(){
+          PlayerAnimations.CalculateScoreAnimation.create({game: castle.game, subject: mario, flag: castle.flag});
+        }),
+        duration: 1
+      });
     }
   },
   this.marioHitsFlagpole = function(mario, flagpole){

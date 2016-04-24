@@ -8,6 +8,7 @@ let Collidable = require('./collidable.js');
 let Debug = require('./debug.js');
 let SimpleAI = require('./simple_ai.js');
 let PhysicsEngine = require('./physics_engine.js');
+let DelayedAction = require('./delayed_action.js');
 let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
 
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
@@ -30,10 +31,10 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
       this.dead = true;
       this.velocity.set(0, 0);
       this.animationState = 'dead';
-      setTimeout((function(){
+      DelayedAction.create({game: this.game, duration: 1, action: (function(){
         console.log("remove goomba");
         this.remove();
-      }.bind(this)),1000);
+      }.bind(this))});
       return;
     },
   });
