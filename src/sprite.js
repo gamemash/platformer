@@ -6,6 +6,7 @@ let loader = new THREE.TextureLoader();
 let Sprite = stampit.compose(CustomShader)
   .refs({
     fixed: false,
+    zIndex: 1,
     size: new THREE.Vector2(1, 1),
     shaders: {
       vertexShader: 'tile.vert',
@@ -22,7 +23,8 @@ let Sprite = stampit.compose(CustomShader)
       tileLocation: { type: "v2", value: this.position },
       screenSize: {type: "v2", value: this.game.renderer.screenSize},
       fixedPosition: {type: "i", value: this.fixed},
-      size: {type: "v2", value: this.size}
+      size: {type: "v2", value: this.size},
+      zIndex: {type: "f", value: this.zIndex}
 
     };
     this.setupCustomShader();

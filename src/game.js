@@ -11,6 +11,7 @@ var Game = stampit()
   })
   .methods({
     start: function(){
+      this.gameRules.levelInProgress = true;
       this.gameloop();
       gameState.togglePause();
     },
@@ -30,11 +31,11 @@ var Game = stampit()
           this.renderer.camera.position.x = (4 - this.player.position.x);
         }
 
-        //if (this.renderer.updating){
+        if (this.renderer.updating){
           //this.player.update(dt);
-          this.gui.updateTime();
+          this.gui.updateTime(dt);
           this.gameRules.update(this.player, this.entities, gameState);
-        //}
+        }
         this.renderer.render(dt);
 
         this.entities.clean();

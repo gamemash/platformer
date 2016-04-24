@@ -141,22 +141,42 @@ let DeathAnimation = stampit.compose(Animation)
     }
   });
 
-let WalkToCastleAnimation = stampit.compose(Animation)
+let CalculateScoreAnimation = stampit.compose(Animation)
   .refs({
-    duration: 1
+    speed: 100,
+    pointsPerSecond: 50
   })
   .methods({
     handleAnimation: function(dt){
-      this.subject.walking = "right";
-      this.subject.updateCallback(dt);
-      this.subject.animatedSpriteUpdateCallback(dt);
+      this.game.gameRules.time -= dt * this.speed;
+      this.subject.score += Math.round(dt * this.speed * this.pointsPerSecond);
+      this.subject.statsChanged();
     },
     handleStop: function(){
-      this.subject.remove();
+      this.game.gameRules.time = 0;
+      this.subject.score = Math.round(this.duration * this.pointsPerSecond);
+      CastleRaiseFlagAnimation.create({game: this.game, subject: this.flag});
     },
     handleStart: function(){
+      this.game.gameRules.levelInProgress = false;
+      this.duration = this.game.gameRules.time;
     }
   })
+let CastleRaiseFlagAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 1.5
+  })
+  .methods({
+    handleAnimation: function(dt){
+      this.subject.position.y += 1 * dt;
+    }
+  });
+
+let AutoWalk = {
+  pressed: function(direction){
+    return direction == "right";
+  }
+}
 
 let VictoryAnimation = stampit.compose(Animation)
   .refs({
@@ -166,7 +186,9 @@ let VictoryAnimation = stampit.compose(Animation)
 
     handleStop: function() {
       this.subject.animated = true;
-      WalkToCastleAnimation.create({game: this.game, subject: this.subject});
+      this.subject.input = AutoWalk;
+      this.game.renderer.updating = true;
+      //WalkToCastleAnimation.create({game: this.game, subject: this.subject});
     },
     handleAnimation: function(dt) {
       if (this.flag.position.y > this.flagpole.position.y){
@@ -200,5 +222,7 @@ module.exports = {
   GrowAnimation: GrowAnimation,
   ShrinkAnimation: ShrinkAnimation,
   DeathAnimation: DeathAnimation,
-  VictoryAnimation: VictoryAnimation
+  VictoryAnimation: VictoryAnimation,
+  CastleRaiseFlagAnimation: CastleRaiseFlagAnimation,
+  CalculateScoreAnimation: CalculateScoreAnimation
 }

@@ -12,7 +12,9 @@ let GameRules = stampit.compose()
    this.time = 400;
   },
   update: function(player, entities, game) {
-    this.time -= 1/60 / 0.65;
+    if (this.levelInProgress){
+      this.time -= 1/60 / 0.65;
+    }
     if (this.time < 0 || player.position.y < -2) {
       player.die();
     }

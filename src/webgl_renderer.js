@@ -42,7 +42,7 @@ let WebGLRenderer = stampit()
     this.width /= 2;
     this.height /= 2;
     this.renderer.setClearColor(0x5c94fc, 0);
-    this.camera = new THREE.OrthographicCamera(0, this.width, 0, this.height, 0.1, 100 );
+    this.camera = new THREE.OrthographicCamera(0, this.width, 0, this.height, 0.0, 100 );
   });
 
 
