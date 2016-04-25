@@ -124,6 +124,7 @@ let CollisionResponses = function(){
     flower.remove();
     PlayerAnimations.FlowerAnimation.create({game: mario.game, subject: mario});
   },
+  this.nothing = function(){},
   this.responses = {
     'MarioCastle': this.marioEntersCastle,
     'MarioFlagpole': this.marioHitsFlagpole,
@@ -134,7 +135,8 @@ let CollisionResponses = function(){
     'MarioGoomba': this.marioHitsGoomba,
     'GoombaGoomba': this.resolveBump,
     'KoopaGoomba': this.resolveBump,
-    'MarioFireFlower': this.marioPicksupFireFlower
+    'MarioFireFlower': this.marioPicksupFireFlower,
+    'MarioFireball': this.nothing
   }
 };
 

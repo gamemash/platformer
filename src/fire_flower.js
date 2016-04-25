@@ -3,6 +3,7 @@ let Entity = require('./entity.js');
 let THREE = require('three');
 let AnimatedSprite = require('./animated_sprite.js');
 let DelayedAction = require('./delayed_action.js');
+let PhysicsEngine = require('./physics_engine.js');
 
 let FireFlower = stampit.compose(AnimatedSprite, Entity)
   .refs({
@@ -25,6 +26,7 @@ FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)
   .refs({
     name: "Fireball",
     texture: "fireball.png",
+    shootingSpeed: 15,
     animationState: 'fireball',
     animations: {
       fireball: [
@@ -56,14 +58,50 @@ FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)
       this.setSpritePositionY(2);
       this.setSize(new THREE.Vector2(1/2, 1/2));
       this.setSpriteSize(new THREE.Vector2(2, 2));
+    },
+    updateCallback: function(dt){
+      this.oldPosition = this.position.clone();
+      PhysicsEngine.newtonianResponse(this, dt);
+      this.updateCollisions(dt);
+    },
+    collided: function(obj, direction){
+      console.log(direction);
+      switch(direction){
+        case 'below':
+          this.acceleration.y = -60;
+          this.velocity.y = -this.velocity.y * 1.2;
+          break;
+        case 'left':
+        case 'right':
+          this.velocity.set(0, 0);
+          this.acceleration.set(0, 0);
+          this.explosion();
+          DelayedAction.create({game: this.game, duration: 0.45, action: (function(){
+            this.remove();
+          }.bind(this))});
+          break;
+
+      }
     }
   })
   .init(function(){
     this.updateUniforms();
     this.fireball();
-    DelayedAction.create({game: this.game, duration: 1, action: (function(){
+    this.acceleration = new THREE.Vector2(0, 0);
+    this.velocity = (new THREE.Vector2(0.8, -0.6)).multiplyScalar(this.shootingSpeed);
+    if (this.direction == "left"){
+      this.velocity.x = -this.velocity.x;
+    }
+    console.log(this);
+
+    DelayedAction.create({game: this.game, duration: 4.0, action: (function(){
       this.explosion();
     }.bind(this))});
+    this.registerUpdateCallback(this.updateCallback);
+    //this.fireball();
+    //DelayedAction.create({game: this.game, duration: 1, action: (function(){
+    //  this.explosion();
+    //}.bind(this))});
   });
 
 module.exports = FireFlower;

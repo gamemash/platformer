@@ -1,10 +1,11 @@
 let stampit = require('stampit');
 let THREE = require('three');
 let Mario = require('./mario.js');
-let {jumpStream, inputState} = require("./input_stream.js");
+let {jumpStream, inputState, shootStream} = require("./input_stream.js");
 let sounds = require('./sounds.js');
 let Debug = require('./debug.js');
 let PointsAnimation = require('./points_animation.js');
+let FireFlower = require('./fire_flower.js');
 
 let Player1 = stampit.compose(Mario)
   .refs({
@@ -22,6 +23,17 @@ let Player1 = stampit.compose(Mario)
       if (this.onGround) {
 
         // this.acceleration.y += this.jumpForce / this.mass;
+      }
+    });
+
+    shootStream.onValue((x) => {
+      if (this.powerUp == 1){
+        let position = this.position.clone();
+        position.y += 0.5;
+        if (this.direction == "right"){
+          position.x += 0.7
+        }
+        FireFlower.Fireball.create({game: this.game, position: position, direction: this.direction});
       }
     });
 

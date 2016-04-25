@@ -16,12 +16,14 @@ var inputStream = Kefir.stream(emitter => {
   inputLoop();
 });
 
-var menuStream = inputStream.filter(x => x == "menu").debounce(50, {immediate: true});
-var jumpStream = inputStream.filter(x => x == "jump").debounce(50, {immediate: true});
+var menuStream  = inputStream.filter(x => x == "menu").debounce(50, {immediate: true});
+var jumpStream  = inputStream.filter(x => x == "jump").debounce(50, {immediate: true});
+var shootStream = inputStream.filter(x => x == "run").debounce(200, {immediate: true});
 
 module.exports = {
   inputStream: inputStream,
   menuStream: menuStream,
   jumpStream: jumpStream,
   inputState: inputState,
+  shootStream: shootStream
 };
