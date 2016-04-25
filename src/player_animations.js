@@ -38,24 +38,22 @@ let FlowerAnimation = stampit.compose(Animation)
     handleStop: function() {
       this.subject.animated = true;
       this.game.renderer.updating = true;
-      console.log("done");
+      this.subject.setPowerUp(1);
     },
     handleAnimation: function(dt) {
       this.timeSinceAnimation += dt;
       if (this.timeSinceAnimation < this.animationSpeed) return;
       this.timeSinceAnimation = 0;
 
-      if (this.flash){
-      } else {
-      }
-      this.flash = !this.flash;
+      this.powerUpAnimation = (this.powerUpAnimation + 1) % 3;
+      this.subject.setPowerUp(this.powerUpAnimation);
     },
     handleStart: function() {
       this.subject.animated = false;
       this.game.renderer.updating = false;
-      this.flash = true;
       this.timeSinceAnimation = 0;
-      this.animationSpeed = 0.1;
+      this.powerUpAnimation = 0;
+      this.animationSpeed = 0.05;
     }
   });
 let GrowAnimation = stampit.compose(Animation)

@@ -27,6 +27,10 @@ let Mario = stampit.compose(AnimatedSprite, Entity)
     spriteLayout: [21, 3],
     spritePosition: [2, 0],
     texture: 'mario.png',
+    shaders: {
+      vertexShader: 'mario.vert',
+      fragmentShader: 'mario.frag'
+    },
     superMario: false,
     animationState: 'standing',
     animations: {
@@ -162,6 +166,7 @@ let Mario = stampit.compose(AnimatedSprite, Entity)
 
   })
   .init(function(){
+    this.uniforms.powerUp = { type: "i", value: 0 };
     this.updateUniforms();
     this.registerUpdateCallback(this.updateCallback);
   });
