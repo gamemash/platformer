@@ -33,6 +33,31 @@ let InvulnerableAnimation = stampit.compose(Animation)
 
   });
 
+let FlowerAnimation = stampit.compose(Animation)
+  .methods({
+    handleStop: function() {
+      this.subject.animated = true;
+      this.game.renderer.updating = true;
+      console.log("done");
+    },
+    handleAnimation: function(dt) {
+      this.timeSinceAnimation += dt;
+      if (this.timeSinceAnimation < this.animationSpeed) return;
+      this.timeSinceAnimation = 0;
+
+      if (this.flash){
+      } else {
+      }
+      this.flash = !this.flash;
+    },
+    handleStart: function() {
+      this.subject.animated = false;
+      this.game.renderer.updating = false;
+      this.flash = true;
+      this.timeSinceAnimation = 0;
+      this.animationSpeed = 0.1;
+    }
+  });
 let GrowAnimation = stampit.compose(Animation)
   .refs({
     speed: 1,
@@ -224,5 +249,6 @@ module.exports = {
   DeathAnimation: DeathAnimation,
   VictoryAnimation: VictoryAnimation,
   CastleRaiseFlagAnimation: CastleRaiseFlagAnimation,
-  CalculateScoreAnimation: CalculateScoreAnimation
+  CalculateScoreAnimation: CalculateScoreAnimation,
+  FlowerAnimation: FlowerAnimation
 }

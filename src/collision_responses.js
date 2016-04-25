@@ -120,6 +120,10 @@ let CollisionResponses = function(){
     PointsAnimation.create({game: mario.game, points: points, subject: mario, duration: 2});
     PlayerAnimations.VictoryAnimation.create({game: mario.game, subject: mario, flagpole: flagpole});
   },
+  this.marioPicksupFireFlower = function(mario, flower){
+    flower.remove();
+    PlayerAnimations.FlowerAnimation.create({game: mario.game, subject: mario});
+  },
   this.responses = {
     'MarioCastle': this.marioEntersCastle,
     'MarioFlagpole': this.marioHitsFlagpole,
@@ -129,7 +133,8 @@ let CollisionResponses = function(){
     'MushroomMario': this.mushroomMario,
     'MarioGoomba': this.marioHitsGoomba,
     'GoombaGoomba': this.resolveBump,
-    'KoopaGoomba': this.resolveBump
+    'KoopaGoomba': this.resolveBump,
+    'MarioFireFlower': this.marioPicksupFireFlower
   }
 };
 
