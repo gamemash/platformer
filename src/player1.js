@@ -29,11 +29,11 @@ let Player1 = stampit.compose(Mario)
     shootStream.onValue((x) => {
       if (this.powerUp == 1){
         let position = this.position.clone();
-        position.y += 0.5;
+        position.y += this.size.y - 0.5
         if (this.direction == "right"){
           position.x += 0.7
         }
-        FireFlower.Fireball.create({game: this.game, position: position, direction: this.direction});
+        FireFlower.Fireball.create({game: this.game, position: position, direction: this.direction, player: this});
       }
     });
 

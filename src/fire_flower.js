@@ -36,9 +36,9 @@ FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)
         {id: 3, duration: 0.15}
       ],
       explode: [
-        {id: 0, duration: 0.15},
-        {id: 2, duration: 0.15},
-        {id: 4, duration: 0.15}
+        {id: 0, duration: 0.10},
+        {id: 2, duration: 0.10},
+        {id: 4, duration: 0.10}
       ]
     },
     spritePosition: [0, 0],
@@ -48,14 +48,15 @@ FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)
   .methods({
     fireball: function(){
       this.animationState = "fireball";
-      this.setSize(new THREE.Vector2(1/4, 1/4));
+      this.setSize(new THREE.Vector2(1/2, 1/2));
       this.setSpritePositionY(0);
       this.setSpriteSize(new THREE.Vector2(1, 1));
     },
     explosion: function(){
+      this.disregardCollisions = true;
       this.animationState = "explode";
       this.position.add(new THREE.Vector2(-1/8, -1/8));
-      this.setSpritePositionY(2);
+      this.setSpritePosition(new THREE.Vector2(0, 2));
       this.setSize(new THREE.Vector2(1/2, 1/2));
       this.setSpriteSize(new THREE.Vector2(2, 2));
     },
@@ -64,23 +65,43 @@ FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)
       PhysicsEngine.newtonianResponse(this, dt);
       this.updateCollisions(dt);
     },
+    updateCollisions: function(dt){
+      if (this.disregardCollisions) return;
+      let fromBlock = new THREE.Vector2(Math.floor(this.oldPosition.x), Math.floor(this.oldPosition.y));
+      let position = [Math.floor(this.position.x), Math.floor(this.position.y)];
+      let block = PhysicsEngine.checkPosition(position[0], position[1]);
+      if (block && PhysicsEngine.boundingBox(this, block)){
+        let difference = block.position.clone().sub(fromBlock);
+        if (difference.length() < 0) return;
+        if (difference.length() > 1){
+          if (Math.abs(difference.x) > Math.abs(difference.y)) {
+            difference.y = 0;
+          } else {
+            difference.x = 0;
+          }
+        }
+        if (Math.abs(difference.x) > 0){
+          this.collided(block, 'side');
+        } else {
+          PhysicsEngine.newtonianResponse(this, -dt);
+          this.collided(block, 'below');
+        }
+      }
+    },
     collided: function(obj, direction){
-      console.log(direction);
       switch(direction){
         case 'below':
           this.acceleration.y = -60;
-          this.velocity.y = -this.velocity.y * 1.2;
+          this.velocity.y = 10.0;
           break;
-        case 'left':
-        case 'right':
+        case 'side':
           this.velocity.set(0, 0);
           this.acceleration.set(0, 0);
           this.explosion();
-          DelayedAction.create({game: this.game, duration: 0.45, action: (function(){
+          DelayedAction.create({game: this.game, duration: 0.30, action: (function(){
             this.remove();
           }.bind(this))});
           break;
-
       }
     }
   })
@@ -92,7 +113,6 @@ FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)
     if (this.direction == "left"){
       this.velocity.x = -this.velocity.x;
     }
-    console.log(this);
 
     DelayedAction.create({game: this.game, duration: 4.0, action: (function(){
       this.explosion();
