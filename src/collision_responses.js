@@ -83,6 +83,7 @@ let CollisionResponses = function(){
   },
   this.fireballHitsEnemy = function(enemy, fireball){
     fireball.explosion();
+    fireball.player.killed(enemy);
     enemy.disregardCollisions = true;
     enemy.dead = true;
     enemy.velocity.set(fireball.velocity.x, 8);
