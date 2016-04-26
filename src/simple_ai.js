@@ -9,6 +9,8 @@ let SimpleAI = stampit()
   })
   .methods({
     collided: function(block, direction){
+      if (this.disregardCollisions) return;
+
       switch(direction){
         case 'left':
           this.position.x = block.position.x + block.size.x;

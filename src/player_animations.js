@@ -1,6 +1,7 @@
 let stampit = require('stampit');
 let THREE = require('three');
 let Animation = require('./animation.js');
+let PhysicsEngine = require('./physics_engine.js');
 
 let InvulnerableAnimation = stampit.compose(Animation)
   .refs({
@@ -140,9 +141,88 @@ let DeathAnimation = stampit.compose(Animation)
     }
   });
 
+let CalculateScoreAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 100,
+    pointsPerSecond: 50
+  })
+  .methods({
+    handleAnimation: function(dt){
+      this.game.gameRules.time -= dt * this.speed;
+      this.subject.score += Math.round(dt * this.speed * this.pointsPerSecond);
+      this.subject.statsChanged();
+    },
+    handleStop: function(){
+      this.game.gameRules.time = 0;
+      this.subject.score = Math.round(this.duration * this.pointsPerSecond);
+      CastleRaiseFlagAnimation.create({game: this.game, subject: this.flag});
+    },
+    handleStart: function(){
+      this.game.gameRules.levelInProgress = false;
+      this.duration = this.game.gameRules.time;
+    }
+  })
+let CastleRaiseFlagAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 1.5
+  })
+  .methods({
+    handleAnimation: function(dt){
+      this.subject.position.y += 1 * dt;
+    }
+  });
+
+let AutoWalk = {
+  pressed: function(direction){
+    return direction == "right";
+  }
+}
+
+let VictoryAnimation = stampit.compose(Animation)
+  .refs({
+    flagpoleSpeed: -5
+  })
+  .methods({
+
+    handleStop: function() {
+      this.subject.animated = true;
+      this.subject.input = AutoWalk;
+      this.game.renderer.updating = true;
+      //WalkToCastleAnimation.create({game: this.game, subject: this.subject});
+    },
+    handleAnimation: function(dt) {
+      if (this.flag.position.y > this.flagpole.position.y){
+        PhysicsEngine.newtonianResponse(this.flag, dt);
+      } else {
+        this.subject.position.x = this.flagpole.position.x + 0.5;
+        this.subject.setSpriteFlipped(1);
+      }
+      if (this.subject.position.y > this.flagpole.position.y){
+        PhysicsEngine.newtonianResponse(this.subject, dt);
+      }
+    },
+    handleStart: function() {
+      this.duration = Math.abs(this.flagpole.size.y / this.flagpoleSpeed);
+      console.log(this.duration);
+      this.flag = this.flagpole.flag;
+
+      this.subject.animated = false;
+      this.subject.velocity.set(0, this.flagpoleSpeed);
+      this.flag.velocity = new THREE.Vector2(0, this.flagpoleSpeed);
+
+      this.subject.acceleration.set(0, 0);
+      this.subject.setSpritePositionX(7);
+      this.subject.position.x = this.flagpole.position.x - 0.5;
+      this.game.renderer.updating = false;
+    }
+  });
+
 module.exports = {
   InvulnerableAnimation: InvulnerableAnimation,
   GrowAnimation: GrowAnimation,
   ShrinkAnimation: ShrinkAnimation,
-  DeathAnimation: DeathAnimation
+  DeathAnimation: DeathAnimation,
+  VictoryAnimation: VictoryAnimation,
+  CastleRaiseFlagAnimation: CastleRaiseFlagAnimation,
+  CalculateScoreAnimation: CalculateScoreAnimation
 }

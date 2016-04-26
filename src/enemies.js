@@ -7,6 +7,8 @@ let Entity = require('./entity.js');
 let Collidable = require('./collidable.js');
 let Debug = require('./debug.js');
 let SimpleAI = require('./simple_ai.js');
+let PhysicsEngine = require('./physics_engine.js');
+let DelayedAction = require('./delayed_action.js');
 let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
 
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
@@ -25,13 +27,16 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
   })
   .methods({
     die: function(){
+      if (this.dead) return;
       this.dead = true;
       this.velocity.set(0, 0);
       this.animationState = 'dead';
-      setTimeout((function(){
-        this.delete();
-      }.bind(this)),1000);
-    }
+      DelayedAction.create({game: this.game, duration: 1, action: (function(){
+        console.log("remove goomba");
+        this.remove();
+      }.bind(this))});
+      return;
+    },
   });
 
 let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
@@ -44,7 +49,39 @@ let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
     NewMushroomAnimation.create({game: this.game, subject: this});
   });
 
+let Koopa = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
+  .refs({
+    name: "Koopa",
+    deadly: true,
+    texture: 'koopa.png',
+    direction: "right",
+    animationState: "walking",
+    animations: {
+      walking: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
+      shell: [{id:6, duration: 1}]
+    },
+    spritePosition: [0, 0],
+    spriteLayout: [8, 2],
+    walkSpeed: 3
+  })
+  .methods({
+    reset: function(){
+      this.name = "Koopa";
+      this.shell = false;
+      this.animationState = "walking";
+      this.velocity = new THREE.Vector2(-this.walkSpeed, 0);
+      this.acceleration = new THREE.Vector2(0, -60);
+      this.setSize(new THREE.Vector2(1, 1.5));
+      this.setSpriteSize(new THREE.Vector2(1, 1.5));
+    }
+  })
+  .init(function(){
+    this.updateUniforms();
+    this.reset();
+  });
+
 module.exports = {
   Goomba: Goomba,
-  Mushroom: Mushroom
+  Mushroom: Mushroom,
+  Koopa: Koopa
 }

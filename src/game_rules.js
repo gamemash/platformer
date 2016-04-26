@@ -1,7 +1,7 @@
 let stampit = require('stampit');
 let sounds = require('./sounds.js');
 let PhysicsEngine = require('./physics_engine.js');
-let PointsAnimation = require('./points_animation.js');
+let CollisionResponses = require('./collision_responses.js');
 
 let GameRules = stampit.compose()
   .refs({
@@ -12,40 +12,20 @@ let GameRules = stampit.compose()
    this.time = 400;
   },
   update: function(player, entities, game) {
-    this.time -= 1/60 / 0.65;
+    if (this.levelInProgress){
+      this.time -= 1/60 / 0.65;
+    }
     if (this.time < 0 || player.position.y < -2) {
       player.die();
     }
 
-    for(let entity of entities) {
-      if (entity.dead) continue;
-      if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
-        switch(entity.name){
-          case 'Goomba':
-            if (PhysicsEngine.hitFromAbove(player, entity)){
-              player.killed(entity);
-              entity.die();
-              player.velocity.y = 17;
-              sounds.stomp.play();
-            } else {
-              if (player.invulnerable){
-                break;
-              }
-
-              if (player.superMario){
-                player.shrink();
-              } else {
-                player.die();
-              }
-            }
-            break;
-          case 'Mushroom':
-            player.grow();
-            PointsAnimation.create({game: player.game, points: 1000, subject: entity});
-            entity.remove();
-            player.score += 1000;
-            player.statsChanged();
-            break;
+    for (let a = 0; a < entities.length(); a += 1){
+      let entity_a = entities.get(a);
+      for (let b = a + 1; b < entities.length(); b += 1){
+        let entity_b = entities.get(b);
+        
+        if (PhysicsEngine.boundingBox(entity_a, entity_b)){
+          CollisionResponses.resolve(entity_a, entity_b);
         }
       }
     }

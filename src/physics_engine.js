@@ -32,8 +32,10 @@ let PhysicsEngine = stampit()
     },
     newtonianResponse: function(obj, dt){
       obj.position.addScaledVector(obj.velocity, dt);
-      obj.position.addScaledVector(obj.acceleration, dt * dt);
-      obj.velocity.addScaledVector(obj.acceleration, dt);
+      if (obj.acceleration){
+        obj.position.addScaledVector(obj.acceleration, dt * dt);
+        obj.velocity.addScaledVector(obj.acceleration, dt);
+      }
     },
     hitFromAbove: function(entity_a, entity_b){
         //difference in current position and top of goomba

@@ -9,13 +9,15 @@ let {BumpAnimation, BrickAnimation, NewMushroomAnimation, BreakBrickAnimation} =
 let {Goomba, Mushroom} = require('./enemies.js')
 let PointsAnimation = require('./points_animation.js');
 let PhysicsEngine = require('./physics_engine.js');
+let Castle = require('./castle.js');
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
-let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
+let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' });
 let PipeTopLeft     = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
 let PipeTopRight    = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
 let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
 let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
+let Tile            = stampit.compose(Sprite, Collidable).refs({ texture: 'tile.png' });
 
 let MushroomBlockAnimation = stampit.compose(BumpAnimation)
   .methods({
@@ -177,5 +179,7 @@ module.exports = {
   PipeBottomLeft: PipeBottomLeft,
   PipeTopRight: PipeTopRight,
   PipeTopLeft: PipeTopLeft,
-  Coin: Coin
+  Coin: Coin,
+  Tile: Tile,
+  Castle: Castle
 }
