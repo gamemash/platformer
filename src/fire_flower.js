@@ -5,6 +5,8 @@ let AnimatedSprite = require('./animated_sprite.js');
 let DelayedAction = require('./delayed_action.js');
 let PhysicsEngine = require('./physics_engine.js');
 
+let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
+
 let FireFlower = stampit.compose(AnimatedSprite, Entity)
   .refs({
     name: "FireFlower",
@@ -20,6 +22,10 @@ let FireFlower = stampit.compose(AnimatedSprite, Entity)
         {id: 3, duration: 0.05}
       ]
     }
+  })
+  .init(function(){
+    NewMushroomAnimation.create({game: this.game, subject: this});
+
   });
 
 FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)

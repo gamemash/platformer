@@ -9,6 +9,7 @@ let {BumpAnimation, BrickAnimation, NewMushroomAnimation, BreakBrickAnimation} =
 let {Goomba, Mushroom} = require('./enemies.js')
 let PointsAnimation = require('./points_animation.js');
 let PhysicsEngine = require('./physics_engine.js');
+let FireFlower = require('./fire_flower.js');
 let Castle = require('./castle.js');
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
@@ -25,6 +26,16 @@ let MushroomBlockAnimation = stampit.compose(BumpAnimation)
       let shroomPosition = this.subject.position.clone();
       shroomPosition.y += 1;
       Mushroom.create({game: this.game, position: shroomPosition })
+      Block.create({game: this.game, position: this.subject.position.clone() })
+    }
+  });
+
+let FireFlowerBlockAnimation = stampit.compose(BumpAnimation)
+  .methods({
+    handleStop: function(){
+      let position = this.subject.position.clone();
+      position.y += 1;
+      FireFlower.create({game: this.game, position: position })
       Block.create({game: this.game, position: this.subject.position.clone() })
     }
   });
@@ -110,6 +121,20 @@ let CoinBlock = stampit.compose(ItemBlock)
     }
   });
 
+let FireFlowerBlock = stampit.compose(ItemBlock)
+  .methods({
+    collided: function(entity, direction) {
+      if(direction == "below") {
+        sounds.powerUpAppears.currentTime = 0;
+        sounds.powerUpAppears.play();
+
+        
+        let block = this.transformToBlock();
+        FireFlowerBlockAnimation.create({game: this.game, subject: block});
+      }
+    }
+  });
+
 let MushroomBlock = stampit.compose(ItemBlock)
   .methods({
     collided: function(entity, direction) {
@@ -172,6 +197,7 @@ let Brick = stampit.compose(Sprite, Collidable)
 module.exports = {
   CoinBlock: CoinBlock,
   MushroomBlock: MushroomBlock,
+  FireFlowerBlock: FireFlowerBlock,
   Ground: Ground,
   Block: Block,
   Brick: Brick,

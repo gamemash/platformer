@@ -3,6 +3,7 @@ uniform vec2 screenSize;
 varying vec2 textureCoord;
 uniform int fixedPosition;
 uniform vec2 size;
+uniform float zIndex;
 
 void main() {
   //vec2 screenSize = vec2(1500, 500);
@@ -13,6 +14,6 @@ void main() {
     pixelPosition = pixelPosition + cameraPosition.xy;
   }
   pixelPosition = pixelPosition * 64.0;
-  gl_Position = vec4(pixelPosition / screenSize - 1.0, 0.0, 1.0);
+  gl_Position = vec4(pixelPosition / screenSize - 1.0, zIndex, 1.0);
   textureCoord = floor(position.xy + 0.5);
 }
