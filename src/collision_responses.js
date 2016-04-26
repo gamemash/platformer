@@ -44,7 +44,9 @@ let CollisionResponses = function(){
         DelayedAction.create({
           game: mario.game,
           action: (function(){
+            if (koopa.name != 'Shell'){
             koopa.reset();
+            }
           }),
           duration: 3
         });
@@ -81,12 +83,26 @@ let CollisionResponses = function(){
       shell.velocity.x = Math.abs(shell.velocity.x);
     }
   },
+  this.fireballHitsEnemy = function(enemy, fireball){
+    fireball.explosion();
+    fireball.player.killed(enemy);
+    enemy.disregardCollisions = true;
+    enemy.dead = true;
+    enemy.velocity.set(fireball.velocity.x, 8);
+    DelayedAction.create({
+      game: fireball.game,
+      action: (function(){
+        enemy.remove();
+      }),
+      duration: 1
+    });
+  },
   this.shellHitsEnemy = function(shell, enemy){
     enemy.disregardCollisions = true;
     enemy.dead = true;
     enemy.velocity.set(shell.velocity.x, 8);
     DelayedAction.create({
-      game: mario.game,
+      game: shell.game,
       action: (function(){
         enemy.remove();
       }),
@@ -120,6 +136,16 @@ let CollisionResponses = function(){
     PointsAnimation.create({game: mario.game, points: points, subject: mario, duration: 2});
     PlayerAnimations.VictoryAnimation.create({game: mario.game, subject: mario, flagpole: flagpole});
   },
+  this.marioPicksupFireFlower = function(mario, flower){
+    flower.remove();
+    PointsAnimation.create({game: mario.game, points: 1000, subject: flower});
+    if (mario.superMario){
+      PlayerAnimations.FlowerAnimation.create({game: mario.game, subject: mario});
+    } else {
+      mario.grow();
+    }
+  },
+  this.nothing = function(){},
   this.responses = {
     'MarioCastle': this.marioEntersCastle,
     'MarioFlagpole': this.marioHitsFlagpole,
@@ -129,7 +155,12 @@ let CollisionResponses = function(){
     'MushroomMario': this.mushroomMario,
     'MarioGoomba': this.marioHitsGoomba,
     'GoombaGoomba': this.resolveBump,
-    'KoopaGoomba': this.resolveBump
+    'KoopaGoomba': this.resolveBump,
+    'MarioFireFlower': this.marioPicksupFireFlower,
+    'MarioFireball': this.nothing,
+    'KoopaFireball': this.fireballHitsEnemy,
+    'GoombaFireball': this.fireballHitsEnemy,
+    'FireballFireball': this.nothing
   }
 };
 
