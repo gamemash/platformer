@@ -44,7 +44,9 @@ let CollisionResponses = function(){
         DelayedAction.create({
           game: mario.game,
           action: (function(){
+            if (koopa.name != 'Shell'){
             koopa.reset();
+            }
           }),
           duration: 3
         });
