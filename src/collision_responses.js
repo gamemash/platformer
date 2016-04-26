@@ -136,7 +136,12 @@ let CollisionResponses = function(){
   },
   this.marioPicksupFireFlower = function(mario, flower){
     flower.remove();
-    PlayerAnimations.FlowerAnimation.create({game: mario.game, subject: mario});
+    PointsAnimation.create({game: mario.game, points: 1000, subject: flower});
+    if (mario.superMario){
+      PlayerAnimations.FlowerAnimation.create({game: mario.game, subject: mario});
+    } else {
+      mario.grow();
+    }
   },
   this.nothing = function(){},
   this.responses = {
