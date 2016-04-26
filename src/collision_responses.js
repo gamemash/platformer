@@ -81,12 +81,25 @@ let CollisionResponses = function(){
       shell.velocity.x = Math.abs(shell.velocity.x);
     }
   },
+  this.fireballHitsEnemy = function(enemy, fireball){
+    fireball.explosion();
+    enemy.disregardCollisions = true;
+    enemy.dead = true;
+    enemy.velocity.set(fireball.velocity.x, 8);
+    DelayedAction.create({
+      game: fireball.game,
+      action: (function(){
+        enemy.remove();
+      }),
+      duration: 1
+    });
+  },
   this.shellHitsEnemy = function(shell, enemy){
     enemy.disregardCollisions = true;
     enemy.dead = true;
     enemy.velocity.set(shell.velocity.x, 8);
     DelayedAction.create({
-      game: mario.game,
+      game: shell.game,
       action: (function(){
         enemy.remove();
       }),
@@ -136,7 +149,9 @@ let CollisionResponses = function(){
     'GoombaGoomba': this.resolveBump,
     'KoopaGoomba': this.resolveBump,
     'MarioFireFlower': this.marioPicksupFireFlower,
-    'MarioFireball': this.nothing
+    'MarioFireball': this.nothing,
+    'KoopaFireball': this.fireballHitsEnemy,
+    'GoombaFireball': this.fireballHitsEnemy
   }
 };
 
