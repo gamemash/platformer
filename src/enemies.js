@@ -9,7 +9,7 @@ let Debug = require('./debug.js');
 let SimpleAI = require('./simple_ai.js');
 let PhysicsEngine = require('./physics_engine.js');
 let DelayedAction = require('./delayed_action.js');
-let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
+let {BumpAnimation, BrickAnimation} = require('./animations.js')
 
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
   .refs({
@@ -37,16 +37,6 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
       }.bind(this))});
       return;
     },
-  });
-
-let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
-  .refs({
-    name: "Mushroom",
-    texture: 'mushroom.png',
-    walkSpeed: -2
-  })
-  .init(function(){
-    NewMushroomAnimation.create({game: this.game, subject: this});
   });
 
 let Koopa = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
@@ -82,6 +72,5 @@ let Koopa = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
 
 module.exports = {
   Goomba: Goomba,
-  Mushroom: Mushroom,
   Koopa: Koopa
 }

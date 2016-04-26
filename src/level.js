@@ -1,8 +1,10 @@
 let stampit             = require('stampit');
 let THREE               = require('three');
-let {CoinBlock, MushroomBlock, FireFlowerBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, Coin, Tile, Castle} = require('./blocks.js');
+let {CoinBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, Coin, Tile, Castle} = require('./blocks.js');
 let FlagPole = require('./flag_pole.js');
-let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, CoinBlock, FlagPole, MushroomBlock, Tile, Castle, FireFlowerBlock];
+let Mushroom = require('./mushroom.js');
+let FireFlower = require('./fire_flower.js');
+let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, CoinBlock, FlagPole, Mushroom.Block, Tile, Castle, FireFlower.Block];
 
 let Level = stampit()
   .refs({

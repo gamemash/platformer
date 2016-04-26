@@ -1,11 +1,12 @@
 let stampit = require('stampit');
 let Entity = require('./entity.js');
 let THREE = require('three');
+let {BumpAnimation, NewItemAnimation} = require('./animations.js');
 let AnimatedSprite = require('./animated_sprite.js');
 let DelayedAction = require('./delayed_action.js');
 let PhysicsEngine = require('./physics_engine.js');
-
-let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
+let {Block, ItemBlock} = require('./blocks.js');
+let sounds = require('./sounds.js');
 
 let FireFlower = stampit.compose(AnimatedSprite, Entity)
   .refs({
@@ -24,9 +25,37 @@ let FireFlower = stampit.compose(AnimatedSprite, Entity)
     }
   })
   .init(function(){
-    NewMushroomAnimation.create({game: this.game, subject: this});
+    FireFlower.NewAnimation.create({game: this.game, subject: this});
 
   });
+
+FireFlower.NewAnimation = NewItemAnimation;
+
+FireFlower.Block = stampit.compose(ItemBlock)
+  .methods({
+    collided: function(entity, direction) {
+      if(direction == "below") {
+        sounds.powerUpAppears.currentTime = 0;
+        sounds.powerUpAppears.play();
+
+        
+        let block = this.transformToBlock();
+        FireFlower.Block.Animation.create({game: this.game, subject: block});
+      }
+    }
+  });
+
+FireFlower.Block.Animation = stampit.compose(BumpAnimation)
+  .methods({
+    handleStop: function(){
+      let position = this.subject.position.clone();
+      position.y += 1;
+      FireFlower.create({game: this.game, position: position })
+      Block.create({game: this.game, position: this.subject.position.clone() })
+    }
+  });
+
+
 
 FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)
   .refs({
