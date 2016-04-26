@@ -115,6 +115,12 @@ let Player1 = stampit.compose(Mario)
         this.walking = "not";
       }
 
+      if (this.input.pressed("run")){
+        this.maxVelocity = 20;
+      } else {
+        this.maxVelocity = 14;
+      }
+
       this.jumping = this.input.pressed("jump");
     }
   });

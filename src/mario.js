@@ -144,7 +144,9 @@ let Mario = stampit.compose(AnimatedSprite, Entity)
       this.timeSinceJump += dt;
 
       if (this.onGround){
-        this.acceleration.x -=  this.velocity.x * this.groundResistance;
+        if (this.walking == "not"){
+          this.acceleration.x -=  this.velocity.x * this.groundResistance;
+        }
       } else {
         this.acceleration.x -=  this.velocity.x * this.groundResistance / 2;
         this.animationState = "jumping";
