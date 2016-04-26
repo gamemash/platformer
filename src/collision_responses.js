@@ -157,7 +157,8 @@ let CollisionResponses = function(){
     'MarioFireFlower': this.marioPicksupFireFlower,
     'MarioFireball': this.nothing,
     'KoopaFireball': this.fireballHitsEnemy,
-    'GoombaFireball': this.fireballHitsEnemy
+    'GoombaFireball': this.fireballHitsEnemy,
+    'FireballFireball': this.nothing
   }
 };
 

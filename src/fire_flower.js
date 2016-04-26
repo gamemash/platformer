@@ -113,15 +113,12 @@ FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)
     if (this.direction == "left"){
       this.velocity.x = -this.velocity.x;
     }
+    this.velocity.x += this.player.velocity.x;
 
     DelayedAction.create({game: this.game, duration: 4.0, action: (function(){
       this.explosion();
     }.bind(this))});
     this.registerUpdateCallback(this.updateCallback);
-    //this.fireball();
-    //DelayedAction.create({game: this.game, duration: 1, action: (function(){
-    //  this.explosion();
-    //}.bind(this))});
   });
 
 module.exports = FireFlower;

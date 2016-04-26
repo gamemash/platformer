@@ -18,7 +18,7 @@ var inputStream = Kefir.stream(emitter => {
 
 var menuStream  = inputStream.filter(x => x == "menu").debounce(50, {immediate: true});
 var jumpStream  = inputStream.filter(x => x == "jump").debounce(50, {immediate: true});
-var shootStream = inputStream.filter(x => x == "run").throttle(200, {immediate: true});
+var shootStream = inputStream.filter(x => x == "run").throttle(500, {trailing: false});
 
 module.exports = {
   inputStream: inputStream,

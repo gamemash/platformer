@@ -50,6 +50,7 @@ let Player1 = stampit.compose(Mario)
 
       if (this.superMario){
         this.shrink();
+        this.setPowerUp(0);
       } else {
         this.die();
       }
