@@ -5,6 +5,7 @@ let Selector                            = require('./selector.js');
 let _                                   = require('underscore');
 let PhysicsEngine                       = require('./physics_engine.js');
 let Blocks                              = require('./blocks.js');
+let lz = require("lz-string");
 
 function convertToGridCoordinatesForRenderer(renderer, pixelCoordinates) {
   let newCoordinates = new THREE.Vector2()
@@ -38,20 +39,20 @@ let Level = stampit
       }
     },
     delete: function(coordinates) {
-      console.log(coordinates);
       delete this.data[coordinates.x + ":" + coordinates.y];
       PhysicsEngine.removeObject(this.loadedSprites[coordinates.x + ":" + coordinates.y]);
       this.game.renderer.deleteFromScene(this.loadedSprites[coordinates.x + ":" + coordinates.y].mesh);
       delete this.loadedSprites[coordinates.x + ":" + coordinates.y];
     },
     export: function() {
-      console.log(JSON.stringify(this.data));
+      var data = JSON.stringify(this.data);
+      var compressed = lz.compressToUTF16(data);
+      console.log(compressed);
     },
     clear: function() {
       let scene = this.game.renderer.scene;
       for(var i = scene.children.length - 1; i >= 0 ; i--){
         let obj = scene.children[i];
-        console.log(obj)
         scene.remove(obj);
       }
     },
@@ -72,20 +73,47 @@ let BlockTool = stampit
 
   })
   .methods({
+    selected: function() {
+
+    },
     use: function(coordinates) {
       level.set(coordinates, this.blockId, {});
     }
-  })
+  });
 
 let EraseTool = stampit
   .methods({
+    selected: function() {
+
+    },
     use: function(coordinates) {
       level.delete(coordinates);
+    }
+  });
+
+let SaveTool = stampit
+  .methods({
+    selected: function() {
+      level.export();
+    },
+    use: function(coordinates) {
+      console.log("whoa");
+    }
+  })
+
+let ClearTool = stampit
+  .methods({
+    selected: function() {
+
+    },
+    use: function(coordinates) {
+      console.log("clear");
     }
   })
 
 let LevelEditor = stampit
   .init(function(){
+    this.tools = {};
     this.selectedTool = BlockTool.create({blockId: "Ground", game: this.game});
     this.selector = Selector.create({game: this.game, position: new THREE.Vector2(0, 0)});
     let convertToGridCoordinates = convertToGridCoordinatesForRenderer.bind(this, this.game.renderer);
@@ -98,6 +126,8 @@ let LevelEditor = stampit
     let dragPositionStream = mouseMoveStream.map(convertToGridCoordinates).filterBy(mouseClickStream);
 
     let level = Level.create({game: this.game});
+
+    // ¯\_(ツ)_/¯ YOLO
     window.level = level;
 
     clickPositionStream.log()
@@ -116,10 +146,10 @@ let LevelEditor = stampit
     }
 
     this.addSpacerToToolbox();
-    this.addBlockToToolbox('Eraser');
-    this.addBlockToToolbox('Clear');
+    this.addBlockToToolbox('Eraser', EraseTool.create({game: this.game}));
+    this.addBlockToToolbox('Clear', ClearTool.create({game: this.game}));
     this.addSpacerToToolbox();
-    this.addBlockToToolbox('Save');
+    this.addBlockToToolbox('Save', SaveTool.create({game: this.game}));
     this.addBlockToToolbox('Load');
 
 
@@ -129,7 +159,8 @@ let LevelEditor = stampit
       if (Blocks.hasOwnProperty(id)) {
         this.selectedTool = BlockTool.create({blockId: id, game: this.game});
       } else {
-        this.selectedTool = EraseTool.create({game: this.game});
+        this.selectedTool = this.tools[id]
+        this.selectedTool.selected();
       }
     },
 
@@ -139,7 +170,8 @@ let LevelEditor = stampit
       this.toolbox.appendChild(element);
     },
 
-    addBlockToToolbox: function(key) {
+    addBlockToToolbox: function(key, tool) {
+      this.tools[key] = tool;
       element = document.createElement("div");
       element.className = "block";
 
