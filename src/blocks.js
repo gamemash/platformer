@@ -9,8 +9,7 @@ let {BumpAnimation, BrickAnimation, BreakBrickAnimation} = require('./animations
 let PointsAnimation = require('./points_animation.js');
 let PhysicsEngine = require('./physics_engine.js');
 let Castle = require('./castle.js');
-let {Goomba, Mushroom} = require('./enemies.js')
-let Entity = require('./entity.js')
+let {Mushroom} = require('./enemies.js')
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' });
@@ -103,9 +102,6 @@ let CoinBlock = stampit.compose(ItemBlock)
         entity.score += 200;
         entity.statsChanged();
 
-        sounds.powerUpAppears.currentTime = 0;
-        sounds.powerUpAppears.play();
-
         let block = this.transformToBlock();
         CoinAnimation.create({game: this.game, subject: block, points: 200});
       }
@@ -160,7 +156,7 @@ let Brick = stampit.compose(Sprite, Collidable)
           if (entity.superMario){
             BreakBrickAnimation.create({game: this.game, subject: this});
             this.game.renderer.deleteFromScene(this.mesh);
-            PhysicsEngine.deleteObject(this);
+            PhysicsEngine.removeObject(this);
           } else {
             BrickAnimation.create({game: this.game, subject: this});
           }

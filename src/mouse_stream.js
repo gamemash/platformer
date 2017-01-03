@@ -30,16 +30,12 @@ directionStream = mouseMoveStream.bufferWithCount(2).map((vectorArray) => {
   if (vectorArray[0].y < vectorArray[1].y) { return "up" }
 }).skipDuplicates();
 
-// directionStream.log();
-
 shakeStream = directionStream.bufferWithTimeOrCount(600, 7)
               .filter((x) => x.length === 7)
               .map(() => {return "shake"})
 
 shakeStream.onValue(() => {
-  sounds.coin.pause();
-  sounds.coin.currentTime = 0;
-  sounds.coin.play();
+  console.log("shake detected?");
 });
 
 module.exports = {

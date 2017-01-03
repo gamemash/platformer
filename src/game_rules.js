@@ -19,26 +19,13 @@ let GameRules = stampit.compose()
       player.die();
     }
 
-    for(let entity of entities) {
-      if (entity.dead) continue;
-      if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
-        // console.log(entity.name)
-        switch(entity.name){
-          case 'Goomba':
-            if (PhysicsEngine.hitFromAbove(player, entity)){
-              player.killed(entity);
-              entity.die();
-              player.velocity.y = 17;
-              sounds.stomp.play();
-            } else {
-              player.die();
-            }
-            break;
-          case 'Mushroom':
-            player.grow();
-            sounds.powerUp.play();
-            entity.remove();
-            break;
+    for (let a = 0; a < entities.length(); a += 1){
+      let entity_a = entities.get(a);
+      for (let b = a + 1; b < entities.length(); b += 1){
+        let entity_b = entities.get(b);
+
+        if (PhysicsEngine.boundingBox(entity_a, entity_b)){
+          CollisionResponses.resolve(entity_a, entity_b);
         }
       }
     }
