@@ -151,8 +151,6 @@ let LevelEditor = stampit
     this.addSpacerToToolbox();
     this.addBlockToToolbox('Save', SaveTool.create({game: this.game}));
     this.addBlockToToolbox('Load');
-
-
   })
   .methods({
     selectTool: function(id) {

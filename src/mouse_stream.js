@@ -21,8 +21,6 @@ var mouseClickStream = Kefir.stream(emitter => {
   });
 });
 
-
-
 directionStream = mouseMoveStream.bufferWithCount(2).map((vectorArray) => {
   if (vectorArray[0].x > vectorArray[1].x) { return "left" }
   if (vectorArray[0].x < vectorArray[1].x) { return "right" }
@@ -42,4 +40,3 @@ module.exports = {
   mouseMoveStream: mouseMoveStream,
   mouseClickStream: mouseClickStream
 }
-

@@ -91,7 +91,6 @@ let CoinAnimation = stampit.compose(Animation)
     }
   });
 
-
 let CoinBlock = stampit.compose(ItemBlock)
   .methods({
     collided: function(entity, direction) {
@@ -107,7 +106,6 @@ let CoinBlock = stampit.compose(ItemBlock)
       }
     }
   });
-
 
 let Coin = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -135,7 +133,6 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
       this.remove();
     }
   });
-
 
 let Brick = stampit.compose(Sprite, Collidable)
     .refs({

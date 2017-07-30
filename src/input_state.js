@@ -21,7 +21,8 @@ InputState  = function() {
     'right': "D",
     'jump': 'J',
     'run': 'K',
-    'menu': 'enter'
+    'menu': 'enter',
+    'edit': 'T'
   }
 }
 
