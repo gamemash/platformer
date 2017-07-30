@@ -27,21 +27,8 @@ this.game = game;
 
 game.start();
 
-<<<<<<< HEAD
-let selector = Selector.create({game: game, position: new THREE.Vector2(0, 0)});
-let mouseState = MouseState.create({canvasId: "game-canvas"});
-
-mouseState.addListener(function(x,y) {
-  x = Math.floor(x/32 - renderer.camera.position.x);
-  y = Math.floor(y/32);
-  selector.moveTo(x,y);
-});
-
-},{"./src/game.js":59,"./src/game_state_controller.js":62,"./src/input_stream.js":65,"./src/interface.js":66,"./src/levels/level_1.js":69,"./src/mouse_state.js":71,"./src/mouse_stream.js":72,"./src/player1.js":74,"./src/selector.js":77,"./src/webgl_renderer.js":85,"stampit":4,"three":47}],2:[function(require,module,exports){
-=======
 LevelEditor.create({game: game})
-},{"./src/blocks.js":52,"./src/game.js":59,"./src/game_state_controller.js":62,"./src/input_stream.js":65,"./src/interface.js":66,"./src/level_editor.js":69,"./src/levels/level_1.js":70,"./src/player1.js":75,"./src/sounds.js":79,"./src/webgl_renderer.js":84,"stampit":4,"three":47}],2:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./src/blocks.js":53,"./src/game.js":65,"./src/game_state_controller.js":68,"./src/input_stream.js":71,"./src/interface.js":72,"./src/level_editor.js":75,"./src/levels/level_1.js":76,"./src/player1.js":83,"./src/sounds.js":89,"./src/webgl_renderer.js":94,"stampit":5,"three":48}],2:[function(require,module,exports){
 (function (process,global){
 /* @preserve
  * The MIT License (MIT)
@@ -5457,11 +5444,7 @@ module.exports = ret;
 },{"./es5":13}]},{},[4])(4)
 });                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-<<<<<<< HEAD
-},{"_process":86}],3:[function(require,module,exports){
-=======
-},{"_process":85}],3:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"_process":95}],3:[function(require,module,exports){
 /*! Kefir.js v3.2.1
  *  https://github.com/rpominov/kefir
  */
@@ -8766,6 +8749,509 @@ module.exports = ret;
 
 }));
 },{}],4:[function(require,module,exports){
+// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
+// This work is free. You can redistribute it and/or modify it
+// under the terms of the WTFPL, Version 2
+// For more information see LICENSE.txt or http://www.wtfpl.net/
+//
+// For more information, the home page:
+// http://pieroxy.net/blog/pages/lz-string/testing.html
+//
+// LZ-based compression algorithm, version 1.4.4
+var LZString = (function() {
+
+// private property
+var f = String.fromCharCode;
+var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+var baseReverseDic = {};
+
+function getBaseValue(alphabet, character) {
+  if (!baseReverseDic[alphabet]) {
+    baseReverseDic[alphabet] = {};
+    for (var i=0 ; i<alphabet.length ; i++) {
+      baseReverseDic[alphabet][alphabet.charAt(i)] = i;
+    }
+  }
+  return baseReverseDic[alphabet][character];
+}
+
+var LZString = {
+  compressToBase64 : function (input) {
+    if (input == null) return "";
+    var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
+    switch (res.length % 4) { // To produce valid Base64
+    default: // When could this happen ?
+    case 0 : return res;
+    case 1 : return res+"===";
+    case 2 : return res+"==";
+    case 3 : return res+"=";
+    }
+  },
+
+  decompressFromBase64 : function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
+  },
+
+  compressToUTF16 : function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
+  },
+
+  decompressFromUTF16: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
+  },
+
+  //compress into uint8array (UCS-2 big endian format)
+  compressToUint8Array: function (uncompressed) {
+    var compressed = LZString.compress(uncompressed);
+    var buf=new Uint8Array(compressed.length*2); // 2 bytes per character
+
+    for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
+      var current_value = compressed.charCodeAt(i);
+      buf[i*2] = current_value >>> 8;
+      buf[i*2+1] = current_value % 256;
+    }
+    return buf;
+  },
+
+  //decompress from uint8array (UCS-2 big endian format)
+  decompressFromUint8Array:function (compressed) {
+    if (compressed===null || compressed===undefined){
+        return LZString.decompress(compressed);
+    } else {
+        var buf=new Array(compressed.length/2); // 2 bytes per character
+        for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
+          buf[i]=compressed[i*2]*256+compressed[i*2+1];
+        }
+
+        var result = [];
+        buf.forEach(function (c) {
+          result.push(f(c));
+        });
+        return LZString.decompress(result.join(''));
+
+    }
+
+  },
+
+
+  //compress into a string that is already URI encoded
+  compressToEncodedURIComponent: function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
+  },
+
+  //decompress from an output of compressToEncodedURIComponent
+  decompressFromEncodedURIComponent:function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    input = input.replace(/ /g, "+");
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
+  },
+
+  compress: function (uncompressed) {
+    return LZString._compress(uncompressed, 16, function(a){return f(a);});
+  },
+  _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+    if (uncompressed == null) return "";
+    var i, value,
+        context_dictionary= {},
+        context_dictionaryToCreate= {},
+        context_c="",
+        context_wc="",
+        context_w="",
+        context_enlargeIn= 2, // Compensate for the first entry which should not count
+        context_dictSize= 3,
+        context_numBits= 2,
+        context_data=[],
+        context_data_val=0,
+        context_data_position=0,
+        ii;
+
+    for (ii = 0; ii < uncompressed.length; ii += 1) {
+      context_c = uncompressed.charAt(ii);
+      if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
+        context_dictionary[context_c] = context_dictSize++;
+        context_dictionaryToCreate[context_c] = true;
+      }
+
+      context_wc = context_w + context_c;
+      if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
+        context_w = context_wc;
+      } else {
+        if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+          if (context_w.charCodeAt(0)<256) {
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<8 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          } else {
+            value = 1;
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1) | value;
+              if (context_data_position ==bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = 0;
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<16 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          }
+          context_enlargeIn--;
+          if (context_enlargeIn == 0) {
+            context_enlargeIn = Math.pow(2, context_numBits);
+            context_numBits++;
+          }
+          delete context_dictionaryToCreate[context_w];
+        } else {
+          value = context_dictionary[context_w];
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+
+
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        // Add wc to the dictionary.
+        context_dictionary[context_wc] = context_dictSize++;
+        context_w = String(context_c);
+      }
+    }
+
+    // Output the code for w.
+    if (context_w !== "") {
+      if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+        if (context_w.charCodeAt(0)<256) {
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<8 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        } else {
+          value = 1;
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | value;
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = 0;
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<16 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        delete context_dictionaryToCreate[context_w];
+      } else {
+        value = context_dictionary[context_w];
+        for (i=0 ; i<context_numBits ; i++) {
+          context_data_val = (context_data_val << 1) | (value&1);
+          if (context_data_position == bitsPerChar-1) {
+            context_data_position = 0;
+            context_data.push(getCharFromInt(context_data_val));
+            context_data_val = 0;
+          } else {
+            context_data_position++;
+          }
+          value = value >> 1;
+        }
+
+
+      }
+      context_enlargeIn--;
+      if (context_enlargeIn == 0) {
+        context_enlargeIn = Math.pow(2, context_numBits);
+        context_numBits++;
+      }
+    }
+
+    // Mark the end of the stream
+    value = 2;
+    for (i=0 ; i<context_numBits ; i++) {
+      context_data_val = (context_data_val << 1) | (value&1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data_position = 0;
+        context_data.push(getCharFromInt(context_data_val));
+        context_data_val = 0;
+      } else {
+        context_data_position++;
+      }
+      value = value >> 1;
+    }
+
+    // Flush the last char
+    while (true) {
+      context_data_val = (context_data_val << 1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data.push(getCharFromInt(context_data_val));
+        break;
+      }
+      else context_data_position++;
+    }
+    return context_data.join('');
+  },
+
+  decompress: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
+  },
+
+  _decompress: function (length, resetValue, getNextValue) {
+    var dictionary = [],
+        next,
+        enlargeIn = 4,
+        dictSize = 4,
+        numBits = 3,
+        entry = "",
+        result = [],
+        i,
+        w,
+        bits, resb, maxpower, power,
+        c,
+        data = {val:getNextValue(0), position:resetValue, index:1};
+
+    for (i = 0; i < 3; i += 1) {
+      dictionary[i] = i;
+    }
+
+    bits = 0;
+    maxpower = Math.pow(2,2);
+    power=1;
+    while (power!=maxpower) {
+      resb = data.val & data.position;
+      data.position >>= 1;
+      if (data.position == 0) {
+        data.position = resetValue;
+        data.val = getNextValue(data.index++);
+      }
+      bits |= (resb>0 ? 1 : 0) * power;
+      power <<= 1;
+    }
+
+    switch (next = bits) {
+      case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 2:
+        return "";
+    }
+    dictionary[3] = c;
+    w = c;
+    result.push(c);
+    while (true) {
+      if (data.index > length) {
+        return "";
+      }
+
+      bits = 0;
+      maxpower = Math.pow(2,numBits);
+      power=1;
+      while (power!=maxpower) {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position == 0) {
+          data.position = resetValue;
+          data.val = getNextValue(data.index++);
+        }
+        bits |= (resb>0 ? 1 : 0) * power;
+        power <<= 1;
+      }
+
+      switch (c = bits) {
+        case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 2:
+          return result.join('');
+      }
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+      if (dictionary[c]) {
+        entry = dictionary[c];
+      } else {
+        if (c === dictSize) {
+          entry = w + w.charAt(0);
+        } else {
+          return null;
+        }
+      }
+      result.push(entry);
+
+      // Add w+entry[0] to the dictionary.
+      dictionary[dictSize++] = w + entry.charAt(0);
+      enlargeIn--;
+
+      w = entry;
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+    }
+  }
+};
+  return LZString;
+})();
+
+if (typeof define === 'function' && define.amd) {
+  define(function () { return LZString; });
+} else if( typeof module !== 'undefined' && module != null ) {
+  module.exports = LZString
+}
+
+},{}],5:[function(require,module,exports){
 /**
  * Stampit
  **
@@ -9201,7 +9687,7 @@ exports['default'] = (0, _supermixer.mixin)(stampit, {
   convertConstructor: convertConstructor
 });
 module.exports = exports['default'];
-},{"lodash/collection/forEach":5,"lodash/lang/isFunction":36,"lodash/lang/isObject":38,"supermixer":45}],5:[function(require,module,exports){
+},{"lodash/collection/forEach":6,"lodash/lang/isFunction":37,"lodash/lang/isObject":39,"supermixer":46}],6:[function(require,module,exports){
 var arrayEach = require('../internal/arrayEach'),
     baseEach = require('../internal/baseEach'),
     createForEach = require('../internal/createForEach');
@@ -9240,7 +9726,7 @@ var forEach = createForEach(arrayEach, baseEach);
 
 module.exports = forEach;
 
-},{"../internal/arrayEach":7,"../internal/baseEach":11,"../internal/createForEach":19}],6:[function(require,module,exports){
+},{"../internal/arrayEach":8,"../internal/baseEach":12,"../internal/createForEach":20}],7:[function(require,module,exports){
 /**
  * Copies the values of `source` to `array`.
  *
@@ -9262,7 +9748,7 @@ function arrayCopy(source, array) {
 
 module.exports = arrayCopy;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /**
  * A specialized version of `_.forEach` for arrays without support for callback
  * shorthands and `this` binding.
@@ -9286,7 +9772,7 @@ function arrayEach(array, iteratee) {
 
 module.exports = arrayEach;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var baseCopy = require('./baseCopy'),
     keys = require('../object/keys');
 
@@ -9307,7 +9793,7 @@ function baseAssign(object, source) {
 
 module.exports = baseAssign;
 
-},{"../object/keys":42,"./baseCopy":10}],9:[function(require,module,exports){
+},{"../object/keys":43,"./baseCopy":11}],10:[function(require,module,exports){
 var arrayCopy = require('./arrayCopy'),
     arrayEach = require('./arrayEach'),
     baseAssign = require('./baseAssign'),
@@ -9437,7 +9923,7 @@ function baseClone(value, isDeep, customizer, key, object, stackA, stackB) {
 
 module.exports = baseClone;
 
-},{"../lang/isArray":35,"../lang/isObject":38,"./arrayCopy":6,"./arrayEach":7,"./baseAssign":8,"./baseForOwn":13,"./initCloneArray":24,"./initCloneByTag":25,"./initCloneObject":26}],10:[function(require,module,exports){
+},{"../lang/isArray":36,"../lang/isObject":39,"./arrayCopy":7,"./arrayEach":8,"./baseAssign":9,"./baseForOwn":14,"./initCloneArray":25,"./initCloneByTag":26,"./initCloneObject":27}],11:[function(require,module,exports){
 /**
  * Copies properties of `source` to `object`.
  *
@@ -9462,7 +9948,7 @@ function baseCopy(source, props, object) {
 
 module.exports = baseCopy;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var baseForOwn = require('./baseForOwn'),
     createBaseEach = require('./createBaseEach');
 
@@ -9479,7 +9965,7 @@ var baseEach = createBaseEach(baseForOwn);
 
 module.exports = baseEach;
 
-},{"./baseForOwn":13,"./createBaseEach":17}],12:[function(require,module,exports){
+},{"./baseForOwn":14,"./createBaseEach":18}],13:[function(require,module,exports){
 var createBaseFor = require('./createBaseFor');
 
 /**
@@ -9498,7 +9984,7 @@ var baseFor = createBaseFor();
 
 module.exports = baseFor;
 
-},{"./createBaseFor":18}],13:[function(require,module,exports){
+},{"./createBaseFor":19}],14:[function(require,module,exports){
 var baseFor = require('./baseFor'),
     keys = require('../object/keys');
 
@@ -9517,7 +10003,7 @@ function baseForOwn(object, iteratee) {
 
 module.exports = baseForOwn;
 
-},{"../object/keys":42,"./baseFor":12}],14:[function(require,module,exports){
+},{"../object/keys":43,"./baseFor":13}],15:[function(require,module,exports){
 /**
  * The base implementation of `_.property` without support for deep paths.
  *
@@ -9533,7 +10019,7 @@ function baseProperty(key) {
 
 module.exports = baseProperty;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var identity = require('../utility/identity');
 
 /**
@@ -9574,7 +10060,7 @@ function bindCallback(func, thisArg, argCount) {
 
 module.exports = bindCallback;
 
-},{"../utility/identity":44}],16:[function(require,module,exports){
+},{"../utility/identity":45}],17:[function(require,module,exports){
 (function (global){
 /** Native method references. */
 var ArrayBuffer = global.ArrayBuffer,
@@ -9598,7 +10084,7 @@ function bufferClone(buffer) {
 module.exports = bufferClone;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var getLength = require('./getLength'),
     isLength = require('./isLength'),
     toObject = require('./toObject');
@@ -9631,7 +10117,7 @@ function createBaseEach(eachFunc, fromRight) {
 
 module.exports = createBaseEach;
 
-},{"./getLength":22,"./isLength":29,"./toObject":32}],18:[function(require,module,exports){
+},{"./getLength":23,"./isLength":30,"./toObject":33}],19:[function(require,module,exports){
 var toObject = require('./toObject');
 
 /**
@@ -9660,7 +10146,7 @@ function createBaseFor(fromRight) {
 
 module.exports = createBaseFor;
 
-},{"./toObject":32}],19:[function(require,module,exports){
+},{"./toObject":33}],20:[function(require,module,exports){
 var bindCallback = require('./bindCallback'),
     isArray = require('../lang/isArray');
 
@@ -9682,7 +10168,7 @@ function createForEach(arrayFunc, eachFunc) {
 
 module.exports = createForEach;
 
-},{"../lang/isArray":35,"./bindCallback":15}],20:[function(require,module,exports){
+},{"../lang/isArray":36,"./bindCallback":16}],21:[function(require,module,exports){
 var bindCallback = require('./bindCallback'),
     keysIn = require('../object/keysIn');
 
@@ -9704,7 +10190,7 @@ function createForIn(objectFunc) {
 
 module.exports = createForIn;
 
-},{"../object/keysIn":43,"./bindCallback":15}],21:[function(require,module,exports){
+},{"../object/keysIn":44,"./bindCallback":16}],22:[function(require,module,exports){
 var bindCallback = require('./bindCallback');
 
 /**
@@ -9725,7 +10211,7 @@ function createForOwn(objectFunc) {
 
 module.exports = createForOwn;
 
-},{"./bindCallback":15}],22:[function(require,module,exports){
+},{"./bindCallback":16}],23:[function(require,module,exports){
 var baseProperty = require('./baseProperty');
 
 /**
@@ -9742,7 +10228,7 @@ var getLength = baseProperty('length');
 
 module.exports = getLength;
 
-},{"./baseProperty":14}],23:[function(require,module,exports){
+},{"./baseProperty":15}],24:[function(require,module,exports){
 var isNative = require('../lang/isNative');
 
 /**
@@ -9760,7 +10246,7 @@ function getNative(object, key) {
 
 module.exports = getNative;
 
-},{"../lang/isNative":37}],24:[function(require,module,exports){
+},{"../lang/isNative":38}],25:[function(require,module,exports){
 /** Used for native method references. */
 var objectProto = Object.prototype;
 
@@ -9788,7 +10274,7 @@ function initCloneArray(array) {
 
 module.exports = initCloneArray;
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var bufferClone = require('./bufferClone');
 
 /** `Object#toString` result references. */
@@ -9853,7 +10339,7 @@ function initCloneByTag(object, tag, isDeep) {
 
 module.exports = initCloneByTag;
 
-},{"./bufferClone":16}],26:[function(require,module,exports){
+},{"./bufferClone":17}],27:[function(require,module,exports){
 /**
  * Initializes an object clone.
  *
@@ -9871,7 +10357,7 @@ function initCloneObject(object) {
 
 module.exports = initCloneObject;
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var getLength = require('./getLength'),
     isLength = require('./isLength');
 
@@ -9888,7 +10374,7 @@ function isArrayLike(value) {
 
 module.exports = isArrayLike;
 
-},{"./getLength":22,"./isLength":29}],28:[function(require,module,exports){
+},{"./getLength":23,"./isLength":30}],29:[function(require,module,exports){
 /** Used to detect unsigned integer values. */
 var reIsUint = /^\d+$/;
 
@@ -9914,7 +10400,7 @@ function isIndex(value, length) {
 
 module.exports = isIndex;
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /**
  * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
  * of an array-like value.
@@ -9936,7 +10422,7 @@ function isLength(value) {
 
 module.exports = isLength;
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * Checks if `value` is object-like.
  *
@@ -9950,7 +10436,7 @@ function isObjectLike(value) {
 
 module.exports = isObjectLike;
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var isArguments = require('../lang/isArguments'),
     isArray = require('../lang/isArray'),
     isIndex = require('./isIndex'),
@@ -9993,7 +10479,7 @@ function shimKeys(object) {
 
 module.exports = shimKeys;
 
-},{"../lang/isArguments":34,"../lang/isArray":35,"../object/keysIn":43,"./isIndex":28,"./isLength":29}],32:[function(require,module,exports){
+},{"../lang/isArguments":35,"../lang/isArray":36,"../object/keysIn":44,"./isIndex":29,"./isLength":30}],33:[function(require,module,exports){
 var isObject = require('../lang/isObject');
 
 /**
@@ -10009,7 +10495,7 @@ function toObject(value) {
 
 module.exports = toObject;
 
-},{"../lang/isObject":38}],33:[function(require,module,exports){
+},{"../lang/isObject":39}],34:[function(require,module,exports){
 var baseClone = require('../internal/baseClone'),
     bindCallback = require('../internal/bindCallback');
 
@@ -10066,7 +10552,7 @@ function cloneDeep(value, customizer, thisArg) {
 
 module.exports = cloneDeep;
 
-},{"../internal/baseClone":9,"../internal/bindCallback":15}],34:[function(require,module,exports){
+},{"../internal/baseClone":10,"../internal/bindCallback":16}],35:[function(require,module,exports){
 var isArrayLike = require('../internal/isArrayLike'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -10102,7 +10588,7 @@ function isArguments(value) {
 
 module.exports = isArguments;
 
-},{"../internal/isArrayLike":27,"../internal/isObjectLike":30}],35:[function(require,module,exports){
+},{"../internal/isArrayLike":28,"../internal/isObjectLike":31}],36:[function(require,module,exports){
 var getNative = require('../internal/getNative'),
     isLength = require('../internal/isLength'),
     isObjectLike = require('../internal/isObjectLike');
@@ -10144,7 +10630,7 @@ var isArray = nativeIsArray || function(value) {
 
 module.exports = isArray;
 
-},{"../internal/getNative":23,"../internal/isLength":29,"../internal/isObjectLike":30}],36:[function(require,module,exports){
+},{"../internal/getNative":24,"../internal/isLength":30,"../internal/isObjectLike":31}],37:[function(require,module,exports){
 var isObject = require('./isObject');
 
 /** `Object#toString` result references. */
@@ -10184,7 +10670,7 @@ function isFunction(value) {
 
 module.exports = isFunction;
 
-},{"./isObject":38}],37:[function(require,module,exports){
+},{"./isObject":39}],38:[function(require,module,exports){
 var isFunction = require('./isFunction'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -10234,7 +10720,7 @@ function isNative(value) {
 
 module.exports = isNative;
 
-},{"../internal/isObjectLike":30,"./isFunction":36}],38:[function(require,module,exports){
+},{"../internal/isObjectLike":31,"./isFunction":37}],39:[function(require,module,exports){
 /**
  * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
  * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
@@ -10264,7 +10750,7 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  * Checks if `value` is `undefined`.
  *
@@ -10287,7 +10773,7 @@ function isUndefined(value) {
 
 module.exports = isUndefined;
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var baseFor = require('../internal/baseFor'),
     createForIn = require('../internal/createForIn');
 
@@ -10322,7 +10808,7 @@ var forIn = createForIn(baseFor);
 
 module.exports = forIn;
 
-},{"../internal/baseFor":12,"../internal/createForIn":20}],41:[function(require,module,exports){
+},{"../internal/baseFor":13,"../internal/createForIn":21}],42:[function(require,module,exports){
 var baseForOwn = require('../internal/baseForOwn'),
     createForOwn = require('../internal/createForOwn');
 
@@ -10357,7 +10843,7 @@ var forOwn = createForOwn(baseForOwn);
 
 module.exports = forOwn;
 
-},{"../internal/baseForOwn":13,"../internal/createForOwn":21}],42:[function(require,module,exports){
+},{"../internal/baseForOwn":14,"../internal/createForOwn":22}],43:[function(require,module,exports){
 var getNative = require('../internal/getNative'),
     isArrayLike = require('../internal/isArrayLike'),
     isObject = require('../lang/isObject'),
@@ -10404,7 +10890,7 @@ var keys = !nativeKeys ? shimKeys : function(object) {
 
 module.exports = keys;
 
-},{"../internal/getNative":23,"../internal/isArrayLike":27,"../internal/shimKeys":31,"../lang/isObject":38}],43:[function(require,module,exports){
+},{"../internal/getNative":24,"../internal/isArrayLike":28,"../internal/shimKeys":32,"../lang/isObject":39}],44:[function(require,module,exports){
 var isArguments = require('../lang/isArguments'),
     isArray = require('../lang/isArray'),
     isIndex = require('../internal/isIndex'),
@@ -10470,7 +10956,7 @@ function keysIn(object) {
 
 module.exports = keysIn;
 
-},{"../internal/isIndex":28,"../internal/isLength":29,"../lang/isArguments":34,"../lang/isArray":35,"../lang/isObject":38}],44:[function(require,module,exports){
+},{"../internal/isIndex":29,"../internal/isLength":30,"../lang/isArguments":35,"../lang/isArray":36,"../lang/isObject":39}],45:[function(require,module,exports){
 /**
  * This method returns the first argument provided to it.
  *
@@ -10492,7 +10978,7 @@ function identity(value) {
 
 module.exports = identity;
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -10564,7 +11050,7 @@ exports.mixinChainFunctions = mixinChainFunctions;
 exports.merge = merge;
 exports.mergeUnique = mergeUnique;
 exports.mergeChainNonFunctions = mergeChainNonFunctions;
-},{"./mixer":46,"lodash/lang/isFunction":36}],46:[function(require,module,exports){
+},{"./mixer":47,"lodash/lang/isFunction":37}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -10663,7 +11149,7 @@ function mixer() {
 }
 
 module.exports = exports['default'];
-},{"lodash/lang/cloneDeep":33,"lodash/lang/isObject":38,"lodash/lang/isUndefined":39,"lodash/object/forIn":40,"lodash/object/forOwn":41}],47:[function(require,module,exports){
+},{"lodash/lang/cloneDeep":34,"lodash/lang/isObject":39,"lodash/lang/isUndefined":40,"lodash/object/forIn":41,"lodash/object/forOwn":42}],48:[function(require,module,exports){
 var self = self || {};// File:src/Three.js
 
 /**
@@ -51346,7 +51832,7 @@ if (typeof exports !== 'undefined') {
   this['THREE'] = THREE;
 }
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -52896,7 +53382,7 @@ if (typeof exports !== 'undefined') {
   }
 }.call(this));
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Sprite = require('./sprite.js');
@@ -52920,8 +53406,9 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
     frames: [{id:0, duration: 1}],
     animationState: false,
     animations: {},
+    spriteFlipped: false,
     fixed: false,
-    size: new THREE.Vector2(1,1),
+    zIndex: 1,
     shaders: {
       vertexShader: 'animated.vert',
       fragmentShader: 'animated.frag'
@@ -52961,7 +53448,9 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
       spriteSize: {type: "v2", value: this.spriteSize },
       spriteLayout: {type: "v2", value: this.spriteLayout },
       spritePosition: {type: "v2", value: this.spritePosition },
-      fixedPosition: {type: "i", value: this.fixed}
+      fixedPosition: {type: "i", value: this.fixed},
+      spriteFlipped: {type: "i", value: this.spriteFlipped},
+      zIndex: {type: "f", value: this.zIndex}
     };
 
     this.setupCustomShader();
@@ -52973,11 +53462,7 @@ let AnimatedSprite = stampit.compose(Updatable, CustomShader)
 
 module.exports = AnimatedSprite;
 
-<<<<<<< HEAD
-},{"./custom_shader.js":53,"./debug.js":54,"./sprite.js":81,"./updatable.js":84,"stampit":4,"three":47}],49:[function(require,module,exports){
-=======
-},{"./debug.js":54,"./sprite.js":80,"./updatable.js":83,"stampit":4,"three":47}],50:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./custom_shader.js":57,"./debug.js":58,"./sprite.js":90,"./updatable.js":93,"stampit":5,"three":48}],51:[function(require,module,exports){
 let stampit = require('stampit');
 
 let Animation = stampit()
@@ -52990,10 +53475,6 @@ let Animation = stampit()
     handleAnimation: function() {},
     handleStart: function() {},
     handleStop: function() {},
-<<<<<<< HEAD
-=======
-
->>>>>>> build bundle.js
     start: function(dt){
       this.time = 0;
       this.handleStart();
@@ -53019,19 +53500,12 @@ let Animation = stampit()
 
 module.exports = Animation;
 
-<<<<<<< HEAD
-},{"stampit":4}],50:[function(require,module,exports){
+},{"stampit":5}],52:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Animation = require('./animation.js');
 let Sprite = require('./sprite.js');
 let PhysicsEngine = require('./physics_engine.js');
-=======
-},{"stampit":4}],51:[function(require,module,exports){
-let stampit = require('stampit');
-let THREE = require('three');
-let Animation = require('./animation.js');
->>>>>>> build bundle.js
 
 let BumpAnimation = stampit.compose(Animation)
   .refs({
@@ -53053,27 +53527,7 @@ let BumpAnimation = stampit.compose(Animation)
 
 let BrickAnimation = stampit.compose(BumpAnimation);
 
-let NewMushroomAnimation = stampit.compose(Animation)
-  .refs({
-    speed: 2.5,
-    amplitude: 1,
-  })
-  .methods({
-    handleStop: function() {
-      this.subject.position.copy(this.startPosition);
-      this.subject.velocity.copy(this.objVelocity);
-    },
-    handleAnimation: function(dt) {
-      this.subject.position.y = this.startPosition.y - 1 + this.time * this.speed * this.amplitude;
-    },
-    handleStart: function() {
-      this.startPosition = this.subject.position.clone();
-      this.objVelocity = this.subject.velocity.clone();
-      this.subject.velocity.set(0, 0);
-    }
-  });
 
-<<<<<<< HEAD
 let Gravel = stampit.compose(Sprite)
   .refs({
     texture: "brick_piece.png"
@@ -53104,52 +53558,56 @@ let BreakBrickAnimation = stampit.compose(Animation)
       ];
     }
   });
-=======
->>>>>>> build bundle.js
+
+let NewItemAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 2.5,
+    amplitude: 1,
+  })
+  .methods({
+    handleStop: function() {
+      this.subject.position.copy(this.startPosition);
+      this.subject.velocity.copy(this.objVelocity);
+    },
+    handleAnimation: function(dt) {
+      this.subject.position.y = this.startPosition.y - 1 + this.time * this.speed * this.amplitude;
+    },
+    handleStart: function() {
+      this.startPosition = this.subject.position.clone();
+      this.objVelocity = this.subject.velocity.clone();
+      this.subject.velocity.set(0, 0);
+    }
+  });
 
 
 module.exports = {
   BumpAnimation: BumpAnimation,
   BrickAnimation: BrickAnimation,
-<<<<<<< HEAD
-  NewMushroomAnimation: NewMushroomAnimation,
-  BreakBrickAnimation: BreakBrickAnimation
+  BreakBrickAnimation: BreakBrickAnimation,
+  NewItemAnimation: NewItemAnimation
 }
 
-},{"./animation.js":49,"./physics_engine.js":73,"./sprite.js":81,"stampit":4,"three":47}],51:[function(require,module,exports){
-=======
-  NewMushroomAnimation: NewMushroomAnimation
-}
-
-},{"./animation.js":50,"stampit":4,"three":47}],52:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./animation.js":51,"./physics_engine.js":82,"./sprite.js":90,"stampit":5,"three":48}],53:[function(require,module,exports){
 let stampit = require('stampit');
 let Sprite = require('./sprite.js');
 let AnimatedSprite = require('./animated_sprite.js');
 let THREE = require('three');
 let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
-<<<<<<< HEAD
 let Animation = require('./animation.js');
-let {BumpAnimation, BrickAnimation, NewMushroomAnimation, BreakBrickAnimation} = require('./animations.js')
-let {Goomba, Mushroom} = require('./enemies.js')
+let {BumpAnimation, BrickAnimation, BreakBrickAnimation} = require('./animations.js')
 let PointsAnimation = require('./points_animation.js');
 let PhysicsEngine = require('./physics_engine.js');
-=======
-let {BumpAnimation, BrickAnimation} = require('./animations.js')
-let {Goomba, Mushroom} = require('./enemies.js')
->>>>>>> build bundle.js
+let Castle = require('./castle.js');
+let {Mushroom} = require('./enemies.js')
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
-let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' })
+let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' });
 let PipeTopLeft     = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_left.png' });
 let PipeTopRight    = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_top_right.png' });
 let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_left.png' });
 let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
-<<<<<<< HEAD
-=======
 let Tile            = stampit.compose(Sprite, Collidable).refs({ texture: 'tile.png' });
->>>>>>> build bundle.js
 
 let MushroomBlockAnimation = stampit.compose(BumpAnimation)
   .methods({
@@ -53160,7 +53618,6 @@ let MushroomBlockAnimation = stampit.compose(BumpAnimation)
       Block.create({game: this.game, position: this.subject.position.clone() })
     }
   });
-
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -53224,12 +53681,10 @@ let CoinAnimation = stampit.compose(Animation)
     }
   });
 
-
 let CoinBlock = stampit.compose(ItemBlock)
   .methods({
     collided: function(entity, direction) {
       if(direction == "below") {
-<<<<<<< HEAD
         sounds.coin.currentTime = 0;
         sounds.coin.play();
         entity.coins += 1;
@@ -53238,34 +53693,13 @@ let CoinBlock = stampit.compose(ItemBlock)
 
         let block = this.transformToBlock();
         CoinAnimation.create({game: this.game, subject: block, points: 200});
-        //MushroomBlockAnimation.create({game: this.game, subject: block});
-      }
-    }
-  });
-
-let MushroomBlock = stampit.compose(ItemBlock)
-  .methods({
-    collided: function(entity, direction) {
-      if(direction == "below") {
-        sounds.powerUpAppears.currentTime = 0;
-        sounds.powerUpAppears.play();
-
-        
-        let block = this.transformToBlock();
-=======
-        sounds.powerUpAppears.currentTime = 0;
-        sounds.powerUpAppears.play();
-
-        this.game.renderer.deleteFromScene(this.mesh);
-        let block = Block.create({game: this.game, position: this.position.clone() });
->>>>>>> build bundle.js
-        MushroomBlockAnimation.create({game: this.game, subject: block});
       }
     }
   });
 
 let Coin = stampit.compose(AnimatedSprite, Collidable)
   .refs({
+    name: "Coin",
     texture: 'coin.png',
     animationState: "blinking",
     animations: {
@@ -53277,10 +53711,18 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
         {id: 0, duration: 0.05}
       ]
     },
-    spritePosition: [2, 0],
-    spriteLayout: [3, 1]
+    spritePosition: new THREE.Vector2( 2, 0),
+    spriteLayout: new THREE.Vector2( 3, 1)
+  })
+  .methods({
+    collided: function(entity, direction) {
+      sounds.coin.currentTime = 0;
+      sounds.coin.play();
+      entity.score += 50
+      entity.stateChanged();
+      this.remove();
+    }
   });
-
 
 let Brick = stampit.compose(Sprite, Collidable)
     .refs({
@@ -53298,44 +53740,61 @@ let Brick = stampit.compose(Sprite, Collidable)
         if(direction == "below") {
           sounds.breakBlock.currentTime = 0;
           sounds.breakBlock.play();
-<<<<<<< HEAD
           if (entity.superMario){
             BreakBrickAnimation.create({game: this.game, subject: this});
             this.game.renderer.deleteFromScene(this.mesh);
-            PhysicsEngine.deleteObject(this);
+            PhysicsEngine.removeObject(this);
           } else {
             BrickAnimation.create({game: this.game, subject: this});
           }
-=======
-          BrickAnimation.create({game: this.game, subject: this});
->>>>>>> build bundle.js
         }
       }
     });
 
 module.exports = {
-<<<<<<< HEAD
+  Block: Block,
+  ItemBlock: ItemBlock,
   CoinBlock: CoinBlock,
-  MushroomBlock: MushroomBlock,
-=======
->>>>>>> build bundle.js
   Ground: Ground,
   Brick: Brick,
   Tile: Tile,
-  Block: Block,
   PipeBottomLeft: PipeBottomLeft,
   PipeBottomRight: PipeBottomRight,
   PipeTopLeft: PipeTopLeft,
   PipeTopRight: PipeTopRight,
   Coin: Coin,
-  ItemBlock: ItemBlock,
+  Castle: Castle
 }
 
-<<<<<<< HEAD
-},{"./animated_sprite.js":48,"./animation.js":49,"./animations.js":50,"./collidable.js":52,"./enemies.js":55,"./physics_engine.js":73,"./points_animation.js":76,"./sounds.js":80,"./sprite.js":81,"stampit":4,"three":47}],52:[function(require,module,exports){
-=======
-},{"./animated_sprite.js":49,"./animations.js":51,"./collidable.js":53,"./enemies.js":55,"./sounds.js":79,"./sprite.js":80,"stampit":4,"three":47}],53:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./animated_sprite.js":50,"./animation.js":51,"./animations.js":52,"./castle.js":54,"./collidable.js":55,"./enemies.js":60,"./physics_engine.js":82,"./points_animation.js":85,"./sounds.js":89,"./sprite.js":90,"stampit":5,"three":48}],54:[function(require,module,exports){
+let stampit = require('stampit');
+let Sprite = require('./sprite.js');
+let THREE = require('three');
+let Entity = require('./entity.js');
+
+let Castle = stampit.compose(Sprite, Entity)
+  .refs({
+    name: "Castle",
+    size: new THREE.Vector2(5,5),
+    spriteLayout: [1, 1],
+    zIndex: 0.5,
+    texture: 'small_castle.png'
+  })
+  .init(function(){
+     this.flag = Castle.Flag.create({game: this.game, position: new THREE.Vector2(this.position.x + 2, this.position.y + 3.5)});
+     this.updateUniforms();
+  });
+
+Castle.Flag = stampit.compose(Sprite)
+  .refs({
+    texture: 'castle_flag.png',
+  });
+  
+
+module.exports = Castle;
+
+
+},{"./entity.js":61,"./sprite.js":90,"stampit":5,"three":48}],55:[function(require,module,exports){
 let stampit = require('stampit');
 let PhysicsEngine = require('./physics_engine.js');
 
@@ -53347,12 +53806,188 @@ let Collidable = stampit()
     this.physicsEngine.addObject(this);
   })
   .methods({
-    collided: function(entity, direction) {}
+    collided: function(entity, direction) {},
+    remove: function(){
+      this.game.renderer.deleteFromScene(this.mesh);
+      this.mesh.geometry.dispose();
+      this.mesh.material.dispose();
+      this.physicsEngine.removeObject(this);
+    },
   });
 
 module.exports = Collidable;
-<<<<<<< HEAD
-},{"./physics_engine.js":73,"stampit":4}],53:[function(require,module,exports){
+},{"./physics_engine.js":82,"stampit":5}],56:[function(require,module,exports){
+let stampit = require('stampit');
+let PhysicsEngine = require('./physics_engine.js');
+let PointsAnimation = require('./points_animation.js');
+let PlayerAnimations = require('./player_animations.js');
+let DelayedAction = require('./delayed_action.js');
+let THREE = require('three');
+
+let CollisionResponses = function(){
+  this.resolve = function(entity_a, entity_b){
+    if (entity_a.disregardCollisions || entity_b.disregardCollisions) return;
+    let result = [entity_a, entity_b].sort(function(a, b){
+      return a.name < b.name;
+    });
+    let collision = result[0].name + result[1].name;
+
+    if (this.responses[collision]){
+      this.responses[collision](result[0],result[1]);
+    } else {
+      console.log("No response for ", collision);
+    }
+  },
+  this.marioHitsKoopa = function(mario, koopa){
+    if (koopa.dead || mario.dead) return;
+
+    if (PhysicsEngine.hitFromAbove(mario, koopa)){
+      if (koopa.shell){
+        koopa.pushed = true;
+        koopa.name = 'Shell';
+        let direction = (mario.position.x < koopa.position.x ? 1 : -1 );
+        koopa.velocity.set(direction * 10, 0);
+        DelayedAction.create({
+          game: mario.game,
+          action: (function(){
+            koopa.remove();
+          }),
+          duration: 8
+        });
+      } else {
+        koopa.shell = true;
+        koopa.velocity.set(0, 0);
+        koopa.animationState = 'shell';
+        koopa.setSize(new THREE.Vector2(1, 1));
+        koopa.setSpriteSize(new THREE.Vector2(1, 1));
+        DelayedAction.create({
+          game: mario.game,
+          action: (function(){
+            if (koopa.name != 'Shell'){
+            koopa.reset();
+            }
+          }),
+          duration: 3
+        });
+      }
+      mario.velocity.y = 17;
+    } else {
+      mario.getsHit();
+    }
+
+  },
+  this.mushroomMario = function(mushroom, mario){
+    mario.grow();
+    PointsAnimation.create({game: mario.game, points: 1000, subject: mushroom});
+    mushroom.remove();
+    mario.score += 1000;
+    mario.statsChanged();
+  },
+  this.marioHitsGoomba = function(mario, goomba){
+    if (goomba.dead || mario.dead) return;
+    if (PhysicsEngine.hitFromAbove(mario, goomba)){
+      console.log("mario hits goomba and goomba dies");
+      goomba.die();
+      mario.velocity.y = 17;
+      mario.killed(goomba);
+    } else {
+      mario.getsHit();
+    }
+  },
+  this.shellHitsMario = function(shell, mario){
+    mario.getsHit();
+    if (mario.position.x > shell.position.x){
+      shell.velocity.x = -Math.abs(shell.velocity.x);
+    } else {
+      shell.velocity.x = Math.abs(shell.velocity.x);
+    }
+  },
+  this.fireballHitsEnemy = function(enemy, fireball){
+    fireball.explosion();
+    fireball.player.killed(enemy);
+    enemy.disregardCollisions = true;
+    enemy.dead = true;
+    enemy.velocity.set(fireball.velocity.x, 8);
+    DelayedAction.create({
+      game: fireball.game,
+      action: (function(){
+        enemy.remove();
+      }),
+      duration: 1
+    });
+  },
+  this.shellHitsEnemy = function(shell, enemy){
+    enemy.disregardCollisions = true;
+    enemy.dead = true;
+    enemy.velocity.set(shell.velocity.x, 8);
+    DelayedAction.create({
+      game: shell.game,
+      action: (function(){
+        enemy.remove();
+      }),
+      duration: 1
+    });
+  },
+  this.resolveBump =  function(entity_a, entity_b){
+    entity_a.velocity.multiplyScalar(-1);
+    entity_b.velocity.multiplyScalar(-1);
+  },
+  this.marioEntersCastle = function(mario, castle){
+    if (mario.position.x > castle.position.x - 1 + castle.size.x / 2){
+      mario.remove();
+      mario.delete();
+      DelayedAction.create({
+        game: mario.game,
+        action: (function(){
+          PlayerAnimations.CalculateScoreAnimation.create({game: castle.game, subject: mario, flag: castle.flag});
+        }),
+        duration: 1
+      });
+    }
+  },
+  this.marioHitsFlagpole = function(mario, flagpole){
+    flagpole.disregardCollisions = true;
+
+    //shitty equation, need more number pictures...
+    let points = Math.pow(2,Math.round(Math.sqrt(mario.position.y - flagpole.position.y))) * 100;
+    mario.score += points;
+    mario.statsChanged();
+    PointsAnimation.create({game: mario.game, points: points, subject: mario, duration: 2});
+    PlayerAnimations.VictoryAnimation.create({game: mario.game, subject: mario, flagpole: flagpole});
+  },
+  this.marioPicksupFireFlower = function(mario, flower){
+    flower.remove();
+    PointsAnimation.create({game: mario.game, points: 1000, subject: flower});
+    if (mario.superMario){
+      PlayerAnimations.FlowerAnimation.create({game: mario.game, subject: mario});
+    } else {
+      mario.grow();
+    }
+  },
+  this.nothing = function(){},
+  this.responses = {
+    'MarioCastle': this.marioEntersCastle,
+    'MarioFlagpole': this.marioHitsFlagpole,
+    'ShellMario': this.shellHitsMario,
+    'ShellGoomba': this.shellHitsEnemy,
+    'MarioKoopa': this.marioHitsKoopa,
+    'MushroomMario': this.mushroomMario,
+    'MarioGoomba': this.marioHitsGoomba,
+    'GoombaGoomba': this.resolveBump,
+    'KoopaGoomba': this.resolveBump,
+    'MarioFireFlower': this.marioPicksupFireFlower,
+    'MarioFireball': this.nothing,
+    'KoopaFireball': this.fireballHitsEnemy,
+    'GoombaFireball': this.fireballHitsEnemy,
+    'FireballFireball': this.nothing
+  }
+};
+
+
+module.exports = new CollisionResponses();
+
+
+},{"./delayed_action.js":59,"./physics_engine.js":82,"./player_animations.js":84,"./points_animation.js":85,"stampit":5,"three":48}],57:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let SpriteGeometry = require('./sprite_geometry.js');
@@ -53420,10 +54055,7 @@ let CustomShader = stampit()
 
 module.exports = CustomShader;
 
-},{"./shader_loader.js":78,"./sprite_geometry.js":82,"./texture_loader.js":83,"stampit":4,"three":47}],54:[function(require,module,exports){
-=======
-},{"./physics_engine.js":74,"stampit":4}],54:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./shader_loader.js":87,"./sprite_geometry.js":91,"./texture_loader.js":92,"stampit":5,"three":48}],58:[function(require,module,exports){
 let stampit = require('stampit');
 
 let debugParent = document.getElementById('debugParent');
@@ -53440,7 +54072,26 @@ let Debug = function(what, value){
 
 module.exports = Debug;
 
-},{"stampit":4}],55:[function(require,module,exports){
+},{"stampit":5}],59:[function(require,module,exports){
+let stampit = require('stampit');
+let Animation = require('./animation.js');
+
+let DelayedAction = stampit.compose(Animation)
+  .refs({
+    
+  })
+  .methods({
+    handleStop: function(){
+      this.action();
+    }
+  });
+
+module.exports = DelayedAction;
+
+
+
+
+},{"./animation.js":51,"stampit":5}],60:[function(require,module,exports){
 let stampit = require('stampit');
 let Sprite = require('./sprite.js');
 let AnimatedSprite = require('./animated_sprite.js');
@@ -53450,7 +54101,9 @@ let Entity = require('./entity.js');
 let Collidable = require('./collidable.js');
 let Debug = require('./debug.js');
 let SimpleAI = require('./simple_ai.js');
-let {BumpAnimation, BrickAnimation, NewMushroomAnimation} = require('./animations.js')
+let PhysicsEngine = require('./physics_engine.js');
+let DelayedAction = require('./delayed_action.js');
+let {BumpAnimation, BrickAnimation} = require('./animations.js')
 
 let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
   .refs({
@@ -53462,58 +54115,61 @@ let Goomba = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
       walking: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
       dead: [{id:2, duration: 1}]
     },
-<<<<<<< HEAD
     spritePosition: [0, 0],
     spriteLayout: [3, 1],
-=======
->>>>>>> build bundle.js
     walkSpeed: 3
   })
   .methods({
     die: function(){
+      if (this.dead) return;
       this.dead = true;
       this.velocity.set(0, 0);
       this.animationState = 'dead';
-      setTimeout((function(){
-        this.delete();
-      }.bind(this)),1000);
+      DelayedAction.create({game: this.game, duration: 1, action: (function(){
+        console.log("remove goomba");
+        this.remove();
+      }.bind(this))});
+      return;
+    },
+  });
+
+let Koopa = stampit.compose(Updateable, AnimatedSprite, Entity, SimpleAI)
+  .refs({
+    name: "Koopa",
+    deadly: true,
+    texture: 'koopa.png',
+    direction: "right",
+    animationState: "walking",
+    animations: {
+      walking: [{id:0, duration: 0.15}, {id:1, duration: 0.15}],
+      shell: [{id:6, duration: 1}]
+    },
+    spritePosition: [0, 0],
+    spriteLayout: [8, 2],
+    walkSpeed: 3
+  })
+  .methods({
+    reset: function(){
+      this.name = "Koopa";
+      this.shell = false;
+      this.animationState = "walking";
+      this.velocity = new THREE.Vector2(-this.walkSpeed, 0);
+      this.acceleration = new THREE.Vector2(0, -60);
+      this.setSize(new THREE.Vector2(1, 1.5));
+      this.setSpriteSize(new THREE.Vector2(1, 1.5));
     }
-  });
-
-let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
-  .refs({
-    name: "Mushroom",
-    texture: 'mushroom.png',
-    walkSpeed: -2
   })
   .init(function(){
-<<<<<<< HEAD
-=======
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 3, 1) };
-    this.material.uniforms['spritePosition'] = {type: 'v2', value: new THREE.Vector2( 0, 0) };
-  });
-
-let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
-  .refs({
-    name: "Mushroom",
-    texture: 'mushroom.png',
-    walkSpeed: -2
-  })
-  .init(function(){
->>>>>>> build bundle.js
-    NewMushroomAnimation.create({game: this.game, subject: this});
+    this.updateUniforms();
+    this.reset();
   });
 
 module.exports = {
   Goomba: Goomba,
-  Mushroom: Mushroom
+  Koopa: Koopa
 }
 
-<<<<<<< HEAD
-},{"./animated_sprite.js":48,"./animations.js":50,"./collidable.js":52,"./debug.js":54,"./entity.js":56,"./simple_ai.js":79,"./sprite.js":81,"./updatable.js":84,"stampit":4,"three":47}],56:[function(require,module,exports){
-=======
-},{"./animated_sprite.js":49,"./animations.js":51,"./collidable.js":53,"./debug.js":54,"./entity.js":56,"./simple_ai.js":78,"./sprite.js":80,"./updatable.js":83,"stampit":4,"three":47}],56:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./animated_sprite.js":50,"./animations.js":52,"./collidable.js":55,"./debug.js":58,"./delayed_action.js":59,"./entity.js":61,"./physics_engine.js":82,"./simple_ai.js":88,"./sprite.js":90,"./updatable.js":93,"stampit":5,"three":48}],61:[function(require,module,exports){
 let PhysicsEngine = require('./physics_engine.js');
 let stampit = require('stampit');
 let THREE = require('three');
@@ -53579,11 +54235,170 @@ let Entity = stampit()
 
 module.exports = Entity;
 
-<<<<<<< HEAD
-},{"./debug.js":54,"./physics_engine.js":73,"stampit":4,"three":47}],57:[function(require,module,exports){
-=======
-},{"./debug.js":54,"./physics_engine.js":74,"stampit":4,"three":47}],57:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./debug.js":58,"./physics_engine.js":82,"stampit":5,"three":48}],62:[function(require,module,exports){
+let stampit = require('stampit');
+let Entity = require('./entity.js');
+let THREE = require('three');
+let {BumpAnimation, NewItemAnimation} = require('./animations.js');
+let AnimatedSprite = require('./animated_sprite.js');
+let DelayedAction = require('./delayed_action.js');
+let PhysicsEngine = require('./physics_engine.js');
+let {Block, ItemBlock} = require('./blocks.js');
+let sounds = require('./sounds.js');
+
+let FireFlower = stampit.compose(AnimatedSprite, Entity)
+  .refs({
+    name: "FireFlower",
+    texture: "fireflower.png",
+    spritePosition: [0, 0],
+    spriteLayout: [4, 2],
+    animationState: 'green',
+    animations: {
+      green: [
+        {id: 0, duration: 0.05},
+        {id: 1, duration: 0.05},
+        {id: 2, duration: 0.05},
+        {id: 3, duration: 0.05}
+      ]
+    }
+  })
+  .init(function(){
+    FireFlower.NewAnimation.create({game: this.game, subject: this});
+
+  });
+
+FireFlower.NewAnimation = NewItemAnimation;
+
+FireFlower.Block = stampit.compose(ItemBlock)
+  .methods({
+    collided: function(entity, direction) {
+      if(direction == "below") {
+        sounds.powerUpAppears.currentTime = 0;
+        sounds.powerUpAppears.play();
+
+        
+        let block = this.transformToBlock();
+        FireFlower.Block.Animation.create({game: this.game, subject: block});
+      }
+    }
+  });
+
+FireFlower.Block.Animation = stampit.compose(BumpAnimation)
+  .methods({
+    handleStop: function(){
+      let position = this.subject.position.clone();
+      position.y += 1;
+      FireFlower.create({game: this.game, position: position })
+      Block.create({game: this.game, position: this.subject.position.clone() })
+    }
+  });
+
+
+
+FireFlower.Fireball = stampit.compose(AnimatedSprite, Entity)
+  .refs({
+    name: "Fireball",
+    texture: "fireball.png",
+    shootingSpeed: 15,
+    animationState: 'fireball',
+    animations: {
+      fireball: [
+        {id: 0, duration: 0.15},
+        {id: 1, duration: 0.15},
+        {id: 2, duration: 0.15},
+        {id: 3, duration: 0.15}
+      ],
+      explode: [
+        {id: 0, duration: 0.10},
+        {id: 2, duration: 0.10},
+        {id: 4, duration: 0.10}
+      ]
+    },
+    spritePosition: [0, 0],
+    spriteLayout: [6, 4]
+    //spriteLayout: [6, 3]
+  })
+  .methods({
+    fireball: function(){
+      this.animationState = "fireball";
+      this.setSize(new THREE.Vector2(1/2, 1/2));
+      this.setSpritePositionY(0);
+      this.setSpriteSize(new THREE.Vector2(1, 1));
+    },
+    explosion: function(){
+      this.disregardCollisions = true;
+      this.animationState = "explode";
+      this.position.add(new THREE.Vector2(-1/8, -1/8));
+      this.setSpritePosition(new THREE.Vector2(0, 2));
+      this.setSize(new THREE.Vector2(1/2, 1/2));
+      this.setSpriteSize(new THREE.Vector2(2, 2));
+    },
+    updateCallback: function(dt){
+      this.oldPosition = this.position.clone();
+      PhysicsEngine.newtonianResponse(this, dt);
+      this.updateCollisions(dt);
+    },
+    updateCollisions: function(dt){
+      if (this.disregardCollisions) return;
+      let fromBlock = new THREE.Vector2(Math.floor(this.oldPosition.x), Math.floor(this.oldPosition.y));
+      let position = [Math.floor(this.position.x), Math.floor(this.position.y)];
+      let block = PhysicsEngine.checkPosition(position[0], position[1]);
+      if (block && PhysicsEngine.boundingBox(this, block)){
+        let difference = block.position.clone().sub(fromBlock);
+        if (difference.length() < 0) return;
+        if (difference.length() > 1){
+          if (Math.abs(difference.x) > Math.abs(difference.y)) {
+            difference.y = 0;
+          } else {
+            difference.x = 0;
+          }
+        }
+        if (Math.abs(difference.x) > 0){
+          this.collided(block, 'side');
+        } else {
+          PhysicsEngine.newtonianResponse(this, -dt);
+          this.collided(block, 'below');
+        }
+      }
+    },
+    collided: function(obj, direction){
+      switch(direction){
+        case 'below':
+          this.acceleration.y = -60;
+          this.velocity.y = 10.0;
+          break;
+        case 'side':
+          this.velocity.set(0, 0);
+          this.acceleration.set(0, 0);
+          this.explosion();
+          DelayedAction.create({game: this.game, duration: 0.30, action: (function(){
+            this.remove();
+          }.bind(this))});
+          break;
+      }
+    }
+  })
+  .init(function(){
+    this.updateUniforms();
+    this.fireball();
+    this.acceleration = new THREE.Vector2(0, 0);
+    this.velocity = (new THREE.Vector2(0.8, -0.6)).multiplyScalar(this.shootingSpeed);
+    if (this.direction == "left"){
+      this.velocity.x = -this.velocity.x;
+    }
+    this.velocity.x += this.player.velocity.x;
+
+    DelayedAction.create({game: this.game, duration: 4.0, action: (function(){
+      this.explosion();
+    }.bind(this))});
+    this.registerUpdateCallback(this.updateCallback);
+  });
+
+module.exports = FireFlower;
+
+
+
+},{"./animated_sprite.js":50,"./animations.js":52,"./blocks.js":53,"./delayed_action.js":59,"./entity.js":61,"./physics_engine.js":82,"./sounds.js":89,"stampit":5,"three":48}],63:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let SpriteGeometry = require('./sprite_geometry.js');
@@ -53601,17 +54416,18 @@ var Flag = stampit
   });
 
 var Top = stampit
-  .compose(Collidable, Entity, Sprite)
+  .compose(Entity, Sprite)
   .refs({
     texture: 'flagpole.png',
   });
 
 var Rod = stampit
-  .compose(Collidable, Entity, Sprite)
+  .compose(Entity, Sprite)
   .init(function(){
   })
   .refs({
-    texture: 'flagpole_rod.png',
+    name: 'Flagpole',
+    texture: 'flagpole_rod.png'
   })
 
 var FlagPole = stampit
@@ -53624,21 +54440,18 @@ var FlagPole = stampit
     let y_pos = this.position.y;
 
     this.top = Top.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + this.height)})
-
-    for (let i = 0; i < this.height; i++) {
-      Rod.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + i)})
-    };
-
     this.flag = Flag.create({game: this.game, position: new THREE.Vector2(x_pos-0.5, y_pos + this.height - 0.8)})
+
+    Rod.create({game: this.game, flag: this.flag, size: new THREE.Vector2(1, this.height), position: new THREE.Vector2(x_pos, y_pos)})
+    //for (let i = 0; i < this.height; i++) {
+    //  Rod.create({game: this.game, position: new THREE.Vector2(x_pos, y_pos + i)})
+    //};
+
   });
 
 module.exports = FlagPole;
 
-<<<<<<< HEAD
-},{"./collidable.js":52,"./entity.js":56,"./shader_loader.js":78,"./sprite.js":81,"./sprite_geometry.js":82,"./texture_loader.js":83,"./updatable.js":84,"stampit":4,"three":47}],58:[function(require,module,exports){
-=======
-},{"./collidable.js":53,"./entity.js":56,"./shader_loader.js":77,"./sprite.js":80,"./sprite_geometry.js":81,"./texture_loader.js":82,"./updatable.js":83,"stampit":4,"three":47}],58:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./collidable.js":55,"./entity.js":61,"./shader_loader.js":87,"./sprite.js":90,"./sprite_geometry.js":91,"./texture_loader.js":92,"./updatable.js":93,"stampit":5,"three":48}],64:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 
@@ -53722,25 +54535,22 @@ var Font = stampit.compose(CustomShader)
 
 module.exports = Font;
 
-<<<<<<< HEAD
-},{"./custom_shader.js":53,"stampit":4,"three":47}],59:[function(require,module,exports){
-=======
-},{"./shader_loader.js":77,"./sprite.js":80,"./sprite_geometry.js":81,"./texture_loader.js":82,"stampit":4,"three":47}],59:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./custom_shader.js":57,"stampit":5,"three":48}],65:[function(require,module,exports){
 let stampit             = require('stampit');
 let THREE               = require('three');
 let gameState           = require('./game_state.js');
 let GameRules           = require('./game_rules.js');
+let List                = require('./list.js');
 
 var Game = stampit()
   .refs({
-    entities: new Set(),
+    entities: new List(),
     gameRules: GameRules.create()
   })
   .methods({
     start: function(){
+      this.gameRules.levelInProgress = true;
       this.gameloop();
-      gameState.togglePause();
     },
     loadLevel: function(level){
       this.level = level;
@@ -53759,12 +54569,15 @@ var Game = stampit()
         }
 
         if (this.renderer.updating){
-          this.player.update(dt);
-          this.gui.updateTime();
-          this.gameRules.update(this.player, this.entities, gameState);
+          this.gui.updateTime(dt);
+          if (!gameState.editing) {
+            this.gameRules.update(this.player, this.entities, gameState);
+          }
         }
+
         this.renderer.render(dt);
 
+        this.entities.clean();
       }
 
       requestAnimationFrame(this.gameloop.bind(this));
@@ -53775,11 +54588,11 @@ var Game = stampit()
 
 module.exports = Game;
 
-},{"./game_rules.js":60,"./game_state.js":61,"stampit":4,"three":47}],60:[function(require,module,exports){
+},{"./game_rules.js":66,"./game_state.js":67,"./list.js":77,"stampit":5,"three":48}],66:[function(require,module,exports){
 let stampit = require('stampit');
 let sounds = require('./sounds.js');
 let PhysicsEngine = require('./physics_engine.js');
-let PointsAnimation = require('./points_animation.js');
+let CollisionResponses = require('./collision_responses.js');
 
 let GameRules = stampit.compose()
   .refs({
@@ -53790,49 +54603,20 @@ let GameRules = stampit.compose()
    this.time = 400;
   },
   update: function(player, entities, game) {
-    this.time -= 1/60 / 0.65;
+    if (this.levelInProgress){
+      this.time -= 1/60 / 0.65;
+    }
     if (this.time < 0 || player.position.y < -2) {
       player.die();
     }
 
-    for(let entity of entities) {
-      if (entity.dead) continue;
-      if (!player.dead && PhysicsEngine.boundingBox(entity, player)) {
-        switch(entity.name){
-          case 'Goomba':
-            if (PhysicsEngine.hitFromAbove(player, entity)){
-              player.killed(entity);
-              entity.die();
-              player.velocity.y = 17;
-              sounds.stomp.play();
-            } else {
-<<<<<<< HEAD
-              if (player.invulnerable){
-                break;
-              }
+    for (let a = 0; a < entities.length(); a += 1){
+      let entity_a = entities.get(a);
+      for (let b = a + 1; b < entities.length(); b += 1){
+        let entity_b = entities.get(b);
 
-              if (player.superMario){
-                player.shrink();
-              } else {
-                player.die();
-              }
-=======
-              player.die();
->>>>>>> build bundle.js
-            }
-            break;
-          case 'Mushroom':
-            player.grow();
-<<<<<<< HEAD
-            PointsAnimation.create({game: player.game, points: 1000, subject: entity});
-            entity.remove();
-            player.score += 1000;
-            player.statsChanged();
-=======
-            sounds.powerUp.play();
-            entity.remove();
->>>>>>> build bundle.js
-            break;
+        if (PhysicsEngine.boundingBox(entity_a, entity_b)){
+          CollisionResponses.resolve(entity_a, entity_b);
         }
       }
     }
@@ -53841,11 +54625,7 @@ let GameRules = stampit.compose()
 
 module.exports = GameRules;
 
-<<<<<<< HEAD
-},{"./physics_engine.js":73,"./points_animation.js":76,"./sounds.js":80,"stampit":4}],61:[function(require,module,exports){
-=======
-},{"./physics_engine.js":74,"./sounds.js":79,"stampit":4}],61:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./collision_responses.js":56,"./physics_engine.js":82,"./sounds.js":89,"stampit":5}],67:[function(require,module,exports){
 let sounds = require('./sounds.js');
 
 let gameState = {
@@ -53866,23 +54646,28 @@ let gameState = {
   togglePause: function() {
     sounds.pauseSound.pause();
     sounds.pauseSound.currentTime = 0;
+    sounds.pauseSound.volume = 1;
     sounds.pauseSound.play();
     document.getElementById("game-wrapper").classList.toggle("paused");
     this.paused = ! this.paused;
+  },
+
+  toggleEdit: function() {
+    this.editing = ! this.editing;
   }
 };
 
 module.exports = gameState;
-<<<<<<< HEAD
-},{"./sounds.js":80}],62:[function(require,module,exports){
-=======
-},{"./sounds.js":79}],62:[function(require,module,exports){
->>>>>>> build bundle.js
-let {menuStream} = require("./input_stream.js");
+},{"./sounds.js":89}],68:[function(require,module,exports){
+let {menuStream, editStream} = require("./input_stream.js");
 let gameState = require('./game_state.js');
 
 menuStream.onValue((x) => {
   gameState.togglePause();
+});
+
+editStream.onValue((x) => {
+  gameState.toggleEdit();
 });
 
 document.getElementById('play-music').onclick = function() {
@@ -53894,7 +54679,7 @@ document.getElementById('stop-music').onclick = function() {
 };
 
 
-},{"./game_state.js":61,"./input_stream.js":65}],63:[function(require,module,exports){
+},{"./game_state.js":67,"./input_stream.js":71}],69:[function(require,module,exports){
 GamepadState  = function() {
   this.controllers = {};
   this.debug = true; // Set to true for some debug out in console
@@ -53957,7 +54742,7 @@ GamepadState.prototype._buttonPressed = function(b) {
 }
 
 module.exports = new GamepadState;
-},{}],64:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 var keyboard = require('./keyboard_state.js');
 var gamepad = require('./gamepad_state.js');
 
@@ -53981,7 +54766,8 @@ InputState  = function() {
     'right': "D",
     'jump': 'J',
     'run': 'K',
-    'menu': 'enter'
+    'menu': 'enter',
+    'edit': 'T'
   }
 }
 
@@ -53997,7 +54783,7 @@ InputState.prototype.pressed = function(button_id) {
 // Triangle => 3
 //
 module.exports = new InputState;
-},{"./gamepad_state.js":63,"./keyboard_state.js":67}],65:[function(require,module,exports){
+},{"./gamepad_state.js":69,"./keyboard_state.js":73}],71:[function(require,module,exports){
 let inputState = require("./input_state.js");
 let Kefir = require('kefir');
 
@@ -54010,22 +54796,28 @@ var inputStream = Kefir.stream(emitter => {
     if (inputState.pressed("jump")) { emitter.emit("jump"); }
     if (inputState.pressed("run")) { emitter.emit("run"); }
     if (inputState.pressed("menu")) { emitter.emit("menu"); }
+    if (inputState.pressed("edit")) { emitter.emit("edit"); }
     requestAnimationFrame(inputLoop);
   }
 
   inputLoop();
 });
 
-var menuStream = inputStream.filter(x => x == "menu").debounce(50, {immediate: true});
-var jumpStream = inputStream.filter(x => x == "jump").debounce(50, {immediate: true});
+var menuStream  = inputStream.filter(x => x == "menu").debounce(50, {immediate: true});
+var editStream  = inputStream.filter(x => x == "edit").debounce(50, {immediate: true});
+var jumpStream  = inputStream.filter(x => x == "jump").debounce(50, {immediate: true});
+var shootStream = inputStream.filter(x => x == "run").throttle(500, {trailing: false});
 
 module.exports = {
   inputStream: inputStream,
   menuStream: menuStream,
+  editStream: editStream,
   jumpStream: jumpStream,
   inputState: inputState,
+  shootStream: shootStream
 };
-},{"./input_state.js":64,"kefir":3}],66:[function(require,module,exports){
+
+},{"./input_state.js":70,"kefir":3}],72:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Font = require('./font.js');
@@ -54051,7 +54843,7 @@ let Interface = stampit()
   })
   .init(function(){
 
-    Font.create({position: new THREE.Vector2(5,15), text: this.player.name, game: this.game});
+    Font.create({position: new THREE.Vector2(5,15), text: this.player.name.toUpperCase(), game: this.game});
     this.score = Font.create({text: padZero(this.player.score, 6), position: new THREE.Vector2(5,14.5), game: this.game});
     this.player.statsChanged = this.updateScore.bind(this);
 
@@ -54072,11 +54864,7 @@ let Interface = stampit()
 
 module.exports = Interface;
 
-<<<<<<< HEAD
-},{"./blocks.js":51,"./font.js":58,"stampit":4,"three":47}],67:[function(require,module,exports){
-=======
-},{"./blocks.js":52,"./font.js":58,"stampit":4,"three":47}],67:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./blocks.js":53,"./font.js":64,"stampit":5,"three":48}],73:[function(require,module,exports){
 KeyboardState  = function(){
   // to store the current state
   this.keyCodes = {};
@@ -54157,12 +54945,14 @@ KeyboardState.prototype.pressed  = function(keyDesc){
 }
 
 module.exports = new KeyboardState;
-},{}],68:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 let stampit             = require('stampit');
 let THREE               = require('three');
-let {CoinBlock, MushroomBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight} = require('./blocks.js');
+let {CoinBlock, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, Coin, Tile, Castle} = require('./blocks.js');
 let FlagPole = require('./flag_pole.js');
-let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, CoinBlock, FlagPole, MushroomBlock];
+let Mushroom = require('./mushroom.js');
+let FireFlower = require('./fire_flower.js');
+let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBottomLeft, PipeBottomRight, CoinBlock, FlagPole, Mushroom.Block, Tile, Castle, FireFlower.Block];
 
 let Level = stampit()
   .refs({
@@ -54187,16 +54977,15 @@ let Level = stampit()
 module.exports = Level;
 
 
-<<<<<<< HEAD
-},{"./blocks.js":51,"./flag_pole.js":57,"stampit":4,"three":47}],69:[function(require,module,exports){
-=======
-},{"./blocks.js":52,"./flag_pole.js":57,"stampit":4,"three":47}],69:[function(require,module,exports){
+},{"./blocks.js":53,"./fire_flower.js":62,"./flag_pole.js":63,"./mushroom.js":81,"stampit":5,"three":48}],75:[function(require,module,exports){
 let stampit                             = require('stampit');
 let THREE                               = require('three');
 let {mouseMoveStream, mouseClickStream} = require('./mouse_stream.js');
 let Selector                            = require('./selector.js');
 let _                                   = require('underscore');
-let Blocks = require('./blocks.js');
+let PhysicsEngine                       = require('./physics_engine.js');
+let Blocks                              = require('./blocks.js');
+let lz = require("lz-string");
 
 function convertToGridCoordinatesForRenderer(renderer, pixelCoordinates) {
   let newCoordinates = new THREE.Vector2()
@@ -54205,9 +54994,107 @@ function convertToGridCoordinatesForRenderer(renderer, pixelCoordinates) {
   return newCoordinates;
 }
 
+let Level = stampit
+  .init(function(){
+    this.data = {}
+    this.loadedSprites = {}
+  })
+  .methods({
+    set: function(coordinates, entity_id, metadata) {
+      let sprite = Blocks[entity_id].create({game: this.game, position: new THREE.Vector2(coordinates.x, coordinates.y) });
+
+      if(this.loadedSprites[coordinates.x + ":" + coordinates.y] != undefined) {
+        this.delete(coordinates);
+        this.loadedSprites[coordinates.x + ":" + coordinates.y] = sprite;
+      } else {
+        this.loadedSprites[coordinates.x + ":" + coordinates.y] = sprite;
+      }
+
+
+      this.data[coordinates.x + ":" + coordinates.y] = {
+        x: coordinates.x,
+        y: coordinates.y,
+        entity_id: entity_id,
+        metadata: metadata
+      }
+    },
+    delete: function(coordinates) {
+      delete this.data[coordinates.x + ":" + coordinates.y];
+      PhysicsEngine.removeObject(this.loadedSprites[coordinates.x + ":" + coordinates.y]);
+      this.game.renderer.deleteFromScene(this.loadedSprites[coordinates.x + ":" + coordinates.y].mesh);
+      delete this.loadedSprites[coordinates.x + ":" + coordinates.y];
+    },
+    export: function() {
+      var data = JSON.stringify(this.data);
+      var compressed = lz.compressToUTF16(data);
+      console.log(compressed);
+    },
+    clear: function() {
+      let scene = this.game.renderer.scene;
+      for(var i = scene.children.length - 1; i >= 0 ; i--){
+        let obj = scene.children[i];
+        scene.remove(obj);
+      }
+    },
+    load: function() {
+      this.clear();
+      for (var key in this.data) {
+        if (this.data.hasOwnProperty(key)) {
+          let block = this.data[key];
+          let sprite = Blocks[block.entity_id].create({game: this.game, position: new THREE.Vector2(block.x, block.y) });
+          this.loadedSprites[block.x + ":" + block.y] = sprite;
+        }
+      }
+    }
+  })
+
+let BlockTool = stampit
+  .init(function() {
+
+  })
+  .methods({
+    selected: function() {
+
+    },
+    use: function(coordinates) {
+      level.set(coordinates, this.blockId, {});
+    }
+  });
+
+let EraseTool = stampit
+  .methods({
+    selected: function() {
+
+    },
+    use: function(coordinates) {
+      level.delete(coordinates);
+    }
+  });
+
+let SaveTool = stampit
+  .methods({
+    selected: function() {
+      level.export();
+    },
+    use: function(coordinates) {
+      console.log("whoa");
+    }
+  })
+
+let ClearTool = stampit
+  .methods({
+    selected: function() {
+
+    },
+    use: function(coordinates) {
+      console.log("clear");
+    }
+  })
+
 let LevelEditor = stampit
   .init(function(){
-    this.selectedBlock = Blocks.Ground;
+    this.tools = {};
+    this.selectedTool = BlockTool.create({blockId: "Ground", game: this.game});
     this.selector = Selector.create({game: this.game, position: new THREE.Vector2(0, 0)});
     let convertToGridCoordinates = convertToGridCoordinatesForRenderer.bind(this, this.game.renderer);
     let mouseMoveGridStream = mouseMoveStream.map(convertToGridCoordinates);
@@ -54215,74 +55102,99 @@ let LevelEditor = stampit
     mouseMoveGridStream.onValue(this.selector.moveToCoordinates.bind(this.selector));
 
     let clickPositionStream = mouseMoveGridStream.sampledBy(mouseClickStream.filter((x) => {return x}));
+    mouseClickStream.log();
     let dragPositionStream = mouseMoveStream.map(convertToGridCoordinates).filterBy(mouseClickStream);
 
-    clickPositionStream
+    let level = Level.create({game: this.game});
+
+    // ¯\_(ツ)_/¯ YOLO
+    window.level = level;
+
+    clickPositionStream.log()
       .merge(dragPositionStream)
       .skipDuplicates(_.isEqual)
       .onValue((coordinates) => {
-        let block = this.selectedBlock.create({game: this.game, position: coordinates });
+        this.selectedTool.use(coordinates);
       });
 
-    let toolbox = document.getElementById('toolbox');
+    this.toolbox = document.getElementById('toolbox');
 
-    for (var key in Blocks) {
-      if (Blocks.hasOwnProperty(key)) {
-        element = document.createElement("div");
-        element.className = "block";
+    this.addBlockToToolbox("Block")
+    this.addBlockToToolbox("CoinBlock")
+    this.addBlockToToolbox("Ground")
+    this.addBlockToToolbox("Brick")
+    this.addBlockToToolbox("Tile")
+    this.addBlockToToolbox("Coin")
 
-        if (key == "Ground") {
-          element.className += " selected";
-        }
-
-        element.id = key;
-        // element.innerHTML = key;
-        toolbox.appendChild(element);
-        element.addEventListener("click", (evt) => {
-          this.selectBlock(evt.target.id);
-          let blockButtons = document.querySelectorAll(".block");
-
-          _.each(blockButtons, (button) => {
-            button.className = "block"
-          });
-
-          evt.target.className += " selected"
-        });
-      }
-    }
-
+    this.addSpacerToToolbox();
+    this.addBlockToToolbox('Eraser', EraseTool.create({game: this.game}));;
   })
   .methods({
-    selectBlock: function(id) {
-      this.selectedBlock = Blocks[id];
+    selectTool: function(id) {
+      if (Blocks.hasOwnProperty(id)) {
+        this.selectedTool = BlockTool.create({blockId: id, game: this.game});
+      } else {
+        this.selectedTool = this.tools[id]
+        this.selectedTool.selected();
+      }
+    },
+
+    addSpacerToToolbox: function() {
+      element = document.createElement("div");
+      element.className = "spacer";
+      this.toolbox.appendChild(element);
+    },
+
+    addBlockToToolbox: function(key, tool) {
+      this.tools[key] = tool;
+      element = document.createElement("div");
+      element.className = "block";
+
+      if (key == "Ground") {
+        element.className += " selected";
+      }
+
+      element.id = key;
+      this.toolbox.appendChild(element);
+      element.addEventListener("click", (evt) => {
+        this.selectTool(evt.target.id);
+        let blockButtons = document.querySelectorAll(".block");
+
+        _.each(blockButtons, (button) => {
+          button.className = "block"
+        });
+
+        evt.target.className += " selected"
+      });
     }
   })
 
 module.exports = LevelEditor;
-},{"./blocks.js":52,"./mouse_stream.js":73,"./selector.js":76,"stampit":4,"three":47,"underscore":48}],70:[function(require,module,exports){
->>>>>>> build bundle.js
+
+},{"./blocks.js":53,"./mouse_stream.js":80,"./physics_engine.js":82,"./selector.js":86,"lz-string":4,"stampit":5,"three":48,"underscore":49}],76:[function(require,module,exports){
 let stampit = require('stampit');
 let Level = require('../level.js');
-let {Goomba} = require('../enemies.js')
+let {Goomba, Mushroom, Koopa} = require('../enemies.js')
 let THREE               = require('three');
+let FireFlower               = require('../fire_flower.js');
 
 let levelData = [
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 3, 10, 3, 8, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 9, 0, 0, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0,13, 0, 0, 0, 8, 0, 0, 0, 3, 10, 3, 8, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 4, 5, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0,  9, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 0, 0, 6, 7, 0, 0, 0, 0, 11, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
 let Level1_1 = stampit.compose(Level)
@@ -54291,40 +55203,77 @@ let Level1_1 = stampit.compose(Level)
   })
   .methods({
     loadEntities: function(game){
-      for(var i=-2; i<3; i++) {
-        Goomba.create({game: game, position: new THREE.Vector2(20+i*2, 7)})
-      }
+      Goomba.create({game: game, position: new THREE.Vector2(24, 3)})
     }
   });
 
 
 module.exports = Level1_1;
 
-<<<<<<< HEAD
-},{"../enemies.js":55,"../level.js":68,"stampit":4,"three":47}],70:[function(require,module,exports){
-=======
-},{"../enemies.js":55,"../level.js":68,"stampit":4,"three":47}],71:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"../enemies.js":60,"../fire_flower.js":62,"../level.js":74,"stampit":5,"three":48}],77:[function(require,module,exports){
+function List (){
+  this.data = [];
+  this.toBeDeleted = new Set();
+  this.add = function(obj){
+    this.data.push(obj);
+  }
+  this.delete = function(obj){
+    this.toBeDeleted.add(obj);
+  }
+  this.length = function(){
+    return this.data.length;
+  }
+  this.get = function(index){
+    return this.data[index];
+  }
+  this.clean = function(){
+    for (let obj of this.toBeDeleted){
+      let i = this.data.indexOf(obj);
+      if (i < 0) continue;
+      this.data[i] = this.data[this.data.length - 1];
+      this.data.pop();
+    }
+    this.toBeDeleted.clear();
+  }
+}
+
+
+module.exports = List;
+
+},{}],78:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let AnimatedSprite = require('./animated_sprite.js');
 let Debug = require('./debug.js');
 let SpriteGeometry = require('./sprite_geometry.js');
-<<<<<<< HEAD
+let Entity = require('./entity.js');
 let ShaderLoader = require('./shader_loader.js');
 let {InvulnerableAnimation, GrowAnimation, ShrinkAnimation, DeathAnimation} = require('./player_animations.js');
+let PhysicsEngine = require('./physics_engine.js');
 let sounds = require('./sounds.js');
 
-let Mario = stampit.compose(AnimatedSprite)
+let scale = 300; //pixel to reality ratio
+let Mario = stampit.compose(AnimatedSprite, Entity)
   .refs({
+    groundResistance: 3.6,
+    accelerationConstant: 0.14 * scale,
+    gravity: 20 * scale,
+    mass: 80,
+    jumpForce: 0.5 * 7.8 * scale,
+    onGround: false,
+    timeSinceJump: 10,
+    jumpLength: 0.3,
+    maxVelocity: 15,
+    airJumpCount: 0,
+    maxAirJumps: 2,
+    dead: false,
     spriteLayout: [21, 3],
     spritePosition: [2, 0],
-=======
-
-let Mario = stampit.compose(AnimatedSprite)
-  .refs({
->>>>>>> build bundle.js
     texture: 'mario.png',
+    shaders: {
+      vertexShader: 'mario.vert',
+      fragmentShader: 'mario.frag'
+    },
     superMario: false,
     animationState: 'standing',
     animations: {
@@ -54344,6 +55293,9 @@ let Mario = stampit.compose(AnimatedSprite)
       ],
       dead: [
         {id: 6, duration: 0.0}
+      ],
+      victory: [
+        {id : 8, duration: 1 }
       ]
     },
     size: new THREE.Vector2(1, 1)
@@ -54358,7 +55310,6 @@ let Mario = stampit.compose(AnimatedSprite)
     grow: function(){
       if (!this.superMario){
         this.superMario = true;
-<<<<<<< HEAD
         sounds.powerUp.currentTime = 0;
         sounds.powerUp.playbackRate = 1;
         sounds.powerUp.play();
@@ -54366,6 +55317,7 @@ let Mario = stampit.compose(AnimatedSprite)
       }
     },
     die: function() {
+      this.disregardCollisions = true;
       if (!this.dead){
         sounds.die.play();
         DeathAnimation.create({game: this.game, subject: this});
@@ -54380,36 +55332,94 @@ let Mario = stampit.compose(AnimatedSprite)
       sounds.pipe.playbackRate = 1;
       sounds.pipe.play();
       this.superMario = false;
-=======
-        this.size = new THREE.Vector2(1, 2);
-        this.material.uniforms['tileSize'] = {type: "v2", value: this.size };
-        this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 1) };
-        this.material.needsUpdate = true;
+    },
+    jump: function(){
+      if(this.onGround) {
+        this.airJumpCount = 0;
       }
->>>>>>> build bundle.js
+
+      if(this.onGround || (this.airJumpCount < this.maxAirJumps)){
+        this.timeSinceJump = 0;
+        this.airJumpCount += 1;
+        this.velocity.y = this.jumpForce / this.mass;
+
+        if (this.airJumpCount == 1) {
+          sounds.jumpSmall.currentTime = 0;
+          sounds.jumpSmall.volume = 0.4;
+          sounds.jumpSmall.play();
+        } else {
+          sounds.kick.currentTime = 0;
+          sounds.kick.playbackRate = 1;
+          sounds.kick.play();
+        }
+
+      }
+
+    },
+    updateCallback: function(dt){
+      this.oldPosition = this.position.clone();
+      this.acceleration.set(0, -this.gravity / this.mass);
+
+      this.animationState = "standing";
+      switch(this.walking){
+        case "left":
+          this.acceleration.x = -this.accelerationConstant;
+          this.direction = this.walking;
+          this.animationState = "moving";
+          break;
+        case "right":
+          this.acceleration.x = this.accelerationConstant;
+          this.direction = this.walking;
+          this.animationState = "moving";
+          break;
+      }
+
+      let slidingSpeed = this.velocity.x / (this.direction == "left" ? -1 : 1);
+      if (slidingSpeed < -1){
+        this.animationState = "sliding";
+      }
+
+      if (this.jumping) {
+        if (this.timeSinceJump < this.jumpLength){ // Jump further while jump button is held down
+          this.velocity.y = this.jumpForce / this.mass;
+        }
+      }
+      this.timeSinceJump += dt;
+
+      if (this.onGround){
+        if (this.walking == "not"){
+          this.acceleration.x -=  this.velocity.x * this.groundResistance;
+        }
+      } else {
+        this.acceleration.x -=  this.velocity.x * this.groundResistance / 2;
+        this.animationState = "jumping";
+      }
+
+      if (Math.abs(this.velocity.x) < 0.5) {
+        this.velocity.x = 0;
+      }
+
+      PhysicsEngine.newtonianResponse(this, dt);
+
+      if (Math.abs(this.velocity.x) > this.maxVelocity){
+        this.velocity.x = this.maxVelocity * this.velocity.x / Math.abs(this.velocity.x);
+      }
+
+      this.updateCollisions(dt);
+
     }
 
   })
   .init(function(){
-<<<<<<< HEAD
+    this.uniforms.powerUp = { type: "i", value: 0 };
     this.updateUniforms();
-=======
-    this.material.uniforms['spriteLayout'] = { type: 'v2', value:  new THREE.Vector2( 21, 3) };
-    this.material.uniforms['spritePosition'] = {type: "v2", value: new THREE.Vector2( 2, 0) };
-    this.material.uniforms['tileSize'] =  {type: "v2", value: this.size };
-
-    //this.selectAnimation('standing', false);
->>>>>>> build bundle.js
+    this.registerUpdateCallback(this.updateCallback);
   });
 
 
 module.exports = Mario;
 
-<<<<<<< HEAD
-},{"./animated_sprite.js":48,"./debug.js":54,"./player_animations.js":75,"./shader_loader.js":78,"./sounds.js":80,"./sprite_geometry.js":82,"stampit":4,"three":47}],71:[function(require,module,exports){
-=======
-},{"./animated_sprite.js":49,"./debug.js":54,"./sprite_geometry.js":81,"stampit":4,"three":47}],72:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./animated_sprite.js":50,"./debug.js":58,"./entity.js":61,"./physics_engine.js":82,"./player_animations.js":84,"./shader_loader.js":87,"./sounds.js":89,"./sprite_geometry.js":91,"stampit":5,"three":48}],79:[function(require,module,exports){
 let debug = require('./debug.js');
 let stampit = require('stampit');
 
@@ -54450,11 +55460,7 @@ let MouseState = stampit()
 
 module.exports = MouseState;
 
-<<<<<<< HEAD
-},{"./debug.js":54,"stampit":4}],72:[function(require,module,exports){
-=======
-},{"./debug.js":54,"stampit":4}],73:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./debug.js":58,"stampit":5}],80:[function(require,module,exports){
 let MouseState = require("./mouse_state.js");
 let Kefir = require('kefir');
 let sounds = require('./sounds');
@@ -54478,31 +55484,79 @@ var mouseClickStream = Kefir.stream(emitter => {
   });
 });
 
-directionStream = mouseMoveStream.bufferWithCount(2).map((x) => {
-  if (x[0][0] > x[1][0]) { return "left" }
-  if (x[0][0] < x[1][0]) { return "right" }
-  if (x[0][1] > x[1][1]) { return "down" }
-  if (x[0][1] < x[1][1]) { return "up" }
+directionStream = mouseMoveStream.bufferWithCount(2).map((vectorArray) => {
+  if (vectorArray[0].x > vectorArray[1].x) { return "left" }
+  if (vectorArray[0].x < vectorArray[1].x) { return "right" }
+  if (vectorArray[0].y > vectorArray[1].y) { return "down" }
+  if (vectorArray[0].y < vectorArray[1].y) { return "up" }
 }).skipDuplicates();
 
-shakeStream = directionStream.bufferWithTimeOrCount(600, 7).filter((x) => x.length == 7).map(() => {return "shake"})
+shakeStream = directionStream.bufferWithTimeOrCount(600, 7)
+              .filter((x) => x.length === 7)
+              .map(() => {return "shake"})
 
 shakeStream.onValue(() => {
-  sounds.coin.pause();
-  sounds.coin.currentTime = 0;
-  sounds.coin.play();
+  console.log("shake detected?");
 });
 
-<<<<<<< HEAD
-module.exports = mouseStream;
-},{"./mouse_state.js":71,"./sounds":80,"kefir":3}],73:[function(require,module,exports){
-=======
 module.exports = {
   mouseMoveStream: mouseMoveStream,
   mouseClickStream: mouseClickStream
 }
-},{"./mouse_state.js":72,"./sounds":79,"kefir":3,"three":47}],74:[function(require,module,exports){
->>>>>>> build bundle.js
+
+},{"./mouse_state.js":79,"./sounds":89,"kefir":3,"three":48}],81:[function(require,module,exports){
+let stampit = require('stampit');
+let SimpleAI = require('./simple_ai.js');
+let Entity = require('./entity.js');
+let THREE = require('three');
+let Updateable = require('./updatable.js');
+let Sprite = require('./sprite.js');
+let {BumpAnimation, NewItemAnimation} = require('./animations.js');
+let Animation = require('./animation.js');
+let {Block, ItemBlock} = require('./blocks.js');
+let sounds = require('./sounds.js');
+
+let Mushroom = stampit.compose(Updateable, Sprite, Entity, SimpleAI)
+  .refs({
+    name: "Mushroom",
+    texture: 'mushroom.png',
+    walkSpeed: -2
+  })
+  .init(function(){
+    Mushroom.NewAnimation.create({game: this.game, subject: this});
+  });
+
+Mushroom.NewAnimation = NewItemAnimation;
+
+Mushroom.Block = stampit.compose(ItemBlock)
+  .methods({
+    collided: function(entity, direction) {
+      if(direction == "below") {
+        sounds.powerUpAppears.currentTime = 0;
+        sounds.powerUpAppears.play();
+
+        
+        let block = this.transformToBlock();
+        Mushroom.Block.Animation.create({game: this.game, subject: block});
+      }
+    }
+  });
+
+
+Mushroom.Block.Animation = stampit.compose(BumpAnimation)
+  .methods({
+    handleStop: function(){
+      let shroomPosition = this.subject.position.clone();
+      shroomPosition.y += 1;
+      Mushroom.create({game: this.game, position: shroomPosition })
+      Block.create({game: this.game, position: this.subject.position.clone() })
+    }
+  });
+
+
+module.exports = Mushroom;
+
+},{"./animation.js":51,"./animations.js":52,"./blocks.js":53,"./entity.js":61,"./simple_ai.js":88,"./sounds.js":89,"./sprite.js":90,"./updatable.js":93,"stampit":5,"three":48}],82:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 
@@ -54526,8 +55580,8 @@ let PhysicsEngine = stampit()
     addObject: function(obj){
       this.objects[this.key(obj)] = obj;
     },
-    deleteObject: function(obj){
-      delete this.objects[this.key(obj)];
+    removeObject: function(obj){
+      delete this.objects[this.key(obj)]
     },
     checkPosition: function(x, y){
       let key = x + "x" + y;
@@ -54535,14 +55589,13 @@ let PhysicsEngine = stampit()
         return this.objects[key];
       return false;
     },
-<<<<<<< HEAD
     newtonianResponse: function(obj, dt){
       obj.position.addScaledVector(obj.velocity, dt);
-      obj.position.addScaledVector(obj.acceleration, dt * dt);
-      obj.velocity.addScaledVector(obj.acceleration, dt);
+      if (obj.acceleration){
+        obj.position.addScaledVector(obj.acceleration, dt * dt);
+        obj.velocity.addScaledVector(obj.acceleration, dt);
+      }
     },
-=======
->>>>>>> build bundle.js
     hitFromAbove: function(entity_a, entity_b){
         //difference in current position and top of goomba
         let dy = (entity_a.position.y - entity_b.position.y - entity_b.size.y);
@@ -54562,40 +55615,24 @@ let PhysicsEngine = stampit()
 
 module.exports = PhysicsEngine.create();
 
-<<<<<<< HEAD
-},{"stampit":4,"three":47}],74:[function(require,module,exports){
-=======
-},{"stampit":4,"three":47}],75:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"stampit":5,"three":48}],83:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Mario = require('./mario.js');
-let {jumpStream, inputState} = require("./input_stream.js");
+let {jumpStream, inputState, shootStream} = require("./input_stream.js");
 let sounds = require('./sounds.js');
-let Entity = require('./entity.js');
 let Debug = require('./debug.js');
 let PointsAnimation = require('./points_animation.js');
+let FireFlower = require('./fire_flower.js');
 
-let scale = 300; //pixel to reality ratio
-let Player1 = stampit.compose(Mario, Entity)
+let Player1 = stampit.compose(Mario)
   .refs({
-    name: "MARIO",
-    groundResistance: 3.6,
-    accelerationConstant: 0.14 * scale,
-    gravity: 20 * scale,
-    mass: 80,
-    jumpForce: 0.5 * 7.8 * scale,
-    onGround: false,
-    timeSinceJump: 10,
-    jumpLength: 0.3,
-    maxVelocity: 15,
-    airJumpCount: 0,
-    maxAirJumps: 2,
-    dead: false,
+    name: "Mario",
     score: 0,
     coins: 0,
     streak: 0,
-    invulnerable: false
+    invulnerable: false,
+    input: inputState
 
   })
   .init(function(){
@@ -54607,31 +55644,35 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     });
 
-    jumpStream.onValue(function(x) {
-      if(this.onGround) {
-        this.airJumpCount = 0;
-      }
-
-      if(this.onGround || (this.airJumpCount < this.maxAirJumps)){
-        this.timeSinceJump = 0;
-        this.airJumpCount += 1;
-        this.velocity.y = this.jumpForce / this.mass;
-
-        if (this.airJumpCount == 1) {
-          sounds.jumpSmall.currentTime = 0;
-          sounds.jumpSmall.volume = 0.4;
-          sounds.jumpSmall.play();
-        } else {
-          sounds.kick.currentTime = 0;
-          sounds.kick.playbackRate = 1;
-          sounds.kick.play();
+    shootStream.onValue((x) => {
+      if (this.powerUp == 1){
+        let position = this.position.clone();
+        position.y += this.size.y - 0.5
+        if (this.direction == "right"){
+          position.x += 0.7
         }
-
+        FireFlower.Fireball.create({game: this.game, position: position, direction: this.direction, player: this});
       }
+    });
+
+    jumpStream.onValue(function(x) {
+      this.jump();
     }.bind(this));
+
+    this.registerUpdateCallback(this.handleInput);
 
   })
   .methods({
+    getsHit: function(){
+      if (this.invulnerable) return;
+
+      if (this.superMario){
+        this.shrink();
+        this.setPowerUp(0);
+      } else {
+        this.die();
+      }
+    },
     killed: function(entity){
       let addedScore = 100 * Math.pow(2, this.streak);
       this.score += addedScore;
@@ -54642,17 +55683,27 @@ let Player1 = stampit.compose(Mario, Entity)
       }
     },
     reset: function(){
+      this.superMario = false;
+      this.disregardCollisions = false;
       this.position.x = 6;
       this.position.y = 5;
       this.acceleration.y = 0;
       this.velocity.y = 18;
       this.velocity.x = 2;
+      this.setSizeY(1);
+      this.setSpriteSizeY(1);
+      this.setSpritePosition(new THREE.Vector2( 2, 0));
       this.game.gameRules.resetTime();
       sounds.kick.play();
       this.dead = false;
     },
 
     collided: function(block, direction){
+      switch(block.name){
+        case 'Coin':
+          return
+      }
+
       switch(direction){
         case 'above':
           this.position.y = block.position.y - this.size.y;
@@ -54677,68 +55728,32 @@ let Player1 = stampit.compose(Mario, Entity)
         this.streak = 0;
       }
     },
-    update: function(dt){
-      this.oldPosition = this.position.clone();
-
-      this.acceleration.x = 0;
-      this.acceleration.y = -this.gravity / this.mass;
-
-      if (inputState.pressed("jump")) {
-        if (this.timeSinceJump < this.jumpLength){ // Jump further while jump button is held down
-          this.velocity.y = this.jumpForce / this.mass;
-        }
-      }
-
-      this.timeSinceJump += dt;
-
-      let slidingSpeed = this.velocity.x / (this.direction == "left" ? -1 : 1);
-      this.animationState = "moving";
-
-      if (inputState.pressed("right")) {
-        this.direction = "right";
-        this.acceleration.x = this.accelerationConstant;
-      } else if(inputState.pressed("left")) {
-        this.direction = "left";
-        this.acceleration.x = -this.accelerationConstant;
+    handleInput: function(dt){
+      if (this.input.pressed("right")){
+        this.walking = "right";
+      } else if (this.input.pressed("left")){
+        this.walking = "left";
       } else {
-        this.animationState = "standing";
+        this.walking = "not";
       }
 
-      if (slidingSpeed < -1){
-        this.animationState = "sliding";
-      }
-
-      if (this.onGround){
-        this.acceleration.x -=  this.velocity.x * this.groundResistance;
+      if (this.input.pressed("run")){
+        this.maxVelocity = 20;
       } else {
-        this.acceleration.x -=  this.velocity.x * this.groundResistance / 2;
-        this.animationState = "jumping";
+        this.maxVelocity = 14;
       }
 
-      if (Math.abs(this.velocity.x) < 0.5) {
-        this.velocity.x = 0;
-      }
-
-      this.position.addScaledVector(this.velocity, dt)
-      this.position.addScaledVector(this.acceleration, dt * dt)
-      this.velocity.addScaledVector(this.acceleration, dt)
-
-      if (Math.abs(this.velocity.x) > this.maxVelocity){
-        this.velocity.x = this.maxVelocity * this.velocity.x / Math.abs(this.velocity.x);
-      }
-
-      this.updateCollisions(dt);
-      this.updateSprite(dt);
+      this.jumping = this.input.pressed("jump");
     }
   });
 
 module.exports = Player1;
 
-<<<<<<< HEAD
-},{"./debug.js":54,"./entity.js":56,"./input_stream.js":65,"./mario.js":70,"./points_animation.js":76,"./sounds.js":80,"stampit":4,"three":47}],75:[function(require,module,exports){
+},{"./debug.js":58,"./fire_flower.js":62,"./input_stream.js":71,"./mario.js":78,"./points_animation.js":85,"./sounds.js":89,"stampit":5,"three":48}],84:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Animation = require('./animation.js');
+let PhysicsEngine = require('./physics_engine.js');
 
 let InvulnerableAnimation = stampit.compose(Animation)
   .refs({
@@ -54770,6 +55785,29 @@ let InvulnerableAnimation = stampit.compose(Animation)
 
   });
 
+let FlowerAnimation = stampit.compose(Animation)
+  .methods({
+    handleStop: function() {
+      this.subject.animated = true;
+      this.game.renderer.updating = true;
+      this.subject.setPowerUp(1);
+    },
+    handleAnimation: function(dt) {
+      this.timeSinceAnimation += dt;
+      if (this.timeSinceAnimation < this.animationSpeed) return;
+      this.timeSinceAnimation = 0;
+
+      this.powerUpAnimation = (this.powerUpAnimation + 1) % 3;
+      this.subject.setPowerUp(this.powerUpAnimation);
+    },
+    handleStart: function() {
+      this.subject.animated = false;
+      this.game.renderer.updating = false;
+      this.timeSinceAnimation = 0;
+      this.powerUpAnimation = 0;
+      this.animationSpeed = 0.05;
+    }
+  });
 let GrowAnimation = stampit.compose(Animation)
   .refs({
     speed: 1,
@@ -54878,14 +55916,94 @@ let DeathAnimation = stampit.compose(Animation)
     }
   });
 
+let CalculateScoreAnimation = stampit.compose(Animation)
+  .refs({
+    speed: 100,
+    pointsPerSecond: 50
+  })
+  .methods({
+    handleAnimation: function(dt){
+      this.game.gameRules.time -= dt * this.speed;
+      this.subject.score += Math.round(dt * this.speed * this.pointsPerSecond);
+      this.subject.statsChanged();
+    },
+    handleStop: function(){
+      this.game.gameRules.time = 0;
+      this.subject.score = Math.round(this.duration * this.pointsPerSecond);
+      CastleRaiseFlagAnimation.create({game: this.game, subject: this.flag});
+    },
+    handleStart: function(){
+      this.game.gameRules.levelInProgress = false;
+      this.duration = this.game.gameRules.time;
+    }
+  })
+let CastleRaiseFlagAnimation = stampit.compose(Animation)
+  .refs({
+    duration: 1.5
+  })
+  .methods({
+    handleAnimation: function(dt){
+      this.subject.position.y += 1 * dt;
+    }
+  });
+
+let AutoWalk = {
+  pressed: function(direction){
+    return direction == "right";
+  }
+}
+
+let VictoryAnimation = stampit.compose(Animation)
+  .refs({
+    flagpoleSpeed: -5
+  })
+  .methods({
+
+    handleStop: function() {
+      this.subject.animated = true;
+      this.subject.input = AutoWalk;
+      this.game.renderer.updating = true;
+      //WalkToCastleAnimation.create({game: this.game, subject: this.subject});
+    },
+    handleAnimation: function(dt) {
+      if (this.flag.position.y > this.flagpole.position.y){
+        PhysicsEngine.newtonianResponse(this.flag, dt);
+      } else {
+        this.subject.position.x = this.flagpole.position.x + 0.5;
+        this.subject.setSpriteFlipped(1);
+      }
+      if (this.subject.position.y > this.flagpole.position.y){
+        PhysicsEngine.newtonianResponse(this.subject, dt);
+      }
+    },
+    handleStart: function() {
+      this.duration = Math.abs(this.flagpole.size.y / this.flagpoleSpeed);
+      console.log(this.duration);
+      this.flag = this.flagpole.flag;
+
+      this.subject.animated = false;
+      this.subject.velocity.set(0, this.flagpoleSpeed);
+      this.flag.velocity = new THREE.Vector2(0, this.flagpoleSpeed);
+
+      this.subject.acceleration.set(0, 0);
+      this.subject.setSpritePositionX(7);
+      this.subject.position.x = this.flagpole.position.x - 0.5;
+      this.game.renderer.updating = false;
+    }
+  });
+
 module.exports = {
   InvulnerableAnimation: InvulnerableAnimation,
   GrowAnimation: GrowAnimation,
   ShrinkAnimation: ShrinkAnimation,
-  DeathAnimation: DeathAnimation
+  DeathAnimation: DeathAnimation,
+  VictoryAnimation: VictoryAnimation,
+  CastleRaiseFlagAnimation: CastleRaiseFlagAnimation,
+  CalculateScoreAnimation: CalculateScoreAnimation,
+  FlowerAnimation: FlowerAnimation
 }
 
-},{"./animation.js":49,"stampit":4,"three":47}],76:[function(require,module,exports){
+},{"./animation.js":51,"./physics_engine.js":82,"stampit":5,"three":48}],85:[function(require,module,exports){
 let stampit = require('stampit');
 let Sprite = require('./sprite.js');
 let THREE = require('three');
@@ -54918,10 +56036,7 @@ let PointsAnimation = stampit.compose(Animation)
 
 module.exports = PointsAnimation;
 
-},{"./animation.js":49,"./sprite.js":81,"stampit":4,"three":47}],77:[function(require,module,exports){
-=======
-},{"./debug.js":54,"./entity.js":56,"./input_stream.js":65,"./mario.js":71,"./sounds.js":79,"stampit":4,"three":47}],76:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./animation.js":51,"./sprite.js":90,"stampit":5,"three":48}],86:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Sprite = require('./sprite.js');
@@ -54944,11 +56059,7 @@ let Selector = stampit.compose(Sprite)
 
 module.exports = Selector;
 
-<<<<<<< HEAD
-},{"./sprite.js":81,"stampit":4,"three":47}],78:[function(require,module,exports){
-=======
-},{"./sprite.js":80,"stampit":4,"three":47}],77:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./sprite.js":90,"stampit":5,"three":48}],87:[function(require,module,exports){
 var Promise = require("bluebird");
 
 function ShaderLoader(){
@@ -55000,11 +56111,7 @@ function ShaderLoader(){
 
 module.exports = new ShaderLoader;
 
-<<<<<<< HEAD
-},{"bluebird":2}],79:[function(require,module,exports){
-=======
-},{"bluebird":2}],78:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"bluebird":2}],88:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 
@@ -55016,6 +56123,8 @@ let SimpleAI = stampit()
   })
   .methods({
     collided: function(block, direction){
+      if (this.disregardCollisions) return;
+
       switch(direction){
         case 'left':
           this.position.x = block.position.x + block.size.x;
@@ -55051,11 +56160,7 @@ let SimpleAI = stampit()
 
 module.exports = SimpleAI;
 
-<<<<<<< HEAD
-},{"stampit":4,"three":47}],80:[function(require,module,exports){
-=======
-},{"stampit":4,"three":47}],79:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"stampit":5,"three":48}],89:[function(require,module,exports){
 var pauseSound = new Audio('sounds/smb_pause.wav');
 var jumpSmall = new Audio('sounds/smb_jump-small.wav');
 var coin = new Audio('sounds/smb_coin.wav');
@@ -55067,10 +56172,7 @@ var stageClear = new Audio('sounds/smb_stage_clear.wav');
 var breakBlock = new Audio('sounds/smb_breakblock.wav');
 var powerUp = new Audio('sounds/smb_powerup.wav');
 var powerUpAppears = new Audio('sounds/smb_powerup_appears.wav');
-<<<<<<< HEAD
 var pipe = new Audio('sounds/smb_pipe.wav');
-=======
->>>>>>> build bundle.js
 
 module.exports = {
   pauseSound: pauseSound,
@@ -55083,17 +56185,11 @@ module.exports = {
   stageClear: stageClear,
   breakBlock: breakBlock,
   powerUp: powerUp,
-<<<<<<< HEAD
   powerUpAppears: powerUpAppears,
   pipe: pipe
 }
 
-},{}],81:[function(require,module,exports){
-=======
-  powerUpAppears: powerUpAppears
-}
-},{}],80:[function(require,module,exports){
->>>>>>> build bundle.js
+},{}],90:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let CustomShader = require('./custom_shader.js');
@@ -55102,6 +56198,7 @@ let loader = new THREE.TextureLoader();
 let Sprite = stampit.compose(CustomShader)
   .refs({
     fixed: false,
+    zIndex: 1,
     size: new THREE.Vector2(1, 1),
     shaders: {
       vertexShader: 'tile.vert',
@@ -55117,10 +56214,14 @@ let Sprite = stampit.compose(CustomShader)
     this.uniforms = {
       tileLocation: { type: "v2", value: this.position },
       screenSize: {type: "v2", value: this.game.renderer.screenSize},
-      fixedPosition: {type: "i", value: this.fixed}
+      fixedPosition: {type: "i", value: this.fixed},
+      size: {type: "v2", value: this.size},
+      zIndex: {type: "f", value: this.zIndex}
     };
+
     this.setupCustomShader();
     this.game.renderer.addToScene(this.mesh);
+    this.meshId = this.mesh.id;
   });
 
 
@@ -55128,11 +56229,7 @@ let Sprite = stampit.compose(CustomShader)
 module.exports = Sprite;
 
 
-<<<<<<< HEAD
-},{"./custom_shader.js":53,"stampit":4,"three":47}],82:[function(require,module,exports){
-=======
-},{"./shader_loader.js":77,"./sprite_geometry.js":81,"./texture_loader.js":82,"stampit":4,"three":47}],81:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./custom_shader.js":57,"stampit":5,"three":48}],91:[function(require,module,exports){
 var stampit = require('stampit');
 var THREE = require('three');
 
@@ -55156,11 +56253,7 @@ var SpriteGeometry = stampit().refs({
 module.exports = SpriteGeometry;
 
 
-<<<<<<< HEAD
-},{"stampit":4,"three":47}],83:[function(require,module,exports){
-=======
-},{"stampit":4,"three":47}],82:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"stampit":5,"three":48}],92:[function(require,module,exports){
 var THREE = require('three');
 
 let loader = new THREE.TextureLoader();
@@ -55183,11 +56276,7 @@ let TextureLoader = {
 }
 module.exports = TextureLoader;
 
-<<<<<<< HEAD
-},{"three":47}],84:[function(require,module,exports){
-=======
-},{"three":47}],83:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"three":48}],93:[function(require,module,exports){
 let stampit = require('stampit');
 
 let Updatable = stampit
@@ -55213,11 +56302,7 @@ let Updatable = stampit
 
 module.exports = Updatable;
 
-<<<<<<< HEAD
-},{"stampit":4}],85:[function(require,module,exports){
-=======
-},{"stampit":4}],84:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"stampit":5}],94:[function(require,module,exports){
 let stampit = require('stampit');
 let THREE = require('three');
 let Sprite = require('./sprite.js');
@@ -55229,7 +56314,6 @@ let Blocks = [undefined, Ground, Block, Brick, PipeTopLeft, PipeTopRight, PipeBo
 let WebGLRenderer = stampit()
   .methods({
     render: function(dt){
-<<<<<<< HEAD
 
       if (this.updating){
         for (let item of this.toUpdate) {
@@ -55241,16 +56325,6 @@ let WebGLRenderer = stampit()
         item.updateAnimation(dt);
       };
 
-=======
-      for (let item of this.toUpdate) {
-        item.updateSprite(dt);
-      };
-
-      for (let item of this.toAnimate) {
-        item.updateAnimation(dt);
-      };
-
->>>>>>> build bundle.js
       this.renderer.render(this.scene, this.camera);
     },
     addToScene: function(obj){
@@ -55273,17 +56347,13 @@ let WebGLRenderer = stampit()
     this.width /= 2;
     this.height /= 2;
     this.renderer.setClearColor(0x5c94fc, 0);
-    this.camera = new THREE.OrthographicCamera(0, this.width, 0, this.height, 0.1, 100 );
+    this.camera = new THREE.OrthographicCamera(0, this.width, 0, this.height, 0.0, 100 );
   });
 
 
 module.exports = WebGLRenderer;
 
-<<<<<<< HEAD
-},{"./blocks.js":51,"./flag_pole.js":57,"./physics_engine.js":73,"./sprite.js":81,"stampit":4,"three":47}],86:[function(require,module,exports){
-=======
-},{"./blocks.js":52,"./flag_pole.js":57,"./physics_engine.js":74,"./sprite.js":80,"stampit":4,"three":47}],85:[function(require,module,exports){
->>>>>>> build bundle.js
+},{"./blocks.js":53,"./flag_pole.js":63,"./physics_engine.js":82,"./sprite.js":90,"stampit":5,"three":48}],95:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
