@@ -18,9 +18,14 @@ let gameState = {
   togglePause: function() {
     sounds.pauseSound.pause();
     sounds.pauseSound.currentTime = 0;
+    sounds.pauseSound.volume = 1;
     sounds.pauseSound.play();
     document.getElementById("game-wrapper").classList.toggle("paused");
     this.paused = ! this.paused;
+  },
+
+  toggleEdit: function() {
+    this.editing = ! this.editing;
   }
 };
 

@@ -6,10 +6,10 @@ let Collidable = require('./collidable.js');
 let sounds = require('./sounds.js');
 let Animation = require('./animation.js');
 let {BumpAnimation, BrickAnimation, BreakBrickAnimation} = require('./animations.js')
-let {Goomba} = require('./enemies.js')
 let PointsAnimation = require('./points_animation.js');
 let PhysicsEngine = require('./physics_engine.js');
 let Castle = require('./castle.js');
+let {Mushroom} = require('./enemies.js')
 
 let Ground          = stampit.compose(Sprite, Collidable).refs({ texture: 'ground.png' });
 let Block           = stampit.compose(Sprite, Collidable).refs({ texture: 'block.png' });
@@ -19,6 +19,15 @@ let PipeBottomLeft  = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_
 let PipeBottomRight = stampit.compose(Sprite, Collidable).refs({ texture: 'pipe_bottom_right.png' });
 let Tile            = stampit.compose(Sprite, Collidable).refs({ texture: 'tile.png' });
 
+let MushroomBlockAnimation = stampit.compose(BumpAnimation)
+  .methods({
+    handleStop: function(){
+      let shroomPosition = this.subject.position.clone();
+      shroomPosition.y += 1;
+      Mushroom.create({game: this.game, position: shroomPosition })
+      Block.create({game: this.game, position: this.subject.position.clone() })
+    }
+  });
 
 let ItemBlock = stampit.compose(AnimatedSprite, Collidable)
   .refs({
@@ -82,7 +91,6 @@ let CoinAnimation = stampit.compose(Animation)
     }
   });
 
-
 let CoinBlock = stampit.compose(ItemBlock)
   .methods({
     collided: function(entity, direction) {
@@ -99,9 +107,9 @@ let CoinBlock = stampit.compose(ItemBlock)
     }
   });
 
-
 let Coin = stampit.compose(AnimatedSprite, Collidable)
   .refs({
+    name: "Coin",
     texture: 'coin.png',
     animationState: "blinking",
     animations: {
@@ -113,10 +121,18 @@ let Coin = stampit.compose(AnimatedSprite, Collidable)
         {id: 0, duration: 0.05}
       ]
     },
-    spritePosition: [2, 0],
-    spriteLayout: [3, 1]
+    spritePosition: new THREE.Vector2( 2, 0),
+    spriteLayout: new THREE.Vector2( 3, 1)
+  })
+  .methods({
+    collided: function(entity, direction) {
+      sounds.coin.currentTime = 0;
+      sounds.coin.play();
+      entity.score += 50
+      entity.stateChanged();
+      this.remove();
+    }
   });
-
 
 let Brick = stampit.compose(Sprite, Collidable)
     .refs({
@@ -137,7 +153,7 @@ let Brick = stampit.compose(Sprite, Collidable)
           if (entity.superMario){
             BreakBrickAnimation.create({game: this.game, subject: this});
             this.game.renderer.deleteFromScene(this.mesh);
-            PhysicsEngine.deleteObject(this);
+            PhysicsEngine.removeObject(this);
           } else {
             BrickAnimation.create({game: this.game, subject: this});
           }
@@ -150,13 +166,12 @@ module.exports = {
   ItemBlock: ItemBlock,
   CoinBlock: CoinBlock,
   Ground: Ground,
-  Block: Block,
   Brick: Brick,
-  PipeBottomRight: PipeBottomRight,
-  PipeBottomLeft: PipeBottomLeft,
-  PipeTopRight: PipeTopRight,
-  PipeTopLeft: PipeTopLeft,
-  Coin: Coin,
   Tile: Tile,
+  PipeBottomLeft: PipeBottomLeft,
+  PipeBottomRight: PipeBottomRight,
+  PipeTopLeft: PipeTopLeft,
+  PipeTopRight: PipeTopRight,
+  Coin: Coin,
   Castle: Castle
 }

@@ -9,7 +9,13 @@ let Collidable = stampit()
     this.physicsEngine.addObject(this);
   })
   .methods({
-    collided: function(entity, direction) {}
+    collided: function(entity, direction) {},
+    remove: function(){
+      this.game.renderer.deleteFromScene(this.mesh);
+      this.mesh.geometry.dispose();
+      this.mesh.material.dispose();
+      this.physicsEngine.removeObject(this);
+    },
   });
 
 module.exports = Collidable;

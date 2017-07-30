@@ -81,7 +81,11 @@ let Player1 = stampit.compose(Mario)
     },
 
     collided: function(block, direction){
-      if (this.disregardCollisions) return;
+      switch(block.name){
+        case 'Coin':
+          return
+      }
+
       switch(direction){
         case 'above':
           this.position.y = block.position.y - this.size.y;

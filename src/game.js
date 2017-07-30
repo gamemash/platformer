@@ -13,7 +13,6 @@ var Game = stampit()
     start: function(){
       this.gameRules.levelInProgress = true;
       this.gameloop();
-      gameState.togglePause();
     },
     loadLevel: function(level){
       this.level = level;
@@ -32,10 +31,12 @@ var Game = stampit()
         }
 
         if (this.renderer.updating){
-          //this.player.update(dt);
           this.gui.updateTime(dt);
-          this.gameRules.update(this.player, this.entities, gameState);
+          if (!gameState.editing) {
+            this.gameRules.update(this.player, this.entities, gameState);
+          }
         }
+
         this.renderer.render(dt);
 
         this.entities.clean();

@@ -5,7 +5,7 @@ let CollisionResponses = require('./collision_responses.js');
 
 let GameRules = stampit.compose()
   .refs({
-    time: 400, 
+    time: 400,
   })
   .init().methods({
   resetTime: function(){
@@ -23,7 +23,7 @@ let GameRules = stampit.compose()
       let entity_a = entities.get(a);
       for (let b = a + 1; b < entities.length(); b += 1){
         let entity_b = entities.get(b);
-        
+
         if (PhysicsEngine.boundingBox(entity_a, entity_b)){
           CollisionResponses.resolve(entity_a, entity_b);
         }
