@@ -69,48 +69,48 @@ h1 {
 }
 
 #Block {
-  background: url("/images/block.png") no-repeat #333 center;
+  background: url("../images/block.png") no-repeat #333 center;
 }
 
 #Brick {
-  background: url("/images/brick.png") no-repeat #333 center;
+  background: url("../images/brick.png") no-repeat #333 center;
 }
 
 #ItemBlock {
-  background: url("/images/item_block.png") no-repeat #333 center;
+  background: url("../images/item_block.png") no-repeat #333 center;
   background-size: 32px;
 }
 
 #Ground {
-  background: url("/images/ground.png") no-repeat #333 center;
+  background: url("../images/ground.png") no-repeat #333 center;
 }
 
 #Tile {
-  background: url("/images/tile.png") no-repeat #333 center;
+  background: url("../images/tile.png") no-repeat #333 center;
 }
 
 #CoinBlock {
-  background: url("/images/item_block_tool.png") no-repeat #333 center;
+  background: url("../images/item_block_tool.png") no-repeat #333 center;
 }
 
 #Coin {
-  background: url("/images/coin_tool.png") no-repeat #333 center;
+  background: url("../images/coin_tool.png") no-repeat #333 center;
 }
 
 #PipeBottomRight {
-  background: url("/images/pipe_bottom_right.png") no-repeat #333 center;
+  background: url("../images/pipe_bottom_right.png") no-repeat #333 center;
 }
 
 #PipeBottomLeft {
-  background: url("/images/pipe_bottom_left.png") no-repeat #333 center;
+  background: url("../images/pipe_bottom_left.png") no-repeat #333 center;
 }
 
 #PipeTopRight {
-  background: url("/images/pipe_top_right.png") no-repeat #333 center;
+  background: url("../images/pipe_top_right.png") no-repeat #333 center;
 }
 
 #PipeTopLeft {
-  background: url("/images/pipe_top_left.png") no-repeat #333 center;
+  background: url("../images/pipe_top_left.png") no-repeat #333 center;
 }
 
 #Eraser, #Save, #Load, #Clear {
