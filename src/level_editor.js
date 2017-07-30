@@ -139,18 +139,15 @@ let LevelEditor = stampit
 
     this.toolbox = document.getElementById('toolbox');
 
-    for (var key in Blocks) {
-      if (Blocks.hasOwnProperty(key)) {
-        this.addBlockToToolbox(key);
-      }
-    }
+    this.addBlockToToolbox("Block")
+    this.addBlockToToolbox("CoinBlock")
+    this.addBlockToToolbox("Ground")
+    this.addBlockToToolbox("Brick")
+    this.addBlockToToolbox("Tile")
+    this.addBlockToToolbox("Coin")
 
     this.addSpacerToToolbox();
-    this.addBlockToToolbox('Eraser', EraseTool.create({game: this.game}));
-    this.addBlockToToolbox('Clear', ClearTool.create({game: this.game}));
-    this.addSpacerToToolbox();
-    this.addBlockToToolbox('Save', SaveTool.create({game: this.game}));
-    this.addBlockToToolbox('Load');
+    this.addBlockToToolbox('Eraser', EraseTool.create({game: this.game}));;
   })
   .methods({
     selectTool: function(id) {

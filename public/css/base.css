@@ -89,9 +89,12 @@ h1 {
   background: url("/images/tile.png") no-repeat #333 center;
 }
 
+#CoinBlock {
+  background: url("/images/item_block_tool.png") no-repeat #333 center;
+}
+
 #Coin {
-  background: url("/images/coin.png") no-repeat #333 center;
-  background-size: 32px;
+  background: url("/images/coin_tool.png") no-repeat #333 center;
 }
 
 #PipeBottomRight {
