@@ -156,6 +156,8 @@ let DeathAnimation = stampit.compose(Animation)
       }
     },
     handleStart: function() {
+      this.subject.setSizeY(1);
+      this.subject.setSpriteSizeY(1);
       this.subject.setSpritePosition(new THREE.Vector2( 6, 0));
       this.deathDelay = 0.5;
       this.subject.animated = false;
